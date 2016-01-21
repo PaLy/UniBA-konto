@@ -31,7 +31,7 @@ public class JedalneListky {
     }
 
     private static Meals getVenza() {
-        return getMeals("http://mlynska-dolina.sk/stravovanie/vsetky-zariadenia/venza/denne-menu", 3); // den pred otvorenim jedalen a bol dostupny listok na dalsie dni
+        return getMeals("http://mlynska-dolina.sk/stravovanie/vsetky-zariadenia/venza/denne-menu", 3); // den pred otvorenim jedalne bol dostupny listok na dalsie dni
     }
 
     private static Meals getMeals(String location, int someParam) {
@@ -139,18 +139,18 @@ public class JedalneListky {
 
         public static class Meal {
             public final String name;
-            public final String cost;
+            public final String price;
 
-            public Meal(String name, String cost) {
+            public Meal(String name, String price) {
                 this.name = name;
-                this.cost = cost;
+                this.price = price;
             }
 
             @Override
             public String toString() {
                 return "Meal{" +
                         "name='" + name + '\'' +
-                        ", cost='" + cost + '\'' +
+                        ", price='" + price + '\'' +
                         '}';
             }
         }

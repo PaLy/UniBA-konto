@@ -153,7 +153,7 @@ public class MenuFragment extends Fragment {
                 nameView.setText(meal.name);
 
                 TextView costView = (TextView) view.findViewById(R.id.meal_cost);
-                costView.setText(meal.cost);
+                costView.setText(meal.price);
             }
         }
 

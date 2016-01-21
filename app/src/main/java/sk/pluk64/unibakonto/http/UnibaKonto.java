@@ -1,5 +1,7 @@
 package sk.pluk64.unibakonto.http;
 
+import android.text.TextUtils;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -25,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,8 +43,11 @@ public class UnibaKonto {
     private static final String KONTO_LOGIN_PAGE = "https://konto.uniba.sk/";
 
     private static final String CLIENT_INF_PAGE = "https://konto.uniba.sk/Secure/UserAccount.aspx";
-    private static final String BALANCE_ID = "#ctl00_ContentPlaceHolderMain_lblAccount";
-    private static final String VAR_SYMBOL_ID = "#ctl00_ContentPlaceHolderMain_lblVarSymbol";
+    public static final String ID_ACCOUNT = "#ctl00_ContentPlaceHolderMain_lblAccount";
+    public static final String ID_DEPOSIT = "#ctl00_ContentPlaceHolderMain_lblFund";
+    public static final String ID_DEPOSIT2 = "#ctl00_ContentPlaceHolderMain_lblFund2";
+    public static final String ID_ZALOHA = "#ctl00_ContentPlaceHolderMain_lblZaloha";
+    private static final String ID_VAR_SYMBOL = "#ctl00_ContentPlaceHolderMain_lblVarSymbol";
 
     private static final String TRANSACTIONS_PAGE = "https://konto.uniba.sk/Secure/Operace.aspx";
     private static final String ID_TRANSACTIONS_HISTORY = "#ctl00_ContentPlaceHolderMain_gvAccountHistory";
@@ -118,7 +124,7 @@ public class UnibaKonto {
 
     public Boolean isLoggedIn() {
         // TODO pozor - ak sa zacachuje po zadani zleho hesla, tak potrebujem ho pri dalsom pokuse refresnut
-        return !documents.get(CLIENT_INF_PAGE).select(VAR_SYMBOL_ID).isEmpty();
+        return !documents.get(CLIENT_INF_PAGE).select(ID_VAR_SYMBOL).isEmpty();
     }
 
     private void mojaUnibaLogin() throws IOException {
@@ -152,8 +158,31 @@ public class UnibaKonto {
         System.out.println(((CookieManager) CookieHandler.getDefault()).getCookieStore().getCookies());
     }
 
-    public String getBalance() {
-        return documents.get(CLIENT_INF_PAGE).select(BALANCE_ID).text();
+    public Map<String, Balance> getBalances() {
+        Map<String, Balance> result = new LinkedHashMap<>();
+        Document doc = documents.get(CLIENT_INF_PAGE);
+
+        String[] ids = {ID_ACCOUNT, ID_DEPOSIT, ID_DEPOSIT2, ID_ZALOHA};
+
+        for (String id : ids) {
+            Elements valueElem = doc.select(id);
+            String label = valueElem.get(0).previousElementSibling().text();
+            String price = valueElem.text();
+            String condensedPrice = TextUtils.join("", price.split(" "));
+            result.put(id, new Balance(label, condensedPrice));
+        }
+
+        return result;
+    }
+
+    public class Balance {
+        public final String label;
+        public final String price;
+
+        private Balance(String label, String price) {
+            this.label = label;
+            this.price = price;
+        }
     }
 
     public List<Transaction> getTransactions() {

@@ -2,14 +2,13 @@ package sk.pluk64.unibakonto;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +17,14 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import sk.pluk64.unibakonto.http.UnibaKonto;
 
 public class AccountFragment extends Fragment {
-    private String balance = "";
+    private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
     private List<UnibaKonto.Transaction> transactions = new ArrayList<>();
 
     public AccountFragment() {
@@ -39,7 +40,7 @@ public class AccountFragment extends Fragment {
             protected Boolean doInBackground(Void... params) {
                 UnibaKonto unibaKonto = LoginActivity.unibaKonto;
                 transactions = unibaKonto.getTransactions();
-                balance = unibaKonto.getBalance();
+                balances = unibaKonto.getBalances();
                 return true;
             }
 
@@ -54,8 +55,19 @@ public class AccountFragment extends Fragment {
     }
 
     private void updateViewData(View view) {
-        TextView textView = (TextView) view.findViewById(R.id.info_text);
-        textView.setText("Balance: " + balance);
+        Object[][] viewIdBalanceId = {
+                {R.id.text_balance, UnibaKonto.ID_ACCOUNT},
+                {R.id.text_deposit, UnibaKonto.ID_DEPOSIT},
+                {R.id.text_deposit2, UnibaKonto.ID_DEPOSIT2},
+                {R.id.text_zaloha, UnibaKonto.ID_ZALOHA}
+        };
+        for (Object[] vb : viewIdBalanceId) {
+            TextView textView = (TextView) view.findViewById((Integer) vb[0]);
+            UnibaKonto.Balance data = balances.get(vb[1]);
+            if (data != null) {
+                textView.setText(Html.fromHtml("<b>" + data.label + "</b>" + " " + data.price));
+            }
+        }
 
         RecyclerView transactionsView = (RecyclerView) view.findViewById(R.id.transactions_history);
         RecyclerView.Adapter mAdapter = new MyAdapter(transactions);
