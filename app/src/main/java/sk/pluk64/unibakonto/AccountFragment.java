@@ -134,7 +134,7 @@ public class AccountFragment extends Fragment {
                 TextView descriptionView = (TextView) transactionItemView.findViewById(R.id.transaction_item_description);
                 descriptionView.setText(transactionItem.description);
 
-                TextView amountView = (TextView) transactionItemView.findViewById(R.id.transaction_item_amount);
+                TextView amountView = (TextView) transactionItemView.findViewById(R.id.transaction_item_price);
                 amountView.setText(String.format("%+,.2f€", transactionItem.parsedAmount));
 
                 transactionTable.addView(transactionItemView);
