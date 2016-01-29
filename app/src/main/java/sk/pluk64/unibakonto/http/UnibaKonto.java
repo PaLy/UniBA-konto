@@ -14,12 +14,6 @@ import java.net.CookieManager;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,12 +24,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 public class UnibaKonto {
     private static final String MOJA_UNIBA_LOGIN_PAGE = "https://moja.uniba.sk//cosauth/cosauth.php";
@@ -62,13 +50,6 @@ public class UnibaKonto {
     }
 
     public void login() {
-        // TODO remove workaround for ssl
-        try {
-            expiredCertificateWorkAround();
-        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-            e.printStackTrace();
-        }
-
         CookieHandler.setDefault(new CookieManager());
         try {
             httpGet(MOJA_UNIBA_LOGIN_PAGE); // sets cookie
@@ -77,42 +58,6 @@ public class UnibaKonto {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void expiredCertificateWorkAround() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(
-                TrustManagerFactory.getDefaultAlgorithm());
-// Initialise the TMF as you normally would, for example:
-        tmf.init((KeyStore) null);
-
-        TrustManager[] trustManagers = tmf.getTrustManagers();
-        final X509TrustManager origTrustmanager = (X509TrustManager) trustManagers[0];
-
-        TrustManager[] wrappedTrustManagers = new TrustManager[]{
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return origTrustmanager.getAcceptedIssuers();
-                    }
-
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        try {
-                            origTrustmanager.checkClientTrusted(certs, authType);
-                        } catch (CertificateException e) {
-                        }
-                    }
-
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        try {
-                            origTrustmanager.checkServerTrusted(certs, authType);
-                        } catch (CertificateException e) {
-                        }
-                    }
-                }
-        };
-
-        SSLContext sc = SSLContext.getInstance("TLS");
-        sc.init(null, wrappedTrustManagers, null);
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     }
 
     private static void kontoLogin() throws IOException {
