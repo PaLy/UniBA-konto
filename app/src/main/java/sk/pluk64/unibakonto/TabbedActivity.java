@@ -98,8 +98,6 @@ public class TabbedActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
             if (position == 0) {
                 return new AccountFragment();
             } else if (position == 1) {
@@ -118,7 +116,7 @@ public class TabbedActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "Account";
+                    return "E-peňaženka";
                 case 1:
                     return "Venza";
                 case 2:
