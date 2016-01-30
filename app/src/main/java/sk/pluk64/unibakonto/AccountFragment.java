@@ -33,11 +33,6 @@ public class AccountFragment extends Fragment {
     public AccountFragment() {
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     private void updateData() {
         new AsyncTask<Void, Void, List<UnibaKonto.Transaction>>() {
             @Override
