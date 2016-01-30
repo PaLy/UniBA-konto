@@ -51,6 +51,7 @@ public class UnibaKonto {
 
     public void login() {
         CookieHandler.setDefault(new CookieManager());
+        documents.cache.clear();
         try {
             httpGet(MOJA_UNIBA_LOGIN_PAGE); // sets cookie
             mojaUnibaLogin();
@@ -67,8 +68,15 @@ public class UnibaKonto {
         httpPost(KONTO_LOGIN_PAGE + parsedData.action, parsedData.postData);
     }
 
+    public Boolean isLoggedIn(boolean refresh) {
+        if (refresh) {
+            return !documents.getRefreshed(CLIENT_INF_PAGE).select(ID_VAR_SYMBOL).isEmpty();
+        } else {
+            return isLoggedIn();
+        }
+    }
+
     public Boolean isLoggedIn() {
-        // TODO pozor - ak sa zacachuje po zadani zleho hesla, tak potrebujem ho pri dalsom pokuse refresnut
         return !documents.get(CLIENT_INF_PAGE).select(ID_VAR_SYMBOL).isEmpty();
     }
 
@@ -105,7 +113,7 @@ public class UnibaKonto {
 
     public Map<String, Balance> getBalances() {
         Map<String, Balance> result = new LinkedHashMap<>();
-        Document doc = documents.get(CLIENT_INF_PAGE);
+        Document doc = documents.getRefreshed(CLIENT_INF_PAGE);
 
         String[] ids = {ID_ACCOUNT, ID_DEPOSIT, ID_DEPOSIT2, ID_ZALOHA};
 
@@ -131,7 +139,7 @@ public class UnibaKonto {
     }
 
     public List<Transaction> getTransactions() {
-        Elements table = documents.get(TRANSACTIONS_PAGE).select(ID_TRANSACTIONS_HISTORY);
+        Elements table = documents.getRefreshed(TRANSACTIONS_PAGE).select(ID_TRANSACTIONS_HISTORY);
         Elements tableRows = table.first().child(0).children();
 
         ArrayList<TransactionItem> items = new ArrayList<>();

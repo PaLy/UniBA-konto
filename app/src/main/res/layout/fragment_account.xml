@@ -1,67 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin">
+    android:layout_height="match_parent">
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/card_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
-        android:layout_marginTop="16dp">
-
-        <android.support.v7.widget.GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:grid="http://schemas.android.com/apk/res-auto"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="4dp">
-
-
-            <TextView
-                android:id="@+id/text_balance"
-                android:fontFamily="sans-serif-light"
-                android:gravity="center"
-                android:textSize="32sp"
-                grid:layout_column="0"
-                grid:layout_columnSpan="3"
-                grid:layout_columnWeight="1"
-                grid:layout_row="0" />
-
-            <TextView
-                android:id="@+id/text_deposit"
-                android:fontFamily="sans-serif-condensed"
-                android:gravity="center"
-                grid:layout_column="0"
-                grid:layout_columnWeight="1"
-                grid:layout_row="1" />
-
-            <TextView
-                android:id="@+id/text_zaloha"
-                android:fontFamily="sans-serif-condensed"
-                android:gravity="center"
-                grid:layout_column="2"
-                grid:layout_columnWeight="1"
-                grid:layout_row="1" />
-
-            <TextView
-                android:id="@+id/text_deposit2"
-                android:fontFamily="sans-serif-condensed"
-                android:gravity="center"
-                grid:layout_column="1"
-                grid:layout_columnWeight="1"
-                grid:layout_row="1" />
-        </android.support.v7.widget.GridLayout>
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/transactions_history"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical" />
-</LinearLayout>
+        android:clickable="true"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+
+
+        <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            card_view:cardElevation="4dp">
+
+            <android.support.v7.widget.GridLayout xmlns:grid="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="4dp">
+
+
+                <TextView
+                    android:id="@+id/text_balance"
+                    android:fontFamily="sans-serif-light"
+                    android:gravity="center"
+                    android:textSize="32sp"
+                    grid:layout_column="0"
+                    grid:layout_columnSpan="3"
+                    grid:layout_columnWeight="1"
+                    grid:layout_row="0" />
+
+                <TextView
+                    android:id="@+id/text_deposit"
+                    android:fontFamily="sans-serif-condensed"
+                    android:gravity="center"
+                    grid:layout_column="0"
+                    grid:layout_columnWeight="1"
+                    grid:layout_row="1" />
+
+                <TextView
+                    android:id="@+id/text_zaloha"
+                    android:fontFamily="sans-serif-condensed"
+                    android:gravity="center"
+                    grid:layout_column="2"
+                    grid:layout_columnWeight="1"
+                    grid:layout_row="1" />
+
+                <TextView
+                    android:id="@+id/text_deposit2"
+                    android:fontFamily="sans-serif-condensed"
+                    android:gravity="center"
+                    grid:layout_column="1"
+                    grid:layout_columnWeight="1"
+                    grid:layout_row="1" />
+            </android.support.v7.widget.GridLayout>
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/transactions_history"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="8dp"
+            android:scrollbars="vertical" />
+    </LinearLayout>
+</android.support.v4.widget.SwipeRefreshLayout>

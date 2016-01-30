@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,7 +20,9 @@ import sk.pluk64.unibakonto.http.JedalneListky;
 public class MenuFragment extends Fragment {
     private static final String ARG_JEDALEN = "jedalen";
     private JedalneListky.Jedalne jedalen;
-    private JedalneListky.Meals menus;
+    private MenuListAdapter adapter = new MenuListAdapter();
+    private SwipeRefreshLayout swipeRefresh;
+    private boolean wasRefreshed = false;
 
     public MenuFragment() {
     }
@@ -39,36 +42,52 @@ public class MenuFragment extends Fragment {
         if (getArguments() != null) {
             jedalen = (JedalneListky.Jedalne) getArguments().getSerializable(ARG_JEDALEN);
         }
+    }
 
-        new AsyncTask<Void, Void, Boolean>() {
+    private void updateData() {
+        new AsyncTask<Void, Void, JedalneListky.Meals>() {
             @Override
-            protected Boolean doInBackground(Void... params) {
-                menus = jedalen.getMenu(); // TODO update fieldu by sa mal robit na UI threade?
-                return true;
+            protected JedalneListky.Meals doInBackground(Void... params) {
+                return jedalen.getMenu();
             }
 
             @Override
-            protected void onPostExecute(Boolean success) {
-                if (listView != null) {
-                    listView.setAdapter(new MenuListAdapter(menus));
-                }
+            protected void onPostExecute(JedalneListky.Meals meals) {
+                wasRefreshed = true;
+                adapter.updateData(meals);
+                adapter.notifyDataSetChanged();
+                swipeRefresh.setRefreshing(false);
             }
         }.execute();
     }
-
-    RecyclerView listView;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_menu, container, false);
-        listView = (RecyclerView) view.findViewById(R.id.menu_list);
+        RecyclerView listView = (RecyclerView) view.findViewById(R.id.menu_list);
 
         listView.setHasFixedSize(true);
         RecyclerView.LayoutManager tLayoutManager = new LinearLayoutManager(getContext());
         listView.setLayoutManager(tLayoutManager);
+        listView.setAdapter(adapter);
 
-        listView.setAdapter(new MenuListAdapter(menus));
+        swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateData();
+            }
+        });
+        if (!wasRefreshed) {
+            swipeRefresh.post(new Runnable() {
+                @Override
+                public void run() {
+                    swipeRefresh.setRefreshing(true);
+                    updateData();
+                }
+            });
+        }
         return view;
     }
 
@@ -83,7 +102,7 @@ public class MenuFragment extends Fragment {
             }
         }
 
-        private final int itemCount;
+        private int itemCount = 0;
         private final Map<Integer, Object> positionToItem = new HashMap<>();
         private final Map<Integer, ViewType> positionToViewType = new HashMap<>();
 
@@ -96,7 +115,10 @@ public class MenuFragment extends Fragment {
             }
         }
 
-        public MenuListAdapter(JedalneListky.Meals meals) {
+        public MenuListAdapter() {
+        }
+
+        public void updateData(JedalneListky.Meals meals) {
             int pos = 0;
             if (meals != null) {
                 for (JedalneListky.Meals.DayMenu dayMenu : meals.menus) {

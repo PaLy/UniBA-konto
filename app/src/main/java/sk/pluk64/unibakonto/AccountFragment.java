@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,7 +26,9 @@ import sk.pluk64.unibakonto.http.UnibaKonto;
 
 public class AccountFragment extends Fragment {
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
-    private List<UnibaKonto.Transaction> transactions = new ArrayList<>();
+    private MyAdapter mAdapter = new MyAdapter();
+    private SwipeRefreshLayout swipeRefresh;
+    private boolean wasRefreshed = false;
 
     public AccountFragment() {
     }
@@ -33,28 +36,42 @@ public class AccountFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
-        // TODO add spinner
-        new AsyncTask<Void, Void, Boolean>() {
+    private void updateData() {
+        new AsyncTask<Void, Void, List<UnibaKonto.Transaction>>() {
             @Override
-            protected Boolean doInBackground(Void... params) {
+            protected List<UnibaKonto.Transaction> doInBackground(Void... params) {
                 UnibaKonto unibaKonto = LoginActivity.unibaKonto;
-                transactions = unibaKonto.getTransactions();
-                balances = unibaKonto.getBalances();
-                return true;
+                if (!unibaKonto.isLoggedIn(true)) {
+                    unibaKonto.login();
+                }
+                if (unibaKonto.isLoggedIn()) {
+                    balances = unibaKonto.getBalances();
+                    return unibaKonto.getTransactions();
+                } else {
+                    // TODO need to correct this case
+                    return mAdapter.getData();
+                }
             }
 
             @Override
-            protected void onPostExecute(Boolean success) {
+            protected void onPostExecute(List<UnibaKonto.Transaction> transactions) {
+                wasRefreshed = true;
                 View view = getView();
                 if (view != null) {
-                    updateViewData(view);
+                    updateViewBalances(view);
                 }
+                MyAdapter adapter = AccountFragment.this.mAdapter;
+                adapter.getData().clear();
+                adapter.getData().addAll(transactions);
+                adapter.notifyDataSetChanged();
+                swipeRefresh.setRefreshing(false);
             }
         }.execute();
     }
 
-    private void updateViewData(View view) {
+    private void updateViewBalances(View view) {
         Object[][] viewIdBalanceId = {
                 {R.id.text_balance, UnibaKonto.ID_ACCOUNT},
                 {R.id.text_deposit, UnibaKonto.ID_DEPOSIT},
@@ -68,10 +85,6 @@ public class AccountFragment extends Fragment {
                 textView.setText(Html.fromHtml("<b>" + data.label + "</b>" + " " + data.price));
             }
         }
-
-        RecyclerView transactionsView = (RecyclerView) view.findViewById(R.id.transactions_history);
-        RecyclerView.Adapter mAdapter = new MyAdapter(transactions);
-        transactionsView.setAdapter(mAdapter);
     }
 
     @Override
@@ -85,13 +98,31 @@ public class AccountFragment extends Fragment {
         transactionsView.setHasFixedSize(true);
         RecyclerView.LayoutManager tLayoutManager = new LinearLayoutManager(getContext());
         transactionsView.setLayoutManager(tLayoutManager);
+        transactionsView.setAdapter(mAdapter);
 
-        updateViewData(view);
+        swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateData();
+            }
+        });
+        if (!wasRefreshed) {
+            swipeRefresh.post(new Runnable() {
+                @Override
+                public void run() {
+                    swipeRefresh.setRefreshing(true);
+                    updateData();
+                }
+            });
+        } else {
+            updateViewBalances(view);
+        }
         return view;
     }
 
     public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-        private List<UnibaKonto.Transaction> transactions;
+        private List<UnibaKonto.Transaction> transactions = new ArrayList<>();
 
         // Provide a reference to the views for each data item
         // Complex data items may need more than one view per item, and
@@ -106,8 +137,11 @@ public class AccountFragment extends Fragment {
         }
 
         // Provide a suitable constructor (depends on the kind of dataset)
-        public MyAdapter(List<UnibaKonto.Transaction> transactions) {
-            this.transactions = transactions;
+        public MyAdapter() {
+        }
+
+        public List<UnibaKonto.Transaction> getData() {
+            return transactions;
         }
 
         // Create new views (invoked by the layout manager)
