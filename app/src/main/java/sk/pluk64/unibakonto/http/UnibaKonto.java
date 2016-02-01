@@ -119,12 +119,14 @@ public class UnibaKonto {
 
         for (String id : ids) {
             Elements valueElem = doc.select(id);
-            String label = valueElem.get(0).previousElementSibling().text();
-            String price = valueElem.text();
-            String condensedPrice = TextUtils.join("", price.split(" "));
-            result.put(id, new Balance(label, condensedPrice));
+            // ak je zaloha na ubytovanie nulova, tak nie je zobrazena
+            if (valueElem.size() != 0) {
+                String label = valueElem.get(0).previousElementSibling().text();
+                String price = valueElem.text();
+                String condensedPrice = TextUtils.join("", price.split(" "));
+                result.put(id, new Balance(label, condensedPrice));
+            }
         }
-
         return result;
     }
 
