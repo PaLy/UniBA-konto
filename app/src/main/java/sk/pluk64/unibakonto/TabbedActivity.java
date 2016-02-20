@@ -1,5 +1,6 @@
 package sk.pluk64.unibakonto;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -8,14 +9,15 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+
+import java.util.Map;
 
 import sk.pluk64.unibakonto.http.JedalneListky;
+import sk.pluk64.unibakonto.http.UnibaKonto;
 
 public class TabbedActivity extends AppCompatActivity {
+    static final String PREF_USERNAME = "username";
+    static final String PREF_PASSWORD = "password";
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -31,10 +33,15 @@ public class TabbedActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private UnibaKonto unibaKonto = null;
+    private boolean wasLoggedIn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        UsernamePassword up = getUsernamePassword();
+        wasLoggedIn = up.username != null && up.password != null;
+
         setContentView(R.layout.activity_tabbed);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -64,7 +71,11 @@ public class TabbedActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
-                return new AccountFragment();
+                if (wasLoggedIn) {
+                    return new AccountFragment();
+                } else {
+                    return new LoginFragment();
+                }
             } else if (position == 1) {
                 return MenuFragment.newInstance(JedalneListky.Jedalne.VENZA);
             } else {
@@ -88,6 +99,55 @@ public class TabbedActivity extends AppCompatActivity {
                     return "Eat & Meet";
             }
             return null;
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            if (object instanceof LoginFragment && wasLoggedIn) {
+                return POSITION_NONE;
+            }
+            if (object instanceof AccountFragment && !wasLoggedIn) {
+                return POSITION_NONE;
+            }
+            return POSITION_UNCHANGED;
+        }
+    }
+
+    void replaceFragment(Fragment oldFragment) {
+        wasLoggedIn = oldFragment instanceof LoginFragment;
+
+        getSupportFragmentManager().beginTransaction()
+                .remove(oldFragment)
+                .commit();
+        mSectionsPagerAdapter.notifyDataSetChanged();
+    }
+
+
+    UnibaKonto getUnibaKonto() {
+        if (unibaKonto == null) {
+            UsernamePassword up = getUsernamePassword();
+            unibaKonto = new UnibaKonto(up.username, up.password);
+        }
+        return unibaKonto;
+    }
+
+    public void invalidateUnibaKonto() {
+        unibaKonto = null;
+    }
+
+    UsernamePassword getUsernamePassword() {
+        return new UsernamePassword().invoke();
+    }
+
+    class UsernamePassword {
+        String username;
+        String password;
+
+        public UsernamePassword invoke() {
+            Map<String, ?> prefs = getPreferences(Context.MODE_PRIVATE).getAll();
+            username = (String) prefs.get(PREF_USERNAME);
+            password = (String) prefs.get(PREF_PASSWORD);
+            return this;
         }
     }
 }

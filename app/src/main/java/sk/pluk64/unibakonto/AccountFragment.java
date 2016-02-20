@@ -1,30 +1,18 @@
 package sk.pluk64.unibakonto;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -37,56 +25,67 @@ import java.util.Map;
 import sk.pluk64.unibakonto.http.UnibaKonto;
 
 public class AccountFragment extends Fragment {
-    private static final String PREF_USERNAME = "username";
-    private static final String PREF_PASSWORD = "password";
 
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
     private MyAdapter mAdapter = new MyAdapter();
     private SwipeRefreshLayout swipeRefresh;
     private boolean wasRefreshed = false;
 
-    private AutoCompleteTextView mUsernameView;
-    private EditText mPasswordView;
-    private View mLoginFormView;
-    private View mProgressView;
-    private UserLoginTask mAuthTask;
-
     public AccountFragment() {
     }
 
     private void updateData() {
-        new AsyncTask<Void, Void, List<UnibaKonto.Transaction>>() {
-            @Override
-            protected List<UnibaKonto.Transaction> doInBackground(Void... params) {
-                UsernamePassword up = new UsernamePassword().invoke();
+        new AsyncTask<Void, Void, Boolean>() {
+            private List<UnibaKonto.Transaction> updatedTransactions;
 
-                UnibaKonto unibaKonto = new UnibaKonto(up.username, up.password);
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                UnibaKonto unibaKonto = getMyActivity().getUnibaKonto();
                 if (!unibaKonto.isLoggedIn(true)) {
                     unibaKonto.login();
                 }
                 if (unibaKonto.isLoggedIn()) {
                     balances = unibaKonto.getBalances();
-                    return unibaKonto.getTransactions();
+                    updatedTransactions = unibaKonto.getTransactions();
+                    return true;
                 } else {
-                    // TODO need to correct this case
-                    return mAdapter.getData();
+                    return false;
                 }
             }
 
             @Override
-            protected void onPostExecute(List<UnibaKonto.Transaction> transactions) {
-                wasRefreshed = true;
+            protected void onPostExecute(Boolean success) {
                 View view = getView();
-                if (view != null) {
-                    updateViewBalances(view);
+                if (success) {
+                    wasRefreshed = true;
+                    if (view != null) {
+                        updateViewBalances(view);
+                    }
+                    MyAdapter adapter = AccountFragment.this.mAdapter;
+                    adapter.getData().clear();
+                    adapter.getData().addAll(updatedTransactions);
+                    adapter.notifyDataSetChanged();
+                    swipeRefresh.setRefreshing(false);
+                } else {
+                    TabbedActivity activity = getMyActivity();
+                    if (activity != null) {
+                        if (view != null) {
+                            // from whatever reason card view and swipeRefresh stay on screen after fragment replacement
+                            // this workaround will hide it
+                            // TODO could potentially leaks memory?
+                            view.findViewById(R.id.card_view).setVisibility(View.GONE);
+                            swipeRefresh.setRefreshing(false);
+                        }
+
+                        activity.replaceFragment(AccountFragment.this);
+                    }
                 }
-                MyAdapter adapter = AccountFragment.this.mAdapter;
-                adapter.getData().clear();
-                adapter.getData().addAll(transactions);
-                adapter.notifyDataSetChanged();
-                swipeRefresh.setRefreshing(false);
             }
         }.execute();
+    }
+
+    private TabbedActivity getMyActivity() {
+        return ((TabbedActivity) getActivity());
     }
 
     private void updateViewBalances(View view) {
@@ -108,98 +107,6 @@ public class AccountFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        UsernamePassword up = new UsernamePassword().invoke();
-        if (up.username != null && up.password != null) {
-            return onCreateViewLoggedIn(inflater, container);
-        } else {
-            return onCreateViewLogIn(inflater, container);
-        }
-    }
-
-    private View onCreateViewLogIn(LayoutInflater inflater, ViewGroup container) {
-        View view = inflater.inflate(R.layout.fragment_login, container, false);
-        mUsernameView = (AutoCompleteTextView) view.findViewById(R.id.username);
-
-        mPasswordView = (EditText) view.findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        Button mSignInButton = (Button) view.findViewById(R.id.email_sign_in_button);
-        mSignInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(mUsernameView.getWindowToken(), 0);
-                imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
-                attemptLogin();
-            }
-        });
-
-        mLoginFormView = view.findViewById(R.id.login_form);
-        mProgressView = view.findViewById(R.id.login_progress);
-        return view;
-    }
-
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
-    private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
-        // Reset errors.
-        mUsernameView.setError(null);
-        mPasswordView.setError(null);
-
-        // Store values at the time of the login attempt.
-        String username = mUsernameView.getText().toString();
-        String password = mPasswordView.getText().toString();
-
-        boolean cancel = false;
-        View focusView = null;
-
-        // Check for a valid username.
-        if (TextUtils.isEmpty(username)) {
-            mUsernameView.setError(getString(R.string.error_field_required));
-            focusView = mUsernameView;
-            cancel = true;
-        } else if (TextUtils.isEmpty(password)) {
-            mUsernameView.setError(getString(R.string.error_field_required));
-            focusView = mPasswordView;
-            cancel = true;
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            getActivity().getPreferences(Context.MODE_PRIVATE).edit()
-                    .putString(PREF_USERNAME, username)
-                    .putString(PREF_PASSWORD, password)
-                    .commit();
-            mAuthTask = new UserLoginTask(username, password);
-            mAuthTask.execute((Void) null);
-        }
-    }
-
-
-    @NonNull
-    private View onCreateViewLoggedIn(LayoutInflater inflater, ViewGroup container) {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
         RecyclerView transactionsView = (RecyclerView) view.findViewById(R.id.transactions_history);
@@ -303,95 +210,6 @@ public class AccountFragment extends Fragment {
         @Override
         public int getItemCount() {
             return transactions.size();
-        }
-    }
-
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-        private final UnibaKonto unibaKonto;
-
-        UserLoginTask(String username, String password) {
-            unibaKonto = new UnibaKonto(username, password);
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            unibaKonto.login();
-            return unibaKonto.isLoggedIn();
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                getFragmentManager().beginTransaction()
-                        .detach(AccountFragment.this)
-                        .attach(AccountFragment.this)
-                        .commit();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_username_or_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
-
-    private class UsernamePassword {
-        private String username;
-        private String password;
-
-        public UsernamePassword invoke() {
-            Map<String, ?> prefs = getActivity().getPreferences(Context.MODE_PRIVATE).getAll();
-            username = (String) prefs.get(PREF_USERNAME);
-            password = (String) prefs.get(PREF_PASSWORD);
-            return this;
         }
     }
 }
