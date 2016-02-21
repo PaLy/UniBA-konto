@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 public class Util {
     public static String connInput2String(URLConnection conn) throws IOException {
@@ -38,6 +38,6 @@ public class Util {
         }
 //        System.out.println(Arrays.toString(postParams));
 //        System.out.println(stringParams.toString());
-        return stringParams.toString().getBytes(StandardCharsets.UTF_8);
+        return stringParams.toString().getBytes(Charset.forName("UTF-8"));
     }
 }
