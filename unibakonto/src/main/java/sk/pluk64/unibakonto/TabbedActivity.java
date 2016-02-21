@@ -9,6 +9,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.ImageButton;
 
 import java.util.Map;
 
@@ -18,6 +20,7 @@ import sk.pluk64.unibakonto.http.UnibaKonto;
 public class TabbedActivity extends AppCompatActivity {
     static final String PREF_USERNAME = "username";
     static final String PREF_PASSWORD = "password";
+    private static final String PREF_LOGGED_IN = "logged_in";
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -34,14 +37,13 @@ public class TabbedActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     private UnibaKonto unibaKonto = null;
-    private boolean wasLoggedIn = false;
+    private boolean isLoggedIn = false;
+    private ImageButton logoutButton;
+    private Fragment curFragmentPos0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UsernamePassword up = getUsernamePassword();
-        wasLoggedIn = up.username != null && up.password != null;
-
         setContentView(R.layout.activity_tabbed);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -57,6 +59,43 @@ public class TabbedActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        logoutButton = (ImageButton) findViewById(R.id.icon_logout);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setIsLoggedIn(false);
+                // TODO hack
+                if (curFragmentPos0 instanceof AccountFragment) {
+                    findViewById(R.id.card_view).setVisibility(View.GONE);
+                    findViewById(R.id.transactions_history).setVisibility(View.GONE);
+                    ((AccountFragment) curFragmentPos0).swipeRefresh.setRefreshing(false);
+                }
+                removeFragment(curFragmentPos0);
+            }
+        });
+
+        setIsLoggedIn(getPrefLoggedIn());
+    }
+
+    void setIsLoggedIn(boolean isLoggedIn) {
+        this.isLoggedIn = isLoggedIn;
+        getPreferences(Context.MODE_PRIVATE).edit().putBoolean(PREF_LOGGED_IN, isLoggedIn).commit();
+
+        enableLogoutButton(isLoggedIn);
+    }
+
+    void enableLogoutButton(boolean enabled) {
+        logoutButton.setEnabled(enabled);
+        if (enabled) {
+            logoutButton.setImageResource(R.drawable.ic_logout_white_36dp);
+        } else {
+            logoutButton.setImageResource(R.drawable.ic_logout_grey600_36dp);
+        }
+    }
+
+    private boolean getPrefLoggedIn() {
+        return getPreferences(Context.MODE_PRIVATE).getBoolean(PREF_LOGGED_IN, false);
     }
 
     /**
@@ -72,11 +111,12 @@ public class TabbedActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
-                if (wasLoggedIn) {
-                    return new AccountFragment();
+                if (isLoggedIn) {
+                    curFragmentPos0 = new AccountFragment();
                 } else {
-                    return new LoginFragment();
+                    curFragmentPos0 = new LoginFragment();
                 }
+                return curFragmentPos0;
             } else if (position == 1) {
                 return MenuFragment.newInstance(JedalneListky.Jedalne.VENZA);
             } else {
@@ -104,19 +144,17 @@ public class TabbedActivity extends AppCompatActivity {
 
         @Override
         public int getItemPosition(Object object) {
-            if (object instanceof LoginFragment && wasLoggedIn) {
+            if (object instanceof LoginFragment && isLoggedIn) {
                 return POSITION_NONE;
             }
-            if (object instanceof AccountFragment && !wasLoggedIn) {
+            if (object instanceof AccountFragment && !isLoggedIn) {
                 return POSITION_NONE;
             }
             return POSITION_UNCHANGED;
         }
     }
 
-    void replaceFragment(Fragment oldFragment) {
-        wasLoggedIn = oldFragment instanceof LoginFragment;
-
+    void removeFragment(Fragment oldFragment) {
         getSupportFragmentManager().beginTransaction()
                 .remove(oldFragment)
                 .commit();

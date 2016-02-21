@@ -28,7 +28,7 @@ public class AccountFragment extends Fragment {
 
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
     private MyAdapter mAdapter = new MyAdapter();
-    private SwipeRefreshLayout swipeRefresh;
+    SwipeRefreshLayout swipeRefresh;
     private boolean wasRefreshed = false;
 
     public AccountFragment() {
@@ -40,16 +40,21 @@ public class AccountFragment extends Fragment {
 
             @Override
             protected Boolean doInBackground(Void... params) {
-                UnibaKonto unibaKonto = getMyActivity().getUnibaKonto();
-                if (!unibaKonto.isLoggedIn(true)) {
-                    unibaKonto.login();
-                }
-                if (unibaKonto.isLoggedIn()) {
-                    balances = unibaKonto.getBalances();
-                    updatedTransactions = unibaKonto.getTransactions();
-                    return true;
-                } else {
+                TabbedActivity activity = getMyActivity();
+                if (activity == null) {
                     return false;
+                } else {
+                    UnibaKonto unibaKonto = activity.getUnibaKonto();
+                    if (!unibaKonto.isLoggedIn(true)) {
+                        unibaKonto.login();
+                    }
+                    if (unibaKonto.isLoggedIn()) {
+                        balances = unibaKonto.getBalances();
+                        updatedTransactions = unibaKonto.getTransactions();
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
             }
 
@@ -74,10 +79,12 @@ public class AccountFragment extends Fragment {
                             // this workaround will hide it
                             // TODO could potentially leaks memory?
                             view.findViewById(R.id.card_view).setVisibility(View.GONE);
+                            view.findViewById(R.id.transactions_history).setVisibility(View.GONE);
                             swipeRefresh.setRefreshing(false);
                         }
 
-                        activity.replaceFragment(AccountFragment.this);
+                        activity.setIsLoggedIn(false);
+                        activity.removeFragment(AccountFragment.this);
                     }
                 }
             }

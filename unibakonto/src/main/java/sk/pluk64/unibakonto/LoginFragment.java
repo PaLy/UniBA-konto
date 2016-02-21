@@ -100,7 +100,8 @@ public class LoginFragment extends Fragment {
             if (success) {
                 TabbedActivity activity = getMyActivity();
                 if (activity != null) {
-                    activity.replaceFragment(LoginFragment.this);
+                    activity.setIsLoggedIn(true);
+                    activity.removeFragment(LoginFragment.this);
                 }
             } else {
                 // TODO moze tu nastat NPE? Ak je v detached stave?
