@@ -10,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 
 import java.util.Map;
@@ -21,6 +22,7 @@ public class TabbedActivity extends AppCompatActivity {
     static final String PREF_USERNAME = "username";
     static final String PREF_PASSWORD = "password";
     private static final String PREF_LOGGED_IN = "logged_in";
+    private static final String PREF_SELECTED_PAGE = "selected_page";
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -56,6 +58,26 @@ public class TabbedActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setOffscreenPageLimit(2);
+        mViewPager.setCurrentItem(getPreferences(MODE_PRIVATE).getInt(PREF_SELECTED_PAGE, 0));
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                getPreferences(MODE_PRIVATE).edit().putInt(PREF_SELECTED_PAGE, position).commit();
+                final InputMethodManager imm = (InputMethodManager) getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(mViewPager.getWindowToken(), 0);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
