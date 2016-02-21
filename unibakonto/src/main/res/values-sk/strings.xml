@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">UniBA konto</string>
+    <string name="prompt_username">Login UK</string>
+    <string name="prompt_password">Heslo</string>
+    <string name="action_sign_in">Prihlásiť</string>
+    <string name="action_sign_in_short">Prihl.</string>
+    <string name="error_incorrect_username_or_password">Nesprávny login alebo heslo alebo sa niečo pokazilo :(</string>
+    <string name="error_field_required">Povinné</string>
+    <string name="logout">Odhlásiť</string>
+</resources>
