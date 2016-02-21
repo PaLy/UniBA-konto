@@ -95,16 +95,16 @@ public class LoginFragment extends Fragment {
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-            showProgress(false);
+            TabbedActivity activity = getMyActivity();
+            if (activity == null) {
+                return;
+            }
 
+            showProgress(false);
             if (success) {
-                TabbedActivity activity = getMyActivity();
-                if (activity != null) {
-                    activity.setIsLoggedIn(true);
-                    activity.removeFragment(LoginFragment.this);
-                }
+                activity.setIsLoggedIn(true);
+                activity.removeFragment(LoginFragment.this);
             } else {
-                // TODO moze tu nastat NPE? Ak je v detached stave?
                 mPasswordView.setError(getString(R.string.error_incorrect_username_or_password));
                 mPasswordView.requestFocus();
             }
@@ -113,7 +113,9 @@ public class LoginFragment extends Fragment {
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-            showProgress(false);
+            if (getActivity() != null) {
+                showProgress(false);
+            }
         }
     }
 

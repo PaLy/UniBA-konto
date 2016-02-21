@@ -142,7 +142,13 @@ public class UnibaKonto {
 
     public List<Transaction> getTransactions() {
         Elements table = documents.getRefreshed(TRANSACTIONS_PAGE).select(ID_TRANSACTIONS_HISTORY);
-        Elements tableRows = table.first().child(0).children();
+        Element first = table.first();
+        Elements tableRows;
+        if (first == null || first.children().size() == 0) {
+            tableRows = new Elements();
+        } else {
+            tableRows = first.child(0).children();
+        }
 
         ArrayList<TransactionItem> items = new ArrayList<>();
         for (int i = 1; i < tableRows.size(); i++) {

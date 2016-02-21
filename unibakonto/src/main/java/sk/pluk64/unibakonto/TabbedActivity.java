@@ -93,7 +93,9 @@ public class TabbedActivity extends AppCompatActivity {
                     findViewById(R.id.transactions_history).setVisibility(View.GONE);
                     ((AccountFragment) curFragmentPos0).swipeRefresh.setRefreshing(false);
                 }
-                removeFragment(curFragmentPos0);
+                if (curFragmentPos0 != null) {
+                    removeFragment(curFragmentPos0);
+                }
             }
         });
 
@@ -179,7 +181,7 @@ public class TabbedActivity extends AppCompatActivity {
     void removeFragment(Fragment oldFragment) {
         getSupportFragmentManager().beginTransaction()
                 .remove(oldFragment)
-                .commit();
+                .commitAllowingStateLoss();
         mSectionsPagerAdapter.notifyDataSetChanged();
     }
 
