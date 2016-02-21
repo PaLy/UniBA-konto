@@ -88,7 +88,7 @@ public class AccountFragment extends Fragment {
                     }
                 }
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private TabbedActivity getMyActivity() {

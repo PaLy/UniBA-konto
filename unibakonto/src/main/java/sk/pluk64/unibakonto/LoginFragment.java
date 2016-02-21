@@ -199,7 +199,7 @@ public class LoginFragment extends Fragment {
                     .commit();
             getMyActivity().invalidateUnibaKonto();
             mAuthTask = new UserLoginTask();
-            mAuthTask.execute((Void) null);
+            mAuthTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 }

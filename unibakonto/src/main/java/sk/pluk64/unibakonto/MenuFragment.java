@@ -58,7 +58,7 @@ public class MenuFragment extends Fragment {
                 adapter.notifyDataSetChanged();
                 swipeRefresh.setRefreshing(false);
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Nullable
