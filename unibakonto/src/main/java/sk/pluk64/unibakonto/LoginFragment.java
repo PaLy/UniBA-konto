@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import sk.pluk64.unibakonto.http.UnibaKonto;
+import sk.pluk64.unibakonto.http.Util;
 
 public class LoginFragment extends Fragment {
     private AutoCompleteTextView mUsernameView;
@@ -82,13 +83,24 @@ public class LoginFragment extends Fragment {
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
         private final UnibaKonto unibaKonto = getMyActivity().getUnibaKonto();
+        private boolean noInternet = false;
 
         UserLoginTask() {
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            unibaKonto.login();
+            try {
+                unibaKonto.login();
+            } catch (Util.NoInternetConnectionException e) {
+                noInternet = true;
+                getMyActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toasts.showNoInternetConnection(getMyActivity().getApplicationContext());
+                    }
+                });
+            }
             return unibaKonto.isLoggedIn();
         }
 
@@ -104,7 +116,7 @@ public class LoginFragment extends Fragment {
             if (success) {
                 activity.setIsLoggedIn(true);
                 activity.removeFragment(LoginFragment.this);
-            } else {
+            } else if (!noInternet) {
                 mPasswordView.setError(getString(R.string.error_incorrect_username_or_password));
                 mPasswordView.requestFocus();
             }

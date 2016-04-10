@@ -7,4 +7,5 @@
     <string name="error_incorrect_username_or_password">Nesprávny login alebo heslo alebo sa niečo pokazilo :(</string>
     <string name="error_field_required">Povinné</string>
     <string name="logout">Odhlásiť</string>
+    <string name="no_internet">Žiadne pripojenie na internet :(</string>
 </resources>

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import sk.pluk64.unibakonto.http.JedalneListky;
+import sk.pluk64.unibakonto.http.Util;
 
 public class MenuFragment extends Fragment {
     private static final String ARG_JEDALEN = "jedalen";
@@ -48,14 +49,26 @@ public class MenuFragment extends Fragment {
         new AsyncTask<Void, Void, JedalneListky.Meals>() {
             @Override
             protected JedalneListky.Meals doInBackground(Void... params) {
-                return jedalen.getMenu();
+                try {
+                    return jedalen.getMenu();
+                } catch (Util.NoInternetConnectionException e) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toasts.showNoInternetConnection(getActivity().getApplicationContext());
+                        }
+                    });
+                    return null;
+                }
             }
 
             @Override
             protected void onPostExecute(JedalneListky.Meals meals) {
-                wasRefreshed = true;
-                adapter.updateData(meals);
-                adapter.notifyDataSetChanged();
+                if (meals != null) {
+                    wasRefreshed = true;
+                    adapter.updateData(meals);
+                    adapter.notifyDataSetChanged();
+                }
                 swipeRefresh.setRefreshing(false);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import sk.pluk64.unibakonto.http.UnibaKonto;
+import sk.pluk64.unibakonto.http.Util;
 
 public class AccountFragment extends Fragment {
 
@@ -36,6 +37,7 @@ public class AccountFragment extends Fragment {
 
     private void updateData() {
         new AsyncTask<Void, Void, Boolean>() {
+            public boolean noInternet = false;
             private List<UnibaKonto.Transaction> updatedTransactions;
 
             @Override
@@ -46,11 +48,21 @@ public class AccountFragment extends Fragment {
                 } else {
                     UnibaKonto unibaKonto = activity.getUnibaKonto();
                     if (!unibaKonto.isLoggedIn(true)) {
-                        unibaKonto.login();
+                        try {
+                            unibaKonto.login();
+                        } catch (Util.NoInternetConnectionException e) {
+                            noInternet = true;
+                            showNoInternetConnectionToastFromBackgroundThread();
+                        }
                     }
                     if (unibaKonto.isLoggedIn()) {
-                        balances = unibaKonto.getBalances();
-                        updatedTransactions = unibaKonto.getTransactions();
+                        try {
+                            balances = unibaKonto.getBalances();
+                            updatedTransactions = unibaKonto.getTransactions();
+                        } catch (Util.NoInternetConnectionException e) {
+                            noInternet = true;
+                            showNoInternetConnectionToastFromBackgroundThread();
+                        }
                         return true;
                     } else {
                         return false;
@@ -71,7 +83,7 @@ public class AccountFragment extends Fragment {
                     adapter.getData().addAll(updatedTransactions);
                     adapter.notifyDataSetChanged();
                     swipeRefresh.setRefreshing(false);
-                } else {
+                } else if (!noInternet) {
                     TabbedActivity activity = getMyActivity();
                     if (activity != null) {
                         if (view != null) {
@@ -86,9 +98,20 @@ public class AccountFragment extends Fragment {
                         activity.setIsLoggedIn(false);
                         activity.removeFragment(AccountFragment.this);
                     }
+                } else {
+                    swipeRefresh.setRefreshing(false);
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void showNoInternetConnectionToastFromBackgroundThread() {
+        getMyActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toasts.showNoInternetConnection(getMyActivity().getApplicationContext());
+            }
+        });
     }
 
     private TabbedActivity getMyActivity() {
