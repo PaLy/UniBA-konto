@@ -14,7 +14,7 @@ public class JedalneListky {
     public enum Jedalne {
         EAM, VENZA;
 
-        public Meals getMenu() throws Util.NoInternetConnectionException {
+        public Meals getMenu() throws Util.ConnectionFailedException {
             switch (this) {
                 case EAM:
                     return getEaM();
@@ -26,15 +26,15 @@ public class JedalneListky {
         }
     }
 
-    private static Meals getEaM() throws Util.NoInternetConnectionException {
+    private static Meals getEaM() throws Util.ConnectionFailedException {
         return getMeals("http://mlynska-dolina.sk/stravovanie/vsetky-zariadenia/eat-meet/denne-menu", 4);
     }
 
-    private static Meals getVenza() throws Util.NoInternetConnectionException {
+    private static Meals getVenza() throws Util.ConnectionFailedException {
         return getMeals("http://mlynska-dolina.sk/stravovanie/vsetky-zariadenia/venza/denne-menu", 3); // den pred otvorenim jedalne bol dostupny listok na dalsie dni
     }
 
-    private static Meals getMeals(String location, int someParam) throws Util.NoInternetConnectionException {
+    private static Meals getMeals(String location, int someParam) throws Util.ConnectionFailedException {
         try {
             URLConnection urlConnection = UnibaKonto.httpGet(location);
             Document doc = Jsoup.parse(Util.connInput2String(urlConnection));
@@ -66,7 +66,7 @@ public class JedalneListky {
             Meals meals = mealsBuilder.build();
             return meals;
         } catch (IOException e) {
-            throw new Util.NoInternetConnectionException();
+            throw new Util.ConnectionFailedException();
         }
     }
 
@@ -159,7 +159,7 @@ public class JedalneListky {
         try {
             System.out.println(getEaM());
             System.out.println(getVenza());
-        } catch (Util.NoInternetConnectionException e) {
+        } catch (Util.ConnectionFailedException e) {
             e.printStackTrace();
         }
     }

@@ -25,8 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import sk.pluk64.unibakonto.Toasts;
-
 public class UnibaKonto {
     private static final String MOJA_UNIBA_LOGIN_PAGE = "https://moja.uniba.sk//cosauth/cosauth.php";
     private static final String UNIBA_LOGIN_PAGE = "https://login.uniba.sk/cosign.cgi";
@@ -51,7 +49,7 @@ public class UnibaKonto {
         this.password = password;
     }
 
-    public void login() throws Util.NoInternetConnectionException {
+    public void login() throws Util.ConnectionFailedException {
         CookieHandler.setDefault(new CookieManager());
         documents.cache.clear();
         try {
@@ -59,11 +57,11 @@ public class UnibaKonto {
             mojaUnibaLogin();
             kontoLogin(); // TODO toto treba spravit asi po nejakom case opakovane???
         } catch (IOException e) {
-            throw new Util.NoInternetConnectionException();
+            throw new Util.ConnectionFailedException();
         }
     }
 
-    private static void kontoLogin() throws IOException, Util.NoInternetConnectionException {
+    private static void kontoLogin() throws IOException, Util.ConnectionFailedException {
         URLConnection kontoLoginPageConn = httpGet(KONTO_LOGIN_PAGE); // sets cookie
 
         KontoParsedData parsedData = new KontoParsedData(kontoLoginPageConn);
@@ -74,7 +72,7 @@ public class UnibaKonto {
         if (refresh) {
             try {
                 return !documents.getRefreshed(CLIENT_INF_PAGE).select(ID_VAR_SYMBOL).isEmpty();
-            } catch (Util.NoInternetConnectionException e) {
+            } catch (Util.ConnectionFailedException e) {
                 return false;
             }
         } else {
@@ -85,7 +83,7 @@ public class UnibaKonto {
     public Boolean isLoggedIn() {
         try {
             return !documents.get(CLIENT_INF_PAGE).select(ID_VAR_SYMBOL).isEmpty();
-        } catch (Util.NoInternetConnectionException e) {
+        } catch (Util.ConnectionFailedException e) {
             return false;
         }
     }
@@ -121,7 +119,7 @@ public class UnibaKonto {
         System.out.println(((CookieManager) CookieHandler.getDefault()).getCookieStore().getCookies());
     }
 
-    public Map<String, Balance> getBalances() throws Util.NoInternetConnectionException {
+    public Map<String, Balance> getBalances() throws Util.ConnectionFailedException {
         Map<String, Balance> result = new LinkedHashMap<>();
         Document doc = documents.getRefreshed(CLIENT_INF_PAGE);
 
@@ -150,7 +148,7 @@ public class UnibaKonto {
         }
     }
 
-    public List<Transaction> getTransactions() throws Util.NoInternetConnectionException {
+    public List<Transaction> getTransactions() throws Util.ConnectionFailedException {
         Elements table = documents.getRefreshed(TRANSACTIONS_PAGE).select(ID_TRANSACTIONS_HISTORY);
         Element first = table.first();
         Elements tableRows;
@@ -187,7 +185,7 @@ public class UnibaKonto {
         public final byte[] postData;
         public final String action;
 
-        public KontoParsedData(URLConnection parseFrom) throws IOException, Util.NoInternetConnectionException {
+        public KontoParsedData(URLConnection parseFrom) throws IOException, Util.ConnectionFailedException {
             String html = Util.connInput2String(parseFrom);
             Document kontoDoc = Jsoup.parse(html);
             ArrayList<String> paramsArray = new ArrayList<>();
@@ -207,7 +205,7 @@ public class UnibaKonto {
     private static class ParsedDocumentCache {
         private final Map<String, Document> cache = new HashMap<>();
 
-        public Document get(String location) throws Util.NoInternetConnectionException {
+        public Document get(String location) throws Util.ConnectionFailedException {
             Document document = cache.get(location);
             if (document == null) {
                 refresh(location);
@@ -216,19 +214,19 @@ public class UnibaKonto {
             return document;
         }
 
-        private void refresh(String location) throws Util.NoInternetConnectionException {
+        private void refresh(String location) throws Util.ConnectionFailedException {
             String html;
             try {
                 URLConnection connection = httpGet(location);
                 html = Util.connInput2String(connection);
             } catch (IOException e) {
-                throw new Util.NoInternetConnectionException();
+                throw new Util.ConnectionFailedException();
             }
             Document document = Jsoup.parse(html);
             cache.put(location, document);
         }
 
-        public Document getRefreshed(String location) throws Util.NoInternetConnectionException {
+        public Document getRefreshed(String location) throws Util.ConnectionFailedException {
             refresh(location);
             return get(location);
         }

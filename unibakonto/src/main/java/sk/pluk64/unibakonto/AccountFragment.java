@@ -50,7 +50,7 @@ public class AccountFragment extends Fragment {
                     if (!unibaKonto.isLoggedIn(true)) {
                         try {
                             unibaKonto.login();
-                        } catch (Util.NoInternetConnectionException e) {
+                        } catch (Util.ConnectionFailedException e) {
                             noInternet = true;
                             showNoInternetConnectionToastFromBackgroundThread();
                         }
@@ -59,7 +59,7 @@ public class AccountFragment extends Fragment {
                         try {
                             balances = unibaKonto.getBalances();
                             updatedTransactions = unibaKonto.getTransactions();
-                        } catch (Util.NoInternetConnectionException e) {
+                        } catch (Util.ConnectionFailedException e) {
                             noInternet = true;
                             showNoInternetConnectionToastFromBackgroundThread();
                         }

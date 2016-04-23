@@ -51,7 +51,7 @@ public class MenuFragment extends Fragment {
             protected JedalneListky.Meals doInBackground(Void... params) {
                 try {
                     return jedalen.getMenu();
-                } catch (Util.NoInternetConnectionException e) {
+                } catch (Util.ConnectionFailedException e) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

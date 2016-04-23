@@ -92,7 +92,7 @@ public class LoginFragment extends Fragment {
         protected Boolean doInBackground(Void... params) {
             try {
                 unibaKonto.login();
-            } catch (Util.NoInternetConnectionException e) {
+            } catch (Util.ConnectionFailedException e) {
                 noInternet = true;
                 getMyActivity().runOnUiThread(new Runnable() {
                     @Override

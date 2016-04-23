@@ -7,10 +7,10 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 
 public class Util {
-    public static String connInput2String(URLConnection conn) throws IOException, NoInternetConnectionException {
+    public static String connInput2String(URLConnection conn) throws IOException, ConnectionFailedException {
         String contentType = conn.getContentType();
         if (contentType == null) {
-            throw new NoInternetConnectionException();
+            throw new ConnectionFailedException();
         } else {
             int charsetBegining = contentType.indexOf("charset=");
             String charsetName = charsetBegining != -1 ?
@@ -45,6 +45,6 @@ public class Util {
         return stringParams.toString().getBytes(Charset.forName("UTF-8"));
     }
 
-    public static class NoInternetConnectionException extends Exception {
+    public static class ConnectionFailedException extends Exception {
     }
 }
