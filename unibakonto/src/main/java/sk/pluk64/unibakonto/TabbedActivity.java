@@ -157,7 +157,7 @@ public class TabbedActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "E-peňaženka";
+                    return getString(R.string.title_e_wallet);
                 case 1:
                     return "Venza";
                 case 2:

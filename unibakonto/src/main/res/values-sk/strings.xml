@@ -8,4 +8,5 @@
     <string name="error_field_required">Povinné</string>
     <string name="logout">Odhlásiť</string>
     <string name="no_internet">Žiadne pripojenie na internet :(</string>
+    <string name="title_e_wallet">E-peňaženka</string>
 </resources>
