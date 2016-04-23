@@ -9,6 +9,7 @@
     <string name="logout">Odhlásiť</string>
     <string name="connection_failed">Pripojenie zlyhalo :(</string>
     <string name="title_e_wallet">E-peňaženka</string>
-    <string name="refreshed">Aktualizované:</string>
+    <string name="refreshed">Aktualizované: %s</string>
     <string name="never">nikdy</string>
+    <string name="refreshing">Aktualizuje sa…</string>
 </resources>

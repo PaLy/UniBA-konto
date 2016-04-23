@@ -39,6 +39,7 @@ public class AccountFragment extends Fragment {
     SwipeRefreshLayout swipeRefresh;
     private boolean wasRefreshed = false;
     private SharedPreferences preferences;
+    private AsyncTask<Void, Void, Boolean> updateDataTask;
 
     public AccountFragment() {
     }
@@ -50,7 +51,14 @@ public class AccountFragment extends Fragment {
     }
 
     private void updateData() {
-        new AsyncTask<Void, Void, Boolean>() {
+        if (updateDataTask != null) {
+            return;
+        }
+        View view = getView();
+        if (view != null) {
+            setRefreshing(view);
+        }
+        updateDataTask = new AsyncTask<Void, Void, Boolean>() {
             public boolean noInternet = false;
             private List<UnibaKonto.Transaction> updatedTransactions;
 
@@ -73,11 +81,12 @@ public class AccountFragment extends Fragment {
                         try {
                             balances = unibaKonto.getBalances();
                             updatedTransactions = unibaKonto.getTransactions();
+                            return true;
                         } catch (Util.ConnectionFailedException e) {
                             noInternet = true;
                             showNoInternetConnectionToastFromBackgroundThread();
+                            return false;
                         }
-                        return true;
                     } else {
                         return false;
                     }
@@ -92,7 +101,6 @@ public class AccountFragment extends Fragment {
                     saveData(balances, updatedTransactions);
                     if (view != null) {
                         updateViewBalances(view);
-                        updateRefreshTime(view);
                     }
                     MyAdapter adapter = AccountFragment.this.mAdapter;
                     adapter.getData().clear();
@@ -117,8 +125,13 @@ public class AccountFragment extends Fragment {
                 } else {
                     swipeRefresh.setRefreshing(false);
                 }
+                if (view != null) {
+                    updateRefreshTime(view);
+                }
+                updateDataTask = null;
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        };
+        updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void saveData(Map<String, UnibaKonto.Balance> balances, List<UnibaKonto.Transaction> transactions) {
@@ -136,25 +149,31 @@ public class AccountFragment extends Fragment {
     private void loadData() {
         Gson gson = new Gson();
 
-        String jsonBalances = preferences.getString(PREF_BALANCES, null);
-        if (jsonBalances != null) {
-            balances = gson.fromJson(jsonBalances, new TypeToken<Map<String, UnibaKonto.Balance>>(){}.getType());
+        String jsonBalances = preferences.getString(PREF_BALANCES, "null");
+        balances = gson.fromJson(jsonBalances, new TypeToken<Map<String, UnibaKonto.Balance>>(){}.getType());
+        if (balances == null) {
+            balances = Collections.emptyMap();
         }
 
-        String jsonTransactions = preferences.getString(PREF_TRANSACTIONS, null);
-        if (jsonTransactions != null) {
-            List<UnibaKonto.Transaction> transactions =
-                    gson.fromJson(jsonTransactions,new TypeToken<List<UnibaKonto.Transaction>>(){}.getType());
+        String jsonTransactions = preferences.getString(PREF_TRANSACTIONS, "null");
+        List<UnibaKonto.Transaction> transactions =
+                gson.fromJson(jsonTransactions,new TypeToken<List<UnibaKonto.Transaction>>(){}.getType());
+        if (transactions != null) {
             mAdapter.getData().clear();
             mAdapter.getData().addAll(transactions);
             mAdapter.notifyDataSetChanged();
         }
     }
 
+    private void setRefreshing(View view) {
+        TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
+        timestamp.setText(getString(R.string.refreshing));
+    }
+
     private void updateRefreshTime(View view) {
         TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
         String refreshTime = preferences.getString(PREF_ACCOUNT_REFRESH_TIMESTAMP, getString(R.string.never));
-        timestamp.setText(refreshTime);
+        timestamp.setText(getString(R.string.refreshed, refreshTime));
     }
 
     private void showNoInternetConnectionToastFromBackgroundThread() {
@@ -200,6 +219,7 @@ public class AccountFragment extends Fragment {
         transactionsView.setAdapter(mAdapter);
 
         loadData();
+        updateRefreshTime(view);
 
         swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -212,13 +232,11 @@ public class AccountFragment extends Fragment {
             swipeRefresh.post(new Runnable() {
                 @Override
                 public void run() {
-                    swipeRefresh.setRefreshing(true);
                     updateData();
                 }
             });
         }
         updateViewBalances(view);
-        updateRefreshTime(view);
         return view;
     }
 

@@ -31,6 +31,7 @@ public class MenuFragment extends Fragment {
     private SwipeRefreshLayout swipeRefresh;
     private boolean wasRefreshed = false;
     private SharedPreferences preferences;
+    private AsyncTask<Void, Void, JedalneListky.Meals> updateDataTask;
 
     public MenuFragment() {
     }
@@ -54,7 +55,14 @@ public class MenuFragment extends Fragment {
     }
 
     private void updateData() {
-        new AsyncTask<Void, Void, JedalneListky.Meals>() {
+        if (updateDataTask != null) {
+            return;
+        }
+        View view = getView();
+        if (view != null) {
+            setRefreshing(view);
+        }
+        updateDataTask = new AsyncTask<Void, Void, JedalneListky.Meals>() {
             @Override
             protected JedalneListky.Meals doInBackground(Void... params) {
                 try {
@@ -74,23 +82,30 @@ public class MenuFragment extends Fragment {
             protected void onPostExecute(JedalneListky.Meals meals) {
                 if (meals != null) {
                     saveData(meals);
-                    View view = getView();
-                    if (view != null) {
-                        updateRefreshTime(view);
-                    }
                     wasRefreshed = true;
                     adapter.updateData(meals);
                     adapter.notifyDataSetChanged();
                 }
+                View view = getView();
+                if (view != null) {
+                    updateRefreshTime(view);
+                }
                 swipeRefresh.setRefreshing(false);
+                updateDataTask = null;
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        };
+        updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void setRefreshing(View view) {
+        TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
+        timestamp.setText(getString(R.string.refreshing));
     }
 
     private void updateRefreshTime(View view) {
         TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
         String refreshTime = preferences.getString(PREF_MEALS_REFRESH_TIMESTAMP + jedalen, getString(R.string.never));
-        timestamp.setText(refreshTime);
+        timestamp.setText(getString(R.string.refreshed, refreshTime));
     }
 
     @Nullable
@@ -105,6 +120,7 @@ public class MenuFragment extends Fragment {
         listView.setAdapter(adapter);
 
         loadData();
+        updateRefreshTime(view);
 
         swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -117,12 +133,10 @@ public class MenuFragment extends Fragment {
             swipeRefresh.post(new Runnable() {
                 @Override
                 public void run() {
-                    swipeRefresh.setRefreshing(true);
                     updateData();
                 }
             });
         }
-        updateRefreshTime(view);
         return view;
     }
 
@@ -136,9 +150,9 @@ public class MenuFragment extends Fragment {
     }
 
     private void loadData() {
-        String jsonMeals = preferences.getString(PREF_MEALS + jedalen, null);
-        if (jsonMeals != null) {
-            JedalneListky.Meals meals = new Gson().fromJson(jsonMeals, JedalneListky.Meals.class);
+        String jsonMeals = preferences.getString(PREF_MEALS + jedalen, "null");
+        JedalneListky.Meals meals = new Gson().fromJson(jsonMeals, JedalneListky.Meals.class);
+        if (meals != null) {
             adapter.updateData(meals);
             adapter.notifyDataSetChanged();
         }
