@@ -1,9 +1,11 @@
 package sk.pluk64.unibakonto;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
@@ -17,6 +19,9 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,13 +31,21 @@ import sk.pluk64.unibakonto.http.UnibaKonto;
 import sk.pluk64.unibakonto.http.Util;
 
 public class AccountFragment extends Fragment {
-
+    static final String PREF_BALANCES = "balances";
+    static final String PREF_TRANSACTIONS = "transactions";
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
     private MyAdapter mAdapter = new MyAdapter();
     SwipeRefreshLayout swipeRefresh;
     private boolean wasRefreshed = false;
+    private SharedPreferences preferences;
 
     public AccountFragment() {
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
     }
 
     private void updateData() {
@@ -75,6 +88,7 @@ public class AccountFragment extends Fragment {
                 View view = getView();
                 if (success) {
                     wasRefreshed = true;
+                    saveData(balances, updatedTransactions);
                     if (view != null) {
                         updateViewBalances(view);
                     }
@@ -103,6 +117,34 @@ public class AccountFragment extends Fragment {
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void saveData(Map<String, UnibaKonto.Balance> balances, List<UnibaKonto.Transaction> transactions) {
+        Gson gson = new Gson();
+        String jsonBalances = gson.toJson(balances);
+        String jsonTransactions = gson.toJson(transactions);
+        preferences.edit()
+                .putString(PREF_BALANCES, jsonBalances)
+                .putString(PREF_TRANSACTIONS, jsonTransactions)
+                .apply();
+    }
+
+    private void loadData() {
+        Gson gson = new Gson();
+
+        String jsonBalances = preferences.getString(PREF_BALANCES, null);
+        if (jsonBalances != null) {
+            balances = gson.fromJson(jsonBalances, new TypeToken<Map<String, UnibaKonto.Balance>>(){}.getType());
+        }
+
+        String jsonTransactions = preferences.getString(PREF_TRANSACTIONS, null);
+        if (jsonTransactions != null) {
+            List<UnibaKonto.Transaction> transactions =
+                    gson.fromJson(jsonTransactions,new TypeToken<List<UnibaKonto.Transaction>>(){}.getType());
+            mAdapter.getData().clear();
+            mAdapter.getData().addAll(transactions);
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     private void showNoInternetConnectionToastFromBackgroundThread() {
@@ -146,6 +188,8 @@ public class AccountFragment extends Fragment {
         RecyclerView.LayoutManager tLayoutManager = new LinearLayoutManager(getContext());
         transactionsView.setLayoutManager(tLayoutManager);
         transactionsView.setAdapter(mAdapter);
+
+        loadData();
 
         swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

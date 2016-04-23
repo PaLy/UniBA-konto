@@ -1,5 +1,7 @@
 package sk.pluk64.unibakonto;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,10 +24,12 @@ import sk.pluk64.unibakonto.http.Util;
 
 public class MenuFragment extends Fragment {
     private static final String ARG_JEDALEN = "jedalen";
+    private static final String PREF_MEALS = "meals";
     private JedalneListky.Jedalne jedalen;
     private MenuListAdapter adapter = new MenuListAdapter();
     private SwipeRefreshLayout swipeRefresh;
     private boolean wasRefreshed = false;
+    private SharedPreferences preferences;
 
     public MenuFragment() {
     }
@@ -43,6 +49,7 @@ public class MenuFragment extends Fragment {
         if (getArguments() != null) {
             jedalen = (JedalneListky.Jedalne) getArguments().getSerializable(ARG_JEDALEN);
         }
+        preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
     }
 
     private void updateData() {
@@ -65,6 +72,7 @@ public class MenuFragment extends Fragment {
             @Override
             protected void onPostExecute(JedalneListky.Meals meals) {
                 if (meals != null) {
+                    saveData(meals);
                     wasRefreshed = true;
                     adapter.updateData(meals);
                     adapter.notifyDataSetChanged();
@@ -85,6 +93,8 @@ public class MenuFragment extends Fragment {
         listView.setLayoutManager(tLayoutManager);
         listView.setAdapter(adapter);
 
+        loadData();
+
         swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -102,6 +112,22 @@ public class MenuFragment extends Fragment {
             });
         }
         return view;
+    }
+
+    private void saveData(JedalneListky.Meals meals) {
+        String jsonMeals = new Gson().toJson(meals);
+        preferences.edit()
+                .putString(PREF_MEALS + jedalen, jsonMeals)
+                .apply();
+    }
+
+    private void loadData() {
+        String jsonMeals = preferences.getString(PREF_MEALS + jedalen, null);
+        if (jsonMeals != null) {
+            JedalneListky.Meals meals = new Gson().fromJson(jsonMeals, JedalneListky.Meals.class);
+            adapter.updateData(meals);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private static class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {

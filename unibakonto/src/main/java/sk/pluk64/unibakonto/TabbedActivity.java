@@ -1,6 +1,7 @@
 package sk.pluk64.unibakonto;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -42,10 +43,12 @@ public class TabbedActivity extends AppCompatActivity {
     private boolean isLoggedIn = false;
     private ImageButton logoutButton;
     private Fragment curFragmentPos0;
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        preferences = getPreferences(MODE_PRIVATE);
         setContentView(R.layout.activity_tabbed);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -67,7 +70,7 @@ public class TabbedActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                getPreferences(MODE_PRIVATE).edit().putInt(PREF_SELECTED_PAGE, position).commit();
+                preferences.edit().putInt(PREF_SELECTED_PAGE, position).apply();
                 final InputMethodManager imm = (InputMethodManager) getSystemService(
                         Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(mViewPager.getWindowToken(), 0);
@@ -86,6 +89,7 @@ public class TabbedActivity extends AppCompatActivity {
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                deleteUserData();
                 setIsLoggedIn(false);
                 // TODO hack
                 if (curFragmentPos0 instanceof AccountFragment) {
@@ -102,9 +106,17 @@ public class TabbedActivity extends AppCompatActivity {
         setIsLoggedIn(getPrefLoggedIn());
     }
 
+    private void deleteUserData() {
+        getPreferences(MODE_PRIVATE).edit()
+//                .remove(PREF_PASSWORD) // TODO think about it
+                .remove(AccountFragment.PREF_BALANCES)
+                .remove(AccountFragment.PREF_TRANSACTIONS)
+                .apply();
+    }
+
     void setIsLoggedIn(boolean isLoggedIn) {
         this.isLoggedIn = isLoggedIn;
-        getPreferences(Context.MODE_PRIVATE).edit().putBoolean(PREF_LOGGED_IN, isLoggedIn).commit();
+        preferences.edit().putBoolean(PREF_LOGGED_IN, isLoggedIn).apply();
 
         enableLogoutButton(isLoggedIn);
     }

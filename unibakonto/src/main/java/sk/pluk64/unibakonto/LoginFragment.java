@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,6 +31,13 @@ public class LoginFragment extends Fragment {
     private View mLoginFormView;
     private View mProgressView;
     private UserLoginTask mAuthTask;
+    private SharedPreferences preferences;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+    }
 
     @Nullable
     @Override
@@ -207,10 +215,10 @@ public class LoginFragment extends Fragment {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            getActivity().getPreferences(Context.MODE_PRIVATE).edit()
+            preferences.edit()
                     .putString(TabbedActivity.PREF_USERNAME, username)
                     .putString(TabbedActivity.PREF_PASSWORD, password)
-                    .commit();
+                    .apply();
             getMyActivity().invalidateUnibaKonto();
             mAuthTask = new UserLoginTask();
             mAuthTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
