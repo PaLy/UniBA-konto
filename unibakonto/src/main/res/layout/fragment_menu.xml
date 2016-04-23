@@ -12,13 +12,21 @@
         android:clickable="true"
         android:orientation="vertical">
 
+        <include layout="@layout/refreshed_timestamp_row" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"/>
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/menu_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
             android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp">
+            android:layout_marginRight="4dp"
+            android:background="@color/cardview_light_background">
 
         </android.support.v7.widget.RecyclerView>
     </LinearLayout>

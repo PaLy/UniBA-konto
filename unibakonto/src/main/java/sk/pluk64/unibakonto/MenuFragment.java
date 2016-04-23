@@ -25,6 +25,7 @@ import sk.pluk64.unibakonto.http.Util;
 public class MenuFragment extends Fragment {
     private static final String ARG_JEDALEN = "jedalen";
     private static final String PREF_MEALS = "meals";
+    private static final String PREF_MEALS_REFRESH_TIMESTAMP = "meals_refreshed_timestamp";
     private JedalneListky.Jedalne jedalen;
     private MenuListAdapter adapter = new MenuListAdapter();
     private SwipeRefreshLayout swipeRefresh;
@@ -62,7 +63,7 @@ public class MenuFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toasts.showNoInternetConnection(getActivity().getApplicationContext());
+                            Utils.showNoInternetConnection(getActivity().getApplicationContext());
                         }
                     });
                     return null;
@@ -73,6 +74,10 @@ public class MenuFragment extends Fragment {
             protected void onPostExecute(JedalneListky.Meals meals) {
                 if (meals != null) {
                     saveData(meals);
+                    View view = getView();
+                    if (view != null) {
+                        updateRefreshTime(view);
+                    }
                     wasRefreshed = true;
                     adapter.updateData(meals);
                     adapter.notifyDataSetChanged();
@@ -80,6 +85,12 @@ public class MenuFragment extends Fragment {
                 swipeRefresh.setRefreshing(false);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void updateRefreshTime(View view) {
+        TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
+        String refreshTime = preferences.getString(PREF_MEALS_REFRESH_TIMESTAMP + jedalen, getString(R.string.never));
+        timestamp.setText(refreshTime);
     }
 
     @Nullable
@@ -111,13 +122,16 @@ public class MenuFragment extends Fragment {
                 }
             });
         }
+        updateRefreshTime(view);
         return view;
     }
 
     private void saveData(JedalneListky.Meals meals) {
         String jsonMeals = new Gson().toJson(meals);
+        String formattedTime = Utils.getCurrentTimeFormatted();
         preferences.edit()
                 .putString(PREF_MEALS + jedalen, jsonMeals)
+                .putString(PREF_MEALS_REFRESH_TIMESTAMP + jedalen, formattedTime)
                 .apply();
     }
 

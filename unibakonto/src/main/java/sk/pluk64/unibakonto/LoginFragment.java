@@ -105,7 +105,7 @@ public class LoginFragment extends Fragment {
                 getMyActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toasts.showNoInternetConnection(getMyActivity().getApplicationContext());
+                        Utils.showNoInternetConnection(getMyActivity().getApplicationContext());
                     }
                 });
             }

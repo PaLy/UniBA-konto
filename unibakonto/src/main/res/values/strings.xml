@@ -9,4 +9,6 @@
     <string name="logout">Log out</string>
     <string name="connection_failed">Connection failed :(</string>
     <string name="title_e_wallet">E-wallet</string>
+    <string name="refreshed">Refreshed:</string>
+    <string name="never">never</string>
 </resources>

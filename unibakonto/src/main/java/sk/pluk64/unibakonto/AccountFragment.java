@@ -33,6 +33,7 @@ import sk.pluk64.unibakonto.http.Util;
 public class AccountFragment extends Fragment {
     static final String PREF_BALANCES = "balances";
     static final String PREF_TRANSACTIONS = "transactions";
+    private static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp";
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
     private MyAdapter mAdapter = new MyAdapter();
     SwipeRefreshLayout swipeRefresh;
@@ -91,6 +92,7 @@ public class AccountFragment extends Fragment {
                     saveData(balances, updatedTransactions);
                     if (view != null) {
                         updateViewBalances(view);
+                        updateRefreshTime(view);
                     }
                     MyAdapter adapter = AccountFragment.this.mAdapter;
                     adapter.getData().clear();
@@ -123,9 +125,11 @@ public class AccountFragment extends Fragment {
         Gson gson = new Gson();
         String jsonBalances = gson.toJson(balances);
         String jsonTransactions = gson.toJson(transactions);
+        String formattedTime = Utils.getCurrentTimeFormatted();
         preferences.edit()
                 .putString(PREF_BALANCES, jsonBalances)
                 .putString(PREF_TRANSACTIONS, jsonTransactions)
+                .putString(PREF_ACCOUNT_REFRESH_TIMESTAMP, formattedTime)
                 .apply();
     }
 
@@ -147,11 +151,17 @@ public class AccountFragment extends Fragment {
         }
     }
 
+    private void updateRefreshTime(View view) {
+        TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
+        String refreshTime = preferences.getString(PREF_ACCOUNT_REFRESH_TIMESTAMP, getString(R.string.never));
+        timestamp.setText(refreshTime);
+    }
+
     private void showNoInternetConnectionToastFromBackgroundThread() {
         getMyActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toasts.showNoInternetConnection(getMyActivity().getApplicationContext());
+                Utils.showNoInternetConnection(getMyActivity().getApplicationContext());
             }
         });
     }
@@ -208,6 +218,7 @@ public class AccountFragment extends Fragment {
             });
         }
         updateViewBalances(view);
+        updateRefreshTime(view);
         return view;
     }
 
