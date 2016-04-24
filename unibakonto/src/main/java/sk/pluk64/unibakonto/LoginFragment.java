@@ -31,13 +31,6 @@ public class LoginFragment extends Fragment {
     private View mLoginFormView;
     private View mProgressView;
     private UserLoginTask mAuthTask;
-    private SharedPreferences preferences;
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-    }
 
     @Nullable
     @Override
@@ -88,10 +81,11 @@ public class LoginFragment extends Fragment {
      * the user.
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-        private final UnibaKonto unibaKonto = getMyActivity().getUnibaKonto();
+        private final UnibaKonto unibaKonto;
         private boolean noInternet = false;
 
-        UserLoginTask() {
+        public UserLoginTask(String username, String password) {
+            unibaKonto = new UnibaKonto(username, password);
         }
 
         @Override
@@ -121,6 +115,7 @@ public class LoginFragment extends Fragment {
             showProgress(false);
             if (success) {
                 activity.setIsLoggedIn(true);
+                activity.saveLoginDetails(unibaKonto.username, unibaKonto.password);
                 activity.removeFragment(LoginFragment.this);
             } else if (!noInternet) {
                 mPasswordView.setError(getString(R.string.error_incorrect_username_or_password));
@@ -216,12 +211,8 @@ public class LoginFragment extends Fragment {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            preferences.edit()
-                    .putString(TabbedActivity.PREF_USERNAME, username)
-                    .putString(TabbedActivity.PREF_PASSWORD, password)
-                    .apply();
             getMyActivity().invalidateUnibaKonto();
-            mAuthTask = new UserLoginTask();
+            mAuthTask = new UserLoginTask(username, password);
             mAuthTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }

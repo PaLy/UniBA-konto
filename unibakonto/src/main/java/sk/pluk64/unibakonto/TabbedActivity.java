@@ -89,7 +89,6 @@ public class TabbedActivity extends AppCompatActivity {
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteUserData();
                 setIsLoggedIn(false);
                 // TODO hack
                 if (curFragmentPos0 instanceof AccountFragment) {
@@ -111,6 +110,7 @@ public class TabbedActivity extends AppCompatActivity {
 //                .remove(PREF_PASSWORD) // TODO think about it
                 .remove(AccountFragment.PREF_BALANCES)
                 .remove(AccountFragment.PREF_TRANSACTIONS)
+                .remove(AccountFragment.PREF_ACCOUNT_REFRESH_TIMESTAMP)
                 .apply();
     }
 
@@ -132,6 +132,17 @@ public class TabbedActivity extends AppCompatActivity {
 
     private boolean getPrefLoggedIn() {
         return getPreferences(Context.MODE_PRIVATE).getBoolean(PREF_LOGGED_IN, false);
+    }
+
+    public void saveLoginDetails(String username, String password) {
+        String previousUsername = preferences.getString(PREF_USERNAME, null);
+        if (!username.equals(previousUsername)) {
+            deleteUserData();
+        }
+        preferences.edit()
+                .putString(PREF_USERNAME, username)
+                .putString(PREF_PASSWORD, password)
+                .apply();
     }
 
     /**

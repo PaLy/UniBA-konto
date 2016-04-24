@@ -40,8 +40,8 @@ public class UnibaKonto {
     private static final String TRANSACTIONS_PAGE = "https://konto.uniba.sk/Secure/Operace.aspx";
     private static final String ID_TRANSACTIONS_HISTORY = "#ctl00_ContentPlaceHolderMain_gvAccountHistory";
 
-    private final String username;
-    private final String password;
+    public final String username;
+    public final String password;
     private final ParsedDocumentCache documents = new ParsedDocumentCache();
 
     public UnibaKonto(String username, String password) {

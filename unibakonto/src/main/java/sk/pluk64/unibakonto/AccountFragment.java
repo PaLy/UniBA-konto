@@ -33,7 +33,7 @@ import sk.pluk64.unibakonto.http.Util;
 public class AccountFragment extends Fragment {
     static final String PREF_BALANCES = "balances";
     static final String PREF_TRANSACTIONS = "transactions";
-    private static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp";
+    static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp";
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
     private MyAdapter mAdapter = new MyAdapter();
     SwipeRefreshLayout swipeRefresh;
