@@ -118,10 +118,10 @@ public class TabbedActivity extends AppCompatActivity {
         this.isLoggedIn = isLoggedIn;
         preferences.edit().putBoolean(PREF_LOGGED_IN, isLoggedIn).apply();
 
-        enableLogoutButton(isLoggedIn);
+        setLogoutButtonEnabled(isLoggedIn);
     }
 
-    void enableLogoutButton(boolean enabled) {
+    void setLogoutButtonEnabled(boolean enabled) {
         logoutButton.setEnabled(enabled);
         if (enabled) {
             logoutButton.setImageResource(R.drawable.ic_logout_white_36dp);
@@ -204,7 +204,7 @@ public class TabbedActivity extends AppCompatActivity {
     void removeFragment(Fragment oldFragment) {
         getSupportFragmentManager().beginTransaction()
                 .remove(oldFragment)
-                .commitAllowingStateLoss();
+                .commitNow();
         mSectionsPagerAdapter.notifyDataSetChanged();
     }
 

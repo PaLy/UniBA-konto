@@ -115,6 +115,7 @@ public class LoginFragment extends Fragment {
             showProgress(false);
             if (success) {
                 activity.setIsLoggedIn(true);
+                activity.setLogoutButtonEnabled(false);
                 activity.saveLoginDetails(unibaKonto.username, unibaKonto.password);
                 activity.removeFragment(LoginFragment.this);
             } else if (!noInternet) {

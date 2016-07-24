@@ -58,6 +58,11 @@ public class AccountFragment extends Fragment {
         if (view != null) {
             setRefreshing(view);
         }
+        TabbedActivity activity = getMyActivity();
+        if (activity != null) {
+            activity.setLogoutButtonEnabled(false);
+        }
+
         updateDataTask = new AsyncTask<Void, Void, Boolean>() {
             public boolean noInternet = false;
             private List<UnibaKonto.Transaction> updatedTransactions;
@@ -95,6 +100,7 @@ public class AccountFragment extends Fragment {
 
             @Override
             protected void onPostExecute(Boolean success) {
+                TabbedActivity activity = getMyActivity();
                 View view = getView();
                 if (success) {
                     wasRefreshed = true;
@@ -107,8 +113,10 @@ public class AccountFragment extends Fragment {
                     adapter.getData().addAll(updatedTransactions);
                     adapter.notifyDataSetChanged();
                     swipeRefresh.setRefreshing(false);
+                    if (activity != null) {
+                        activity.setLogoutButtonEnabled(true);
+                    }
                 } else if (!noInternet) {
-                    TabbedActivity activity = getMyActivity();
                     if (activity != null) {
                         if (view != null) {
                             // from whatever reason card view and swipeRefresh stay on screen after fragment replacement
@@ -123,6 +131,9 @@ public class AccountFragment extends Fragment {
                         activity.removeFragment(AccountFragment.this);
                     }
                 } else {
+                    if (activity != null) {
+                        activity.setLogoutButtonEnabled(true);
+                    }
                     swipeRefresh.setRefreshing(false);
                 }
                 if (view != null) {
