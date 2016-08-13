@@ -12,4 +12,9 @@
     <string name="refreshed">Refreshed: %s</string>
     <string name="never">never</string>
     <string name="refreshing">Refreshing…</string>
+    <string name="title_card">Card number</string>
+    <string name="valid_until">valid until</string>
+    <string name="ok">OK</string>
+    <string name="no_cards">No cards found :(</string>
+    <string name="try_logout">Try to log out and log back in</string>
 </resources>

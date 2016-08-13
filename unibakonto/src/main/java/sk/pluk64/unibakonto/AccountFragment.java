@@ -34,12 +34,14 @@ public class AccountFragment extends Fragment {
     static final String PREF_BALANCES = "balances";
     static final String PREF_TRANSACTIONS = "transactions";
     static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp";
+    static final String PREF_CARDS = "cards";
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
     private MyAdapter mAdapter = new MyAdapter();
     SwipeRefreshLayout swipeRefresh;
     private boolean wasRefreshed = false;
     private SharedPreferences preferences;
     private AsyncTask<Void, Void, Boolean> updateDataTask;
+    private List<UnibaKonto.CardInfo> cards;
 
     public AccountFragment() {
     }
@@ -86,6 +88,9 @@ public class AccountFragment extends Fragment {
                         try {
                             balances = unibaKonto.getBalances();
                             updatedTransactions = unibaKonto.getTransactions();
+                            if (cards == null) {
+                                cards = unibaKonto.getCards();
+                            }
                             return true;
                         } catch (Util.ConnectionFailedException e) {
                             noInternet = true;
@@ -102,9 +107,14 @@ public class AccountFragment extends Fragment {
             protected void onPostExecute(Boolean success) {
                 TabbedActivity activity = getMyActivity();
                 View view = getView();
+
+                if (activity != null) {
+                    activity.setCardsButtonEnabled(true);
+                }
+
                 if (success) {
                     wasRefreshed = true;
-                    saveData(balances, updatedTransactions);
+                    saveData(balances, updatedTransactions, cards);
                     if (view != null) {
                         updateViewBalances(view);
                     }
@@ -145,14 +155,16 @@ public class AccountFragment extends Fragment {
         updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void saveData(Map<String, UnibaKonto.Balance> balances, List<UnibaKonto.Transaction> transactions) {
+    private void saveData(Map<String, UnibaKonto.Balance> balances, List<UnibaKonto.Transaction> transactions, List<UnibaKonto.CardInfo> cards) {
         Gson gson = new Gson();
         String jsonBalances = gson.toJson(balances);
         String jsonTransactions = gson.toJson(transactions);
+        String jsonCards = gson.toJson(cards);
         String formattedTime = Utils.getCurrentTimeFormatted();
         preferences.edit()
                 .putString(PREF_BALANCES, jsonBalances)
                 .putString(PREF_TRANSACTIONS, jsonTransactions)
+                .putString(PREF_CARDS, jsonCards)
                 .putString(PREF_ACCOUNT_REFRESH_TIMESTAMP, formattedTime)
                 .apply();
     }
@@ -168,12 +180,19 @@ public class AccountFragment extends Fragment {
 
         String jsonTransactions = preferences.getString(PREF_TRANSACTIONS, "null");
         List<UnibaKonto.Transaction> transactions =
-                gson.fromJson(jsonTransactions,new TypeToken<List<UnibaKonto.Transaction>>(){}.getType());
+                gson.fromJson(jsonTransactions, new TypeToken<List<UnibaKonto.Transaction>>(){}.getType());
         if (transactions != null) {
             mAdapter.getData().clear();
             mAdapter.getData().addAll(transactions);
             mAdapter.notifyDataSetChanged();
         }
+
+        cards = loadCards(preferences, gson);
+    }
+
+    static List<UnibaKonto.CardInfo> loadCards(SharedPreferences preferences, Gson gson) {
+        String jsonCards = preferences.getString(PREF_CARDS, "null");
+        return gson.fromJson(jsonCards, new TypeToken<List<UnibaKonto.CardInfo>>(){}.getType());
     }
 
     private void setRefreshing(View view) {

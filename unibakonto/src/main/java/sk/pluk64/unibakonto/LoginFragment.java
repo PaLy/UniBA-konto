@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -117,6 +116,7 @@ public class LoginFragment extends Fragment {
                 activity.setIsLoggedIn(true);
                 activity.setLogoutButtonEnabled(false);
                 activity.saveLoginDetails(unibaKonto.username, unibaKonto.password);
+                activity.removeCards();
                 activity.removeFragment(LoginFragment.this);
             } else if (!noInternet) {
                 mPasswordView.setError(getString(R.string.error_incorrect_username_or_password));

@@ -40,6 +40,9 @@ public class UnibaKonto {
     private static final String TRANSACTIONS_PAGE = "https://konto.uniba.sk/Secure/Operace.aspx";
     private static final String ID_TRANSACTIONS_HISTORY = "#ctl00_ContentPlaceHolderMain_gvAccountHistory";
 
+    private static final String CARDS_PAGE = "https://konto.uniba.sk/Secure/UserCards.aspx";
+    public static final String ID_CARDS_TABLE = "#ctl00_ContentPlaceHolderMain_gvUserCards";
+
     public final String username;
     public final String password;
     private final ParsedDocumentCache documents = new ParsedDocumentCache();
@@ -179,6 +182,61 @@ public class UnibaKonto {
             }
         }
         return result;
+    }
+
+    public List<CardInfo> getCards() throws Util.ConnectionFailedException {
+        Elements tables = documents.getRefreshed(CARDS_PAGE).select(ID_CARDS_TABLE);
+        Element firstTable = tables.first();
+
+        ArrayList<CardInfo> cards = new ArrayList<>();
+
+        if (firstTable != null) {
+            Elements rows = firstTable.select("tr");
+            for (int i = 1; i < rows.size(); i++) {
+                Element row = rows.get(i);
+                Elements cols = row.select("td");
+                if (cols.size() >= 5) {
+                    String number = cols.get(1).text();
+                    String released = cols.get(2).text();
+                    String validFrom = cols.get(3).text();
+                    String validUntil = cols.get(4).text();
+                    cards.add(new CardInfo(number, released, validFrom, validUntil));
+                }
+            }
+        }
+        return cards;
+    }
+
+    public static class CardInfo {
+        public final String number;
+        private final String released;
+        private final String validFrom;
+        public final String validUntil;
+
+        public CardInfo(String number, String released, String validFrom, String validUntil) {
+            this.number = divideBy4Digits(number);
+            this.released = released;
+            this.validFrom = validFrom;
+            this.validUntil = validUntil;
+        }
+
+        private String divideBy4Digits(String number) {
+            StringBuilder resultBuilder = new StringBuilder();
+
+            int BLOCK_LENGTH = 4;
+            int length = number.length();
+            int firstBlockLength = length % BLOCK_LENGTH;
+            resultBuilder.append(number.substring(0, firstBlockLength));
+
+            for (int i = firstBlockLength; i < length; i += BLOCK_LENGTH) {
+                if (i > 0) {
+                    resultBuilder.append(" ");
+                }
+                resultBuilder.append(number.substring(i, i + BLOCK_LENGTH));
+            }
+
+            return resultBuilder.toString();
+        }
     }
 
     private static class KontoParsedData {

@@ -12,4 +12,9 @@
     <string name="refreshed">Aktualizované: %s</string>
     <string name="never">nikdy</string>
     <string name="refreshing">Aktualizuje sa…</string>
+    <string name="title_card">Číslo karty</string>
+    <string name="valid_until">Platná do</string>
+    <string name="ok">OK</string>
+    <string name="no_cards">Žiadne karty nenájdené :(</string>
+    <string name="try_logout">Skús sa odhlásiť a znovu prihlásiť</string>
 </resources>

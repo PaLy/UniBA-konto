@@ -1,19 +1,29 @@
 package sk.pluk64.unibakonto;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 
+import com.google.gson.Gson;
+
+import java.util.List;
 import java.util.Map;
 
 import sk.pluk64.unibakonto.http.JedalneListky;
@@ -44,6 +54,7 @@ public class TabbedActivity extends AppCompatActivity {
     private ImageButton logoutButton;
     private Fragment curFragmentPos0;
     private SharedPreferences preferences;
+    private ImageButton cardsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +114,57 @@ public class TabbedActivity extends AppCompatActivity {
         });
 
         setIsLoggedIn(getPrefLoggedIn());
+
+        final DialogFragment cardsDialog = new CardsDialog();
+
+        cardsButton = (ImageButton) findViewById(R.id.icon_card);
+        cardsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cardsDialog.show(getSupportFragmentManager(), "cards");
+            }
+        });
+    }
+
+    public void removeCards() {
+        preferences.edit().remove(AccountFragment.PREF_CARDS).apply();
+        setCardsButtonEnabled(false);
+    }
+
+    public static class CardsDialog extends DialogFragment {
+        @NonNull
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle(R.string.title_card);
+            builder.setPositiveButton(R.string.ok, null);
+
+            builder.setMessage(getFormattedCardsData());
+            return builder.create();
+        }
+
+        public SpannableStringBuilder getFormattedCardsData() {
+            SharedPreferences preferences = getActivity().getPreferences(MODE_PRIVATE);
+            List<UnibaKonto.CardInfo> cardInfos = AccountFragment.loadCards(preferences, new Gson());
+            SpannableStringBuilder resultBuilder = new SpannableStringBuilder();
+            if (cardInfos != null) {
+                for (UnibaKonto.CardInfo cardInfo : cardInfos) {
+                    SpannableString ss = new SpannableString(cardInfo.number);
+                    ss.setSpan(new RelativeSizeSpan(1.6f), 0, ss.length(), 0);
+
+                    resultBuilder.append(ss);
+                    resultBuilder.append(String.format("\n(%s: %s)\n\n", getString(R.string.valid_until), cardInfo.validUntil));
+                }
+            }
+            if (resultBuilder.length() > 0) {
+                resultBuilder.delete(resultBuilder.length() - 2, resultBuilder.length());
+            } else {
+                resultBuilder.append(getString(R.string.no_cards));
+                resultBuilder.append("\n\n");
+                resultBuilder.append(String.format("(%s)", getString(R.string.try_logout)));
+            }
+            return resultBuilder;
+        }
     }
 
     private void deleteUserData() {
@@ -127,6 +189,15 @@ public class TabbedActivity extends AppCompatActivity {
             logoutButton.setImageResource(R.drawable.ic_logout_white_36dp);
         } else {
             logoutButton.setImageResource(R.drawable.ic_logout_grey600_36dp);
+        }
+    }
+
+    void setCardsButtonEnabled(boolean enabled) {
+        cardsButton.setEnabled(enabled);
+        if (enabled) {
+            cardsButton.setImageResource(R.drawable.ic_credit_card_white_36dp);
+        } else {
+            cardsButton.setImageResource(R.drawable.ic_credit_card_grey600_36dp);
         }
     }
 
