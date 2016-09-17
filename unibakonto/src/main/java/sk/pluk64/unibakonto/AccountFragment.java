@@ -88,9 +88,7 @@ public class AccountFragment extends Fragment {
                         try {
                             balances = unibaKonto.getBalances();
                             updatedTransactions = unibaKonto.getTransactions();
-                            if (cards == null) {
-                                cards = unibaKonto.getCards();
-                            }
+                            cards = unibaKonto.getCards();
                             return true;
                         } catch (Util.ConnectionFailedException e) {
                             noInternet = true;
