@@ -5,6 +5,7 @@ import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class Utils {
     private static Toast noInternetConnection;
@@ -17,7 +18,24 @@ public class Utils {
     }
 
     public static String getCurrentTimeFormatted() {
-        Calendar calendar = Calendar.getInstance();
-        return new SimpleDateFormat("d.M.yyyy HH:mm").format(calendar.getTime());
+        return getTimeFormatted(getCurrentTime());
+    }
+
+    public static String getTimeFormatted(Date time) {
+        return new SimpleDateFormat("d.M.yyyy HH:mm").format(time);
+    }
+
+    public static Date getCurrentTime() {
+        return Calendar.getInstance().getTime();
+    }
+
+    public static boolean isTimeDiffMoreThanXHours(Date time, int x) {
+        if (time == null) {
+            return true;
+        } else {
+            long timeDiff = getCurrentTime().getTime() - time.getTime();
+            long timeDiffHours = timeDiff / (1000 * 60 * 60);
+            return timeDiffHours >= x;
+        }
     }
 }

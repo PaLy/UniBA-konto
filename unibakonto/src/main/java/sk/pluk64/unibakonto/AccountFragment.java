@@ -24,6 +24,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -33,15 +34,16 @@ import sk.pluk64.unibakonto.http.Util;
 public class AccountFragment extends Fragment {
     static final String PREF_BALANCES = "balances";
     static final String PREF_TRANSACTIONS = "transactions";
-    static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp";
+//    static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp"; // DO NOT USE - could contain old data (string)
+    static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp_date";
     static final String PREF_CARDS = "cards";
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
     private MyAdapter mAdapter = new MyAdapter();
     SwipeRefreshLayout swipeRefresh;
-    private boolean wasRefreshed = false;
     private SharedPreferences preferences;
     private AsyncTask<Void, Void, Boolean> updateDataTask;
     private List<UnibaKonto.CardInfo> cards;
+    private Date refreshTime;
 
     public AccountFragment() {
     }
@@ -111,7 +113,6 @@ public class AccountFragment extends Fragment {
                 }
 
                 if (success) {
-                    wasRefreshed = true;
                     saveData(balances, updatedTransactions, cards);
                     if (view != null) {
                         updateViewBalances(view);
@@ -158,12 +159,13 @@ public class AccountFragment extends Fragment {
         String jsonBalances = gson.toJson(balances);
         String jsonTransactions = gson.toJson(transactions);
         String jsonCards = gson.toJson(cards);
-        String formattedTime = Utils.getCurrentTimeFormatted();
+        refreshTime = Utils.getCurrentTime();
+        String jsonRefreshTime = gson.toJson(refreshTime);
         preferences.edit()
                 .putString(PREF_BALANCES, jsonBalances)
                 .putString(PREF_TRANSACTIONS, jsonTransactions)
                 .putString(PREF_CARDS, jsonCards)
-                .putString(PREF_ACCOUNT_REFRESH_TIMESTAMP, formattedTime)
+                .putString(PREF_ACCOUNT_REFRESH_TIMESTAMP, jsonRefreshTime)
                 .apply();
     }
 
@@ -186,6 +188,9 @@ public class AccountFragment extends Fragment {
         }
 
         cards = loadCards(preferences, gson);
+
+        String jsonRefreshTime = preferences.getString(PREF_ACCOUNT_REFRESH_TIMESTAMP, "null");
+        refreshTime = gson.fromJson(jsonRefreshTime, new TypeToken<Date>(){}.getType());
     }
 
     static List<UnibaKonto.CardInfo> loadCards(SharedPreferences preferences, Gson gson) {
@@ -200,8 +205,13 @@ public class AccountFragment extends Fragment {
 
     private void updateRefreshTime(View view) {
         TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
-        String refreshTime = preferences.getString(PREF_ACCOUNT_REFRESH_TIMESTAMP, getString(R.string.never));
-        timestamp.setText(getString(R.string.refreshed, refreshTime));
+        String refreshTimeFormatted;
+        if (refreshTime != null) {
+            refreshTimeFormatted = Utils.getTimeFormatted(refreshTime);
+        } else {
+            refreshTimeFormatted = getString(R.string.never);
+        }
+        timestamp.setText(getString(R.string.refreshed, refreshTimeFormatted));
     }
 
     private void showNoInternetConnectionToastFromBackgroundThread() {
@@ -256,7 +266,14 @@ public class AccountFragment extends Fragment {
                 updateData();
             }
         });
-        if (!wasRefreshed) {
+        updateViewBalances(view);
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (Utils.isTimeDiffMoreThanXHours(refreshTime, 2)) {
             swipeRefresh.post(new Runnable() {
                 @Override
                 public void run() {
@@ -264,8 +281,6 @@ public class AccountFragment extends Fragment {
                 }
             });
         }
-        updateViewBalances(view);
-        return view;
     }
 
     public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
