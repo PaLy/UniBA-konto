@@ -205,12 +205,7 @@ public class AccountFragment extends Fragment {
 
     private void updateRefreshTime(View view) {
         TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
-        String refreshTimeFormatted;
-        if (refreshTime != null) {
-            refreshTimeFormatted = Utils.getTimeFormatted(refreshTime);
-        } else {
-            refreshTimeFormatted = getString(R.string.never);
-        }
+        String refreshTimeFormatted = Utils.getTimeFormatted(refreshTime, getString(R.string.never));
         timestamp.setText(getString(R.string.refreshed, refreshTimeFormatted));
     }
 

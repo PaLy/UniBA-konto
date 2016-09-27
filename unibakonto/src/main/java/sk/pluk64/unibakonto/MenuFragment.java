@@ -15,7 +15,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,13 +27,14 @@ import sk.pluk64.unibakonto.http.Util;
 public class MenuFragment extends Fragment {
     private static final String ARG_JEDALEN = "jedalen";
     private static final String PREF_MEALS = "meals";
-    private static final String PREF_MEALS_REFRESH_TIMESTAMP = "meals_refreshed_timestamp";
+//    private static final String PREF_MEALS_REFRESH_TIMESTAMP = "meals_refreshed_timestamp"; // DO NOT USE - could contain old data (string)
+    private static final String PREF_MEALS_REFRESH_TIMESTAMP = "meals_refreshed_timestamp_date";
     private JedalneListky.Jedalne jedalen;
     private MenuListAdapter adapter = new MenuListAdapter();
     private SwipeRefreshLayout swipeRefresh;
-    private boolean wasRefreshed = false;
     private SharedPreferences preferences;
     private AsyncTask<Void, Void, JedalneListky.Meals> updateDataTask;
+    private Date refreshTime;
 
     public MenuFragment() {
     }
@@ -82,7 +85,6 @@ public class MenuFragment extends Fragment {
             protected void onPostExecute(JedalneListky.Meals meals) {
                 if (meals != null) {
                     saveData(meals);
-                    wasRefreshed = true;
                     adapter.updateData(meals);
                     adapter.notifyDataSetChanged();
                 }
@@ -104,8 +106,8 @@ public class MenuFragment extends Fragment {
 
     private void updateRefreshTime(View view) {
         TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
-        String refreshTime = preferences.getString(PREF_MEALS_REFRESH_TIMESTAMP + jedalen, getString(R.string.never));
-        timestamp.setText(getString(R.string.refreshed, refreshTime));
+        String refreshTimeFormatted = Utils.getTimeFormatted(refreshTime, getString(R.string.never));
+        timestamp.setText(getString(R.string.refreshed, refreshTimeFormatted));
     }
 
     @Nullable
@@ -129,7 +131,13 @@ public class MenuFragment extends Fragment {
                 updateData();
             }
         });
-        if (!wasRefreshed) {
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (Utils.isTimeDiffMoreThanXHours(refreshTime, 1)) {
             swipeRefresh.post(new Runnable() {
                 @Override
                 public void run() {
@@ -137,25 +145,30 @@ public class MenuFragment extends Fragment {
                 }
             });
         }
-        return view;
     }
 
     private void saveData(JedalneListky.Meals meals) {
-        String jsonMeals = new Gson().toJson(meals);
-        String formattedTime = Utils.getCurrentTimeFormatted();
+        Gson gson = new Gson();
+        String jsonMeals = gson.toJson(meals);
+        refreshTime = Utils.getCurrentTime();
+        String jsonCurrentTime = gson.toJson(refreshTime);
         preferences.edit()
                 .putString(PREF_MEALS + jedalen, jsonMeals)
-                .putString(PREF_MEALS_REFRESH_TIMESTAMP + jedalen, formattedTime)
+                .putString(PREF_MEALS_REFRESH_TIMESTAMP + jedalen, jsonCurrentTime)
                 .apply();
     }
 
     private void loadData() {
+        Gson gson = new Gson();
         String jsonMeals = preferences.getString(PREF_MEALS + jedalen, "null");
-        JedalneListky.Meals meals = new Gson().fromJson(jsonMeals, JedalneListky.Meals.class);
+        JedalneListky.Meals meals = gson.fromJson(jsonMeals, JedalneListky.Meals.class);
         if (meals != null) {
             adapter.updateData(meals);
             adapter.notifyDataSetChanged();
         }
+
+        String jsonRefreshTime = preferences.getString(PREF_MEALS_REFRESH_TIMESTAMP + jedalen, "null");
+        refreshTime = gson.fromJson(jsonRefreshTime, new TypeToken<Date>(){}.getType());
     }
 
     private static class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {

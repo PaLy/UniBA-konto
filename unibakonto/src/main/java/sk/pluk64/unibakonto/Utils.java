@@ -22,7 +22,15 @@ public class Utils {
     }
 
     public static String getTimeFormatted(Date time) {
-        return new SimpleDateFormat("d.M.yyyy HH:mm").format(time);
+        return getTimeFormatted(time, null);
+    }
+
+    public static String getTimeFormatted(Date time, String def) {
+        if (time == null) {
+            return def;
+        } else {
+            return new SimpleDateFormat("d.M.yyyy HH:mm").format(time);
+        }
     }
 
     public static Date getCurrentTime() {
