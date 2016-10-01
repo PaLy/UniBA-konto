@@ -231,9 +231,13 @@ public class AccountFragment extends Fragment {
         };
         for (Object[] vb : viewIdBalanceId) {
             UnibaKonto.Balance data = balances.get(vb[1]);
+            TextView textView = (TextView) view.findViewById((Integer) vb[0]);
             if (data != null) {
-                TextView textView = (TextView) view.findViewById((Integer) vb[0]);
                 textView.setText(Html.fromHtml("<b>" + data.label + "</b>" + " " + data.price));
+                textView.setVisibility(View.VISIBLE);
+            } else {
+                textView.setText("");
+                textView.setVisibility(View.GONE);
             }
         }
     }
