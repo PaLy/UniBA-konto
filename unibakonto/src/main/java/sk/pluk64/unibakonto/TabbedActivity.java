@@ -55,6 +55,7 @@ public class TabbedActivity extends AppCompatActivity {
     private Fragment curFragmentPos0;
     private SharedPreferences preferences;
     private ImageButton cardsButton;
+    private boolean forceRefresh = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,9 +127,12 @@ public class TabbedActivity extends AppCompatActivity {
         });
     }
 
-    public void removeCards() {
-        preferences.edit().remove(AccountFragment.PREF_CARDS).apply();
-        setCardsButtonEnabled(false);
+    public void setForceRefresh(boolean forceRefresh) {
+        this.forceRefresh = forceRefresh;
+    }
+
+    public boolean isForceRefresh() {
+        return forceRefresh;
     }
 
     public static class CardsDialog extends DialogFragment {

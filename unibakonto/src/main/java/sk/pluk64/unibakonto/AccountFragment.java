@@ -65,6 +65,8 @@ public class AccountFragment extends Fragment {
         TabbedActivity activity = getMyActivity();
         if (activity != null) {
             activity.setLogoutButtonEnabled(false);
+            activity.setCardsButtonEnabled(false);
+            activity.setForceRefresh(false);
         }
 
         updateDataTask = new AsyncTask<Void, Void, Boolean>() {
@@ -272,7 +274,8 @@ public class AccountFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (Utils.isTimeDiffMoreThanXHours(refreshTime, 2)) {
+        if (Utils.isTimeDiffMoreThanXHours(refreshTime, 2) ||
+                getMyActivity() != null && getMyActivity().isForceRefresh()) {
             swipeRefresh.post(new Runnable() {
                 @Override
                 public void run() {
