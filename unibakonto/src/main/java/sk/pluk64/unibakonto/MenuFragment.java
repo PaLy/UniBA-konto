@@ -21,25 +21,26 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import sk.pluk64.unibakonto.http.JedalneListky;
 import sk.pluk64.unibakonto.http.Util;
+import sk.pluk64.unibakonto.meals.Meals;
+import sk.pluk64.unibakonto.meals.Menza;
 
 public class MenuFragment extends Fragment {
     private static final String ARG_JEDALEN = "jedalen";
     private static final String PREF_MEALS = "meals";
 //    private static final String PREF_MEALS_REFRESH_TIMESTAMP = "meals_refreshed_timestamp"; // DO NOT USE - could contain old data (string)
     private static final String PREF_MEALS_REFRESH_TIMESTAMP = "meals_refreshed_timestamp_date";
-    private JedalneListky.Jedalne jedalen;
+    private Menza jedalen;
     private MenuListAdapter adapter = new MenuListAdapter();
     private SwipeRefreshLayout swipeRefresh;
     private SharedPreferences preferences;
-    private AsyncTask<Void, Void, JedalneListky.Meals> updateDataTask;
+    private AsyncTask<Void, Void, Meals> updateDataTask;
     private Date refreshTime;
 
     public MenuFragment() {
     }
 
-    public static MenuFragment newInstance(JedalneListky.Jedalne jedalen) {
+    public static MenuFragment newInstance(Menza jedalen) {
         MenuFragment f = new MenuFragment();
         Bundle args = new Bundle();
         args.putSerializable(ARG_JEDALEN, jedalen);
@@ -52,7 +53,7 @@ public class MenuFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            jedalen = (JedalneListky.Jedalne) getArguments().getSerializable(ARG_JEDALEN);
+            jedalen = (Menza) getArguments().getSerializable(ARG_JEDALEN);
         }
         preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
     }
@@ -65,9 +66,9 @@ public class MenuFragment extends Fragment {
         if (view != null) {
             setRefreshing(view);
         }
-        updateDataTask = new AsyncTask<Void, Void, JedalneListky.Meals>() {
+        updateDataTask = new AsyncTask<Void, Void, Meals>() {
             @Override
-            protected JedalneListky.Meals doInBackground(Void... params) {
+            protected Meals doInBackground(Void... params) {
                 try {
                     return jedalen.getMenu();
                 } catch (Util.ConnectionFailedException e) {
@@ -82,7 +83,7 @@ public class MenuFragment extends Fragment {
             }
 
             @Override
-            protected void onPostExecute(JedalneListky.Meals meals) {
+            protected void onPostExecute(Meals meals) {
                 if (meals != null) {
                     saveData(meals);
                     adapter.updateData(meals);
@@ -147,7 +148,7 @@ public class MenuFragment extends Fragment {
         }
     }
 
-    private void saveData(JedalneListky.Meals meals) {
+    private void saveData(Meals meals) {
         Gson gson = new Gson();
         String jsonMeals = gson.toJson(meals);
         refreshTime = Utils.getCurrentTime();
@@ -161,7 +162,7 @@ public class MenuFragment extends Fragment {
     private void loadData() {
         Gson gson = new Gson();
         String jsonMeals = preferences.getString(PREF_MEALS + jedalen, "null");
-        JedalneListky.Meals meals = gson.fromJson(jsonMeals, JedalneListky.Meals.class);
+        Meals meals = gson.fromJson(jsonMeals, Meals.class);
         if (meals != null) {
             adapter.updateData(meals);
             adapter.notifyDataSetChanged();
@@ -198,18 +199,18 @@ public class MenuFragment extends Fragment {
         public MenuListAdapter() {
         }
 
-        public void updateData(JedalneListky.Meals meals) {
+        public void updateData(Meals meals) {
             int pos = 0;
             if (meals != null) {
-                for (JedalneListky.Meals.DayMenu dayMenu : meals.menus) {
+                for (Meals.DayMenu dayMenu : meals.menus) {
                     positionToItem.put(pos, dayMenu.dayName);
                     positionToViewType.put(pos, ViewType.DAY_NAME);
                     pos++;
-                    for (JedalneListky.Meals.SubMenu subMenu : dayMenu.subMenus) {
+                    for (Meals.SubMenu subMenu : dayMenu.subMenus) {
                         positionToItem.put(pos, subMenu.name);
                         positionToViewType.put(pos, ViewType.SUBMENU_NAME);
                         pos++;
-                        for (JedalneListky.Meals.Meal meal : subMenu.meals) {
+                        for (Meals.Meal meal : subMenu.meals) {
                             positionToItem.put(pos, meal);
                             positionToViewType.put(pos, ViewType.MEAL);
                             pos++;
@@ -249,7 +250,7 @@ public class MenuFragment extends Fragment {
                 view.setText((CharSequence) positionToItem.get(position));
             } else if (viewType == ViewType.MEAL) {
                 View view = holder.view;
-                JedalneListky.Meals.Meal meal = (JedalneListky.Meals.Meal) positionToItem.get(position);
+                Meals.Meal meal = (Meals.Meal) positionToItem.get(position);
 
                 TextView nameView = (TextView) view.findViewById(R.id.meal_name);
                 nameView.setText(meal.name);

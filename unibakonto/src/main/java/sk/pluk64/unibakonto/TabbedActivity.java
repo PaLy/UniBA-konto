@@ -26,8 +26,8 @@ import com.google.gson.Gson;
 import java.util.List;
 import java.util.Map;
 
-import sk.pluk64.unibakonto.http.JedalneListky;
 import sk.pluk64.unibakonto.http.UnibaKonto;
+import sk.pluk64.unibakonto.meals.Menza;
 
 public class TabbedActivity extends AppCompatActivity {
     static final String PREF_USERNAME = "username";
@@ -240,9 +240,9 @@ public class TabbedActivity extends AppCompatActivity {
                 }
                 return curFragmentPos0;
             } else if (position == 1) {
-                return MenuFragment.newInstance(JedalneListky.Jedalne.VENZA);
+                return MenuFragment.newInstance(Menza.VENZA);
             } else {
-                return MenuFragment.newInstance(JedalneListky.Jedalne.EAM);
+                return MenuFragment.newInstance(Menza.EAM);
             }
         }
 
