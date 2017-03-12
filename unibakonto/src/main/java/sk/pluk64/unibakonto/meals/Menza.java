@@ -9,13 +9,13 @@ public enum Menza {
         switch (this) {
             case EAM:
                 try {
-                    new MlynskaDolinaMealsProvider(EAM).getMenu();
+                    return new MlynskaDolinaNewMealsProvider(EAM).getMenu();
                 } catch (Util.ConnectionFailedException ignored) {
                 }
 
                 return new EamWebMealsProvider().getMenu();
             case VENZA:
-                return new MlynskaDolinaMealsProvider(VENZA).getMenu();
+                return new MlynskaDolinaNewMealsProvider(VENZA).getMenu();
             default:
                 return null;
         }

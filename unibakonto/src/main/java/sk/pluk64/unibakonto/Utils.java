@@ -3,6 +3,8 @@ package sk.pluk64.unibakonto;
 import android.content.Context;
 import android.widget.Toast;
 
+import org.jsoup.select.Elements;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -44,6 +46,14 @@ public class Utils {
             long timeDiff = getCurrentTime().getTime() - time.getTime();
             long timeDiffHours = timeDiff / (1000 * 60 * 60);
             return timeDiffHours >= x;
+        }
+    }
+
+    public static String getFirstOrEmpty(Elements elements) {
+        if (elements.size() > 0) {
+            return elements.get(0).text().trim();
+        } else {
+            return "";
         }
     }
 }
