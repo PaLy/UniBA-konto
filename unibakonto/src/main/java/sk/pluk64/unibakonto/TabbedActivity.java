@@ -26,10 +26,13 @@ import com.google.gson.Gson;
 import java.util.List;
 import java.util.Map;
 
+import sk.pluk64.unibakonto.fragments.AccountFragment;
+import sk.pluk64.unibakonto.fragments.LoginFragment;
+import sk.pluk64.unibakonto.fragments.menu.MenuFragment;
 import sk.pluk64.unibakonto.http.UnibaKonto;
 import sk.pluk64.unibakonto.meals.Menza;
 
-public class TabbedActivity extends AppCompatActivity {
+public class TabbedActivity extends AppCompatActivity implements UpdateMenusListener {
     static final String PREF_USERNAME = "username";
     static final String PREF_PASSWORD = "password";
     private static final String PREF_LOGGED_IN = "logged_in";
@@ -106,7 +109,7 @@ public class TabbedActivity extends AppCompatActivity {
                 if (curFragmentPos0 instanceof AccountFragment) {
                     findViewById(R.id.card_view).setVisibility(View.GONE);
                     findViewById(R.id.transactions_history).setVisibility(View.GONE);
-                    ((AccountFragment) curFragmentPos0).swipeRefresh.setRefreshing(false);
+                    ((AccountFragment) curFragmentPos0).getSwipeRefresh().setRefreshing(false);
                 }
                 if (curFragmentPos0 != null) {
                     removeFragment(curFragmentPos0);
@@ -133,6 +136,18 @@ public class TabbedActivity extends AppCompatActivity {
 
     public boolean isForceRefresh() {
         return forceRefresh;
+    }
+
+    @Override
+    public void updateMenus() {
+        for (int i = 1; i < 3; i++) {
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag(
+                    "android:switcher:" + mViewPager.getId() + ":" + mSectionsPagerAdapter.getItemId(i)
+            );
+            if (fragment instanceof MenuFragment) {
+                ((MenuFragment) fragment).updateData();
+            }
+        }
     }
 
     public static class CardsDialog extends DialogFragment {
@@ -180,14 +195,14 @@ public class TabbedActivity extends AppCompatActivity {
                 .apply();
     }
 
-    void setIsLoggedIn(boolean isLoggedIn) {
+    public void setIsLoggedIn(boolean isLoggedIn) {
         this.isLoggedIn = isLoggedIn;
         preferences.edit().putBoolean(PREF_LOGGED_IN, isLoggedIn).apply();
 
         setLogoutButtonEnabled(isLoggedIn);
     }
 
-    void setLogoutButtonEnabled(boolean enabled) {
+    public void setLogoutButtonEnabled(boolean enabled) {
         logoutButton.setEnabled(enabled);
         if (enabled) {
             logoutButton.setImageResource(R.drawable.ic_logout_white_36dp);
@@ -196,7 +211,7 @@ public class TabbedActivity extends AppCompatActivity {
         }
     }
 
-    void setCardsButtonEnabled(boolean enabled) {
+    public void setCardsButtonEnabled(boolean enabled) {
         cardsButton.setEnabled(enabled);
         if (enabled) {
             cardsButton.setImageResource(R.drawable.ic_credit_card_white_36dp);
@@ -276,7 +291,7 @@ public class TabbedActivity extends AppCompatActivity {
         }
     }
 
-    void removeFragment(Fragment oldFragment) {
+    public void removeFragment(Fragment oldFragment) {
         getSupportFragmentManager().beginTransaction()
                 .remove(oldFragment)
                 .commitNow();
@@ -284,7 +299,7 @@ public class TabbedActivity extends AppCompatActivity {
     }
 
 
-    UnibaKonto getUnibaKonto() {
+    public UnibaKonto getUnibaKonto() {
         if (unibaKonto == null) {
             UsernamePassword up = getUsernamePassword();
             unibaKonto = new UnibaKonto(up.username, up.password);
@@ -296,13 +311,13 @@ public class TabbedActivity extends AppCompatActivity {
         unibaKonto = null;
     }
 
-    UsernamePassword getUsernamePassword() {
+    public UsernamePassword getUsernamePassword() {
         return new UsernamePassword().invoke();
     }
 
-    class UsernamePassword {
-        String username;
-        String password;
+    public class UsernamePassword {
+        public String username;
+        public String password;
 
         public UsernamePassword invoke() {
             Map<String, ?> prefs = getPreferences(Context.MODE_PRIVATE).getAll();

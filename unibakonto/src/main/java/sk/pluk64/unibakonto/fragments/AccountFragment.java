@@ -1,4 +1,4 @@
-package sk.pluk64.unibakonto;
+package sk.pluk64.unibakonto.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -28,14 +28,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import sk.pluk64.unibakonto.R;
+import sk.pluk64.unibakonto.TabbedActivity;
+import sk.pluk64.unibakonto.Utils;
 import sk.pluk64.unibakonto.http.UnibaKonto;
 import sk.pluk64.unibakonto.http.Util;
 
 public class AccountFragment extends Fragment {
-    static final String PREF_BALANCES = "balances";
-    static final String PREF_TRANSACTIONS = "transactions";
+    public static final String PREF_BALANCES = "balances";
+    public static final String PREF_TRANSACTIONS = "transactions";
 //    static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp"; // DO NOT USE - could contain old data (string)
-    static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp_date";
+    public static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp_date";
     static final String PREF_CARDS = "cards";
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
     private MyAdapter mAdapter = new MyAdapter();
@@ -195,7 +198,7 @@ public class AccountFragment extends Fragment {
         refreshTime = gson.fromJson(jsonRefreshTime, new TypeToken<Date>(){}.getType());
     }
 
-    static List<UnibaKonto.CardInfo> loadCards(SharedPreferences preferences, Gson gson) {
+    public static List<UnibaKonto.CardInfo> loadCards(SharedPreferences preferences, Gson gson) {
         String jsonCards = preferences.getString(PREF_CARDS, "null");
         return gson.fromJson(jsonCards, new TypeToken<List<UnibaKonto.CardInfo>>(){}.getType());
     }
@@ -359,5 +362,9 @@ public class AccountFragment extends Fragment {
         public int getItemCount() {
             return transactions.size();
         }
+    }
+
+    public SwipeRefreshLayout getSwipeRefresh() {
+        return swipeRefresh;
     }
 }

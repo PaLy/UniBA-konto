@@ -1,4 +1,4 @@
-package sk.pluk64.unibakonto;
+package sk.pluk64.unibakonto.fragments;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -21,6 +21,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import sk.pluk64.unibakonto.R;
+import sk.pluk64.unibakonto.TabbedActivity;
+import sk.pluk64.unibakonto.Utils;
 import sk.pluk64.unibakonto.http.UnibaKonto;
 import sk.pluk64.unibakonto.http.Util;
 

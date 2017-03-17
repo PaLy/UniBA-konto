@@ -1,6 +1,8 @@
 package sk.pluk64.unibakonto;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
 import android.widget.Toast;
 
 import org.jsoup.select.Elements;
@@ -55,5 +57,14 @@ public class Utils {
         } else {
             return "";
         }
+    }
+
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 }

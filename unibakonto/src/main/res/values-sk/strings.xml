@@ -17,4 +17,6 @@
     <string name="ok">OK</string>
     <string name="no_cards">Žiadne karty nenájdené :(</string>
     <string name="try_logout">Skús sa odhlásiť a znovu prihlásiť</string>
+    <string name="above_fb_login_button">Pre zobrazenie obrázkov jedál je potrebné</string>
+    <string name="no_fb_images">Zatiaľ žiadne obrázky pre dnešné menu.</string>
 </resources>

@@ -20,4 +20,15 @@ public enum Menza {
                 return null;
         }
     }
+
+    public String getFBid() {
+        switch (this) {
+            case EAM:
+                return "164741110224671";
+            case VENZA:
+                return "venza.mlyny";
+            default:
+                return "";
+        }
+    }
 }
