@@ -121,6 +121,7 @@ public class AccountFragment extends Fragment {
                     saveData(balances, updatedTransactions, cards);
                     if (view != null) {
                         updateViewBalances(view);
+                        updateRefreshTime(view);
                     }
                     MyAdapter adapter = AccountFragment.this.mAdapter;
                     adapter.getData().clear();
@@ -130,7 +131,15 @@ public class AccountFragment extends Fragment {
                     if (activity != null) {
                         activity.setLogoutButtonEnabled(true);
                     }
-                } else if (!noInternet) {
+                } else if (noInternet) {
+                    if (activity != null) {
+                        activity.setLogoutButtonEnabled(true);
+                    }
+                    swipeRefresh.setRefreshing(false);
+                    if (view != null) {
+                        updateRefreshTime(view);
+                    }
+                } else {
                     if (activity != null) {
                         if (view != null) {
                             // from whatever reason card view and swipeRefresh stay on screen after fragment replacement
@@ -144,14 +153,6 @@ public class AccountFragment extends Fragment {
                         activity.setIsLoggedIn(false);
                         activity.removeFragment(AccountFragment.this);
                     }
-                } else {
-                    if (activity != null) {
-                        activity.setLogoutButtonEnabled(true);
-                    }
-                    swipeRefresh.setRefreshing(false);
-                }
-                if (view != null) {
-                    updateRefreshTime(view);
                 }
                 updateDataTask = null;
             }
