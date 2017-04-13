@@ -219,7 +219,7 @@ public class MenuFragment extends Fragment {
                             continue;
                         }
 
-                        JSONObject chosenSource = chooseSource(photo);
+                        JSONObject chosenSource = chooseFBPhotoSource(photo);
                         if (chosenSource != null) {
                             result.add(new FBPhoto()
                                     .setID(photo.getString("id"))
@@ -290,18 +290,22 @@ public class MenuFragment extends Fragment {
     }
 
     @Nullable
-    private JSONObject chooseSource(JSONObject photo) throws JSONException {
+    private JSONObject chooseFBPhotoSource(JSONObject photo) throws JSONException {
         JSONArray images = photo.getJSONArray("images");
-        int maxWidth = 0;
+
+        int maxWidth = 800;
+        int bestWidth = 0;
         JSONObject chosenSource = null;
+
         for (int j = 0; j < images.length(); j++) {
             JSONObject image = images.getJSONObject(j);
             int width = image.getInt("width");
-            if (width > maxWidth) {
-                maxWidth = width;
+            if (bestWidth == 0 || (width > bestWidth && width <= maxWidth) || (bestWidth > maxWidth && width < bestWidth)) {
+                bestWidth = width;
                 chosenSource = image;
             }
         }
+        // photos widths: 480, 960, 800, 640, 426, 720, 320, 405, 130, 168, 2048, 1440, 173, 300, 1080, 960,
         return chosenSource;
     }
 

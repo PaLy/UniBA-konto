@@ -22,7 +22,6 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<MenuImagesAdapter.Vi
     private final SparseArray<FBPhoto> positionToPhoto = new SparseArray<>();
     private final PicassoWrapper picassoWrapper;
     private int imageWidth;
-    private int imageHeight;
 
     private static class PicassoWrapper {
         private Picasso picasso;
@@ -31,6 +30,7 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<MenuImagesAdapter.Vi
     public MenuImagesAdapter(MenuFragment menuFragment) {
         this.menuFragment = menuFragment;
         picassoWrapper = new PicassoWrapper();
+        imageWidth = Utils.getScreenWidth() - Utils.dpToPx(8) - Utils.dpToPx(8) - Utils.dpToPx(16);
     }
 
     private Picasso getPicasso() {
@@ -50,16 +50,19 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<MenuImagesAdapter.Vi
         view.setLayoutParams(layoutParams);
 
         ImageView imageView = (ImageView) view.findViewById(R.id.image);
-        imageView.setLayoutParams(new LinearLayout.LayoutParams(imageWidth, imageHeight));
+        imageView.setLayoutParams(new LinearLayout.LayoutParams(imageWidth, LinearLayout.LayoutParams.WRAP_CONTENT));
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         FBPhoto photo = positionToPhoto.get(position);
         if (photo != null) {
             ImageView imageView = (ImageView) holder.view.findViewById(R.id.image);
-            getPicasso().load(photo.getSource()).into(imageView);
+            double scale = imageWidth / (double) photo.getWidth();
+            final int imageHeight = (int) (photo.getHeight() * scale);
+            getPicasso().load(photo.getSource()).resize(imageWidth, imageHeight).into(imageView);
+            imageView.setLayoutParams(new LinearLayout.LayoutParams(imageWidth, imageHeight));
 
             TextView captionView = (TextView) holder.view.findViewById(R.id.text);
             if ("".equals(photo.getCaption())) {
@@ -78,31 +81,7 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<MenuImagesAdapter.Vi
         for (int i = 0; i < photos.size(); i++) {
             positionToPhoto.put(i, photos.get(i));
         }
-        computeImagesWidthAndHeight(photos);
         notifyDataSetChanged();
-    }
-
-    private void computeImagesWidthAndHeight(List<FBPhoto> photos) {
-        int maxWidth = Utils.getScreenWidth() - Utils.dpToPx(8) - Utils.dpToPx(8) - Utils.dpToPx(16);
-        int maxPhotoWidth = 0;
-        int maxPhotoHeight = 0;
-        for (FBPhoto photo : photos) {
-            int photoWidth = photo.getWidth();
-            int photoHeight = photo.getHeight();
-            if (photoWidth > maxWidth) {
-                double scale = maxWidth / (double) photoWidth;
-                photoHeight = (int) (photoHeight * scale);
-                photoWidth = maxWidth;
-            }
-
-            if (photoWidth > maxPhotoWidth) {
-                maxPhotoWidth = photoWidth;
-                maxPhotoHeight = photoHeight;
-            }
-        }
-
-        imageWidth = maxPhotoWidth;
-        imageHeight = maxPhotoHeight;
     }
 
     @Override
