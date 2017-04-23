@@ -26,7 +26,7 @@ public enum Menza {
             case EAM:
                 return "164741110224671";
             case VENZA:
-                return "venza.mlyny";
+                return "1744845135734777";
             default:
                 return "";
         }
