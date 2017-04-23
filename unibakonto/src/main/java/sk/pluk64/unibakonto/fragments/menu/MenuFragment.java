@@ -72,12 +72,6 @@ public class MenuFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        adapter.setUpdateMenusListener((UpdateMenusListener) activity);
-    }
-
-    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -85,6 +79,7 @@ public class MenuFragment extends Fragment {
         }
         preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         fbCallbackManager = CallbackManager.Factory.create();
+        adapter.setUpdateMenusListener((UpdateMenusListener) getActivity());
     }
 
     public void updateData() {

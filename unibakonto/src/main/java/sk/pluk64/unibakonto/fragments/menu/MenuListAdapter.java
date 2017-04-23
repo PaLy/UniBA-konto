@@ -63,7 +63,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
 
     public void showFBButton() {
         positionToViewType.put(0, ViewType.FB_LOGIN);
-        notifyItemChanged(0);
+        notifyDataSetChanged();
     }
 
     public void updatePhotos(List<FBPhoto> photos) {
@@ -75,7 +75,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
                 positionToViewType.put(0, ViewType.GALLERY);
             }
             menuImagesAdapter.updateData(photos);
-            notifyItemChanged(0);
+            notifyDataSetChanged();
         }
     }
 
