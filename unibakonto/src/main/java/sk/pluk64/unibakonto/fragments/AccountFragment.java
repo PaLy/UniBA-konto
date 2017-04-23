@@ -145,7 +145,7 @@ public class AccountFragment extends Fragment {
                             // from whatever reason card view and swipeRefresh stay on screen after fragment replacement
                             // this workaround will hide it
                             // TODO could potentially leaks memory?
-                            view.findViewById(R.id.card_view).setVisibility(View.GONE);
+                            view.findViewById(R.id.balances_card_view).setVisibility(View.GONE);
                             view.findViewById(R.id.transactions_history).setVisibility(View.GONE);
                             swipeRefresh.setRefreshing(false);
                         }

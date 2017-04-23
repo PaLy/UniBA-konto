@@ -107,7 +107,7 @@ public class TabbedActivity extends AppCompatActivity implements UpdateMenusList
                 setIsLoggedIn(false);
                 // TODO hack
                 if (curFragmentPos0 instanceof AccountFragment) {
-                    findViewById(R.id.card_view).setVisibility(View.GONE);
+                    findViewById(R.id.balances_card_view).setVisibility(View.GONE);
                     findViewById(R.id.transactions_history).setVisibility(View.GONE);
                     ((AccountFragment) curFragmentPos0).getSwipeRefresh().setRefreshing(false);
                 }
@@ -248,9 +248,10 @@ public class TabbedActivity extends AppCompatActivity implements UpdateMenusList
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
-                if (isLoggedIn) {
+                if (isLoggedIn && !(curFragmentPos0 instanceof AccountFragment)) {
                     curFragmentPos0 = new AccountFragment();
-                } else {
+                }
+                if (!isLoggedIn && !(curFragmentPos0 instanceof LoginFragment)){
                     curFragmentPos0 = new LoginFragment();
                 }
                 return curFragmentPos0;
