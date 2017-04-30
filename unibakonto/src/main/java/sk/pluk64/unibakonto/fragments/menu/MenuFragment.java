@@ -1,6 +1,5 @@
 package sk.pluk64.unibakonto.fragments.menu;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -193,7 +192,7 @@ public class MenuFragment extends Fragment {
     private List<FBPhoto> processPhotosResponse(GraphResponse response) {
         ArrayList<FBPhoto> result = new ArrayList<>();
 
-        boolean foundTooOldPhoto = false;
+        boolean lastPhotoIsTooOld = false;
         int REQUESTS_LIMIT = 4;
         int requestCounter = 1;
         while (true) {
@@ -209,21 +208,20 @@ public class MenuFragment extends Fragment {
                         JSONObject photo = photos.getJSONObject(i);
 
                         Date createdTime = parseDate(photo.optString("created_time"));
-                        if (!FBPhoto.isToday(createdTime)) {
-                            foundTooOldPhoto = true;
-                            continue;
-                        }
+                        lastPhotoIsTooOld = !FBPhoto.isToday(createdTime);
 
-                        JSONObject chosenSource = chooseFBPhotoSource(photo);
-                        if (chosenSource != null) {
-                            result.add(new FBPhoto()
-                                    .setID(photo.getString("id"))
-                                    .setSource(chosenSource.getString("source"))
-                                    .setWidth(chosenSource.optInt("width"))
-                                    .setHeight(chosenSource.optInt("height"))
-                                    .setCreatedTime(createdTime)
-                                    .setCaption(photo.optString("name"))
-                            );
+                        if (!lastPhotoIsTooOld) {
+                            JSONObject chosenSource = chooseFBPhotoSource(photo);
+                            if (chosenSource != null) {
+                                result.add(new FBPhoto()
+                                        .setID(photo.getString("id"))
+                                        .setSource(chosenSource.getString("source"))
+                                        .setWidth(chosenSource.optInt("width"))
+                                        .setHeight(chosenSource.optInt("height"))
+                                        .setCreatedTime(createdTime)
+                                        .setCaption(photo.optString("name"))
+                                );
+                            }
                         }
                     }
                 } catch (JSONException e) {
@@ -231,7 +229,7 @@ public class MenuFragment extends Fragment {
                 }
             }
 
-            if (foundTooOldPhoto || requestCounter == REQUESTS_LIMIT) {
+            if (lastPhotoIsTooOld || requestCounter == REQUESTS_LIMIT) {
                 break;
             } else {
                 GraphRequest nextPage = response.getRequestForPagedResults(GraphResponse.PagingDirection.NEXT);
@@ -307,7 +305,7 @@ public class MenuFragment extends Fragment {
     GraphRequest createGetPhotosRequest(final String menzaFBid) {
         GraphRequest request = new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
-                "/" + menzaFBid + "/photos?type=uploaded&limit=25",
+                "/" + menzaFBid + "/photos?type=uploaded&limit=30",
                 null,
                 HttpMethod.GET);
         Bundle params = new Bundle();
