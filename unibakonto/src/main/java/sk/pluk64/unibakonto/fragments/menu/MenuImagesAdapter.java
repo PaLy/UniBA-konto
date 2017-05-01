@@ -6,6 +6,8 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,7 +29,7 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<MenuImagesAdapter.Vi
     private final SparseArray<Object> positionToItem = new SparseArray<>();
     private final SparseArray<ViewType> positionToViewType = new SparseArray<>();
 
-    private enum ViewType {
+    enum ViewType {
         PHOTO_WITH_OPTIONAL_CAPTION(0), DAY(1), POST_MESSAGE(2);
 
         final int id;
@@ -87,6 +89,38 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<MenuImagesAdapter.Vi
     }
 
     @Override
+    public void onViewAttachedToWindow(ViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        // TODO this is hack...
+        final TextView textView = (TextView) holder.view.findViewById(R.id.text);
+        if (textView != null && textView.getVisibility() != View.GONE) {
+            textView.post(new Runnable() {
+                @Override
+                public void run() {
+                    int lineCount = textView.getLineCount();
+                    float lineHeight = textView.getPaint().getFontMetrics().bottom - textView.getPaint().getFontMetrics().top;
+                    ViewParent parent = textView.getParent();
+                    if (parent instanceof FrameLayout) {
+                        textView.setLayoutParams(
+                            new FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                (int) Math.ceil(lineCount * lineHeight) + Utils.dpToPx(8)
+                            )
+                        );
+                    } else if (parent instanceof LinearLayout) {
+                        textView.setLayoutParams(
+                            new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                (int) Math.ceil(lineCount * lineHeight) + Utils.dpToPx(8)
+                            )
+                        );
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         ViewType viewType = positionToViewType.get(position);
         if (viewType == ViewType.PHOTO_WITH_OPTIONAL_CAPTION) {
@@ -101,6 +135,7 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<MenuImagesAdapter.Vi
 
                 TextView captionView = (TextView) holder.view.findViewById(R.id.text);
                 if ("".equals(photo.getCaption())) {
+                    captionView.setText("");
                     captionView.setVisibility(View.GONE);
                 } else {
                     captionView.setVisibility(View.VISIBLE);

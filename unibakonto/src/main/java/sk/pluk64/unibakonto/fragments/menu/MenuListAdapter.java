@@ -1,7 +1,8 @@
 package sk.pluk64.unibakonto.fragments.menu;
 
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -117,8 +118,8 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fb_images, parent, false);
 
             RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler);
-            recyclerView.setHasFixedSize(true);
-            StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.HORIZONTAL);
+            recyclerView.setHasFixedSize(false);
+            RecyclerView.LayoutManager layoutManager = new GridLayoutManager(parent.getContext(), 1, LinearLayoutManager.HORIZONTAL, false);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.setAdapter(menuImagesAdapter);
         } else if (viewType == ViewType.NO_GALLERY_IMAGES.id) {
