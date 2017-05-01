@@ -20,6 +20,7 @@ import java.util.Map;
 
 import sk.pluk64.unibakonto.R;
 import sk.pluk64.unibakonto.UpdateMenusListener;
+import sk.pluk64.unibakonto.Utils;
 import sk.pluk64.unibakonto.meals.Meals;
 
 class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
@@ -68,7 +69,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
 
     public void updatePhotos(List<FBPhoto> photos) {
         if (photos != null) {
-            photos = filterTodayPhotos(photos);
+//            photos = filterTodayPhotos(photos); // TODO naco to tu je?, zatial vypnem, lebo robi problemy
             if (photos.isEmpty()) {
                 positionToViewType.put(0, ViewType.NO_GALLERY_IMAGES);
             } else {
@@ -82,7 +83,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
     private List<FBPhoto> filterTodayPhotos(List<FBPhoto> photos) {
         List<FBPhoto> result = new ArrayList<>();
         for (FBPhoto photo : photos) {
-            if (photo.isCreatedToday()) {
+            if (Utils.isToday(photo.getCreatedTime())) {
                 result.add(photo);
             }
         }

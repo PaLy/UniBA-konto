@@ -6,8 +6,8 @@ import java.util.Date;
 public class FBPhoto {
     private String id;
     private String source;
-    private int width;
-    private int height;
+    private int width = 0;
+    private int height = 0;
     private Date createdTime;
     private String caption;
     private int seqNo;
@@ -73,22 +73,5 @@ public class FBPhoto {
 
     public int getSeqNo() {
         return seqNo;
-    }
-
-    public boolean isCreatedToday() {
-        return isToday(createdTime);
-    }
-
-    public static boolean isToday(Date time) {
-        if (time == null) {
-            return false;
-        }
-        Calendar nowTime = Calendar.getInstance();
-
-        Calendar thenTime = Calendar.getInstance();
-        thenTime.setTime(time);
-
-        return nowTime.get(Calendar.DAY_OF_YEAR) == thenTime.get(Calendar.DAY_OF_YEAR) &&
-                nowTime.get(Calendar.YEAR) == thenTime.get(Calendar.YEAR);
     }
 }

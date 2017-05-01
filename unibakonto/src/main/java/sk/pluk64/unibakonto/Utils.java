@@ -2,6 +2,9 @@ package sk.pluk64.unibakonto;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.SpannableStringBuilder;
+import android.text.style.URLSpan;
+import android.text.util.Linkify;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
 
@@ -66,5 +69,70 @@ public class Utils {
     public static int dpToPx(int dp) {
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public static final int MAX_LINK_LENGTH = 100;
+
+    /**
+     * By http://stackoverflow.com/questions/33203359/android-ellipsize-truncate-all-long-urls-in-a-textview
+     */
+    public static CharSequence shortenLinks(String text) {
+        SpannableStringBuilder builder = new SpannableStringBuilder(text);
+        Linkify.addLinks(builder, Linkify.ALL);
+        URLSpan[] spans = builder.getSpans(0, builder.length(), URLSpan.class);
+        for (URLSpan span : spans) {
+            int start = builder.getSpanStart(span);
+            int end = builder.getSpanEnd(span);
+            int flags = builder.getSpanFlags(span);
+
+            CharSequence linkText = builder.subSequence(start, end);
+            if (linkText.length() > MAX_LINK_LENGTH) {
+
+                // 1 - Remove the https:// or http:// prefix
+                if (linkText.toString().toLowerCase().startsWith("https://"))
+                    linkText = linkText.subSequence("https://".length(), linkText.length());
+                else if (linkText.toString().toLowerCase().startsWith("http://"))
+                    linkText = linkText.subSequence("http://".length(), linkText.length());
+
+                // 2 - Remove the www. prefix
+                if (linkText.toString().toLowerCase().startsWith("www."))
+                    linkText = linkText.subSequence("www.".length(), linkText.length());
+
+                // 3 - Truncate if still longer than MAX_LINK_LENGTH
+                if (linkText.length() > MAX_LINK_LENGTH) {
+                    linkText = linkText.subSequence(0, MAX_LINK_LENGTH) + "…";
+                }
+
+                // 4 - Replace the text preserving the spans
+                builder.replace(start, end, linkText);
+                builder.removeSpan(span);
+                builder.setSpan(span, start, start + linkText.length(), flags);
+            }
+        }
+        return builder;
+    }
+
+    public static boolean isToday(Date time) {
+        if (time == null) {
+            return false;
+        }
+        Calendar nowTime = Calendar.getInstance();
+
+        Calendar thenTime = Calendar.getInstance();
+        thenTime.setTime(time);
+
+        return nowTime.get(Calendar.DAY_OF_YEAR) == thenTime.get(Calendar.DAY_OF_YEAR) &&
+            nowTime.get(Calendar.YEAR) == thenTime.get(Calendar.YEAR);
+    }
+
+    public static boolean isAtMostXHoursOld(Date time, long x) {
+        if (time == null) {
+            return false;
+        } else {
+            long nowTime = System.currentTimeMillis();
+            long hoursDiff = (nowTime - time.getTime()) / (1000 * 60 * 60);
+
+            return hoursDiff < x;
+        }
     }
 }
