@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -86,21 +87,31 @@ public class MenuFragment extends Fragment {
 
                 try {
                     photos = new FBPageFeedFoodPhotosSupplier(jedalen).getPhotos();
-                    if (photos == null) {
-                        needAuthenticate = true;
-                    } else if (photos.isEmpty()) {
+                    if (photos.isEmpty()) {
                         photos = new FBPageUploadedImagesFoodPhotosSupplier(jedalen).getPhotos();
-                        if (photos == null) {
-                            needAuthenticate = true;
-                        }
                     }
                 } catch (FacebookException e) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showNoInternetConnection(getActivity().getApplicationContext());
-                        }
-                    });
+                    final FragmentActivity activity = getActivity();
+                    if (activity != null) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showToast(activity.getApplicationContext(), R.string.internal_error);
+                            }
+                        });
+                    }
+                } catch (Utils.FBAuthenticationException e) {
+                    needAuthenticate = true;
+                } catch (Util.ConnectionFailedException e) {
+                    final FragmentActivity activity = getActivity();
+                    if (activity != null) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showNoInternetConnection(activity.getApplicationContext());
+                            }
+                        });
+                    }
                 }
 
                 try {
@@ -121,11 +132,11 @@ public class MenuFragment extends Fragment {
                 if (needAuthenticate) {
                     saveData(photos);
                     adapter.showFBButton();
-                }
-                if (photos != null) {
+                } else if (photos != null) {
                     saveData(photos);
                     adapter.updatePhotos(photos);
                 }
+
                 if (meals != null) {
                     saveData(meals);
                     adapter.updateMeals(meals);
@@ -202,9 +213,9 @@ public class MenuFragment extends Fragment {
         refreshTime = Utils.getCurrentTime();
         String jsonCurrentTime = gson.toJson(refreshTime);
         preferences.edit()
-                .putString(PREF_MEALS + jedalen, jsonMeals)
-                .putString(PREF_MEALS_REFRESH_TIMESTAMP + jedalen, jsonCurrentTime)
-                .apply();
+            .putString(PREF_MEALS + jedalen, jsonMeals)
+            .putString(PREF_MEALS_REFRESH_TIMESTAMP + jedalen, jsonCurrentTime)
+            .apply();
     }
 
     private void loadData() {
@@ -228,7 +239,7 @@ public class MenuFragment extends Fragment {
         Gson gson = new Gson();
         String jsonPhotos = gson.toJson(photosWithSources);
         preferences.edit()
-                .putString(PREF_MEALS_PHOTOS + jedalen, jsonPhotos)
-                .apply();
+            .putString(PREF_MEALS_PHOTOS + jedalen, jsonPhotos)
+            .apply();
     }
 }

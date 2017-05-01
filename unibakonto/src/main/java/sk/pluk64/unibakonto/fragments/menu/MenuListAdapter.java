@@ -2,6 +2,7 @@ package sk.pluk64.unibakonto.fragments.menu;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +13,11 @@ import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import sk.pluk64.unibakonto.R;
 import sk.pluk64.unibakonto.UpdateMenusListener;
-import sk.pluk64.unibakonto.Utils;
 import sk.pluk64.unibakonto.meals.Meals;
 
 class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
@@ -39,8 +36,8 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
     }
 
     private int itemCount = 0;
-    private final Map<Integer, Object> positionToItem = new HashMap<>();
-    private final Map<Integer, ViewType> positionToViewType = new HashMap<>();
+    private final SparseArray<Object> positionToItem = new SparseArray<>();
+    private final SparseArray<ViewType> positionToViewType = new SparseArray<>();
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public View view;
@@ -69,7 +66,6 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
 
     public void updatePhotos(List<FBPhoto> photos) {
         if (photos != null) {
-//            photos = filterTodayPhotos(photos); // TODO naco to tu je?, zatial vypnem, lebo robi problemy
             if (photos.isEmpty()) {
                 positionToViewType.put(0, ViewType.NO_GALLERY_IMAGES);
             } else {
@@ -78,16 +74,6 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
             menuImagesAdapter.updateData(photos);
             notifyDataSetChanged();
         }
-    }
-
-    private List<FBPhoto> filterTodayPhotos(List<FBPhoto> photos) {
-        List<FBPhoto> result = new ArrayList<>();
-        for (FBPhoto photo : photos) {
-            if (Utils.isToday(photo.getCreatedTime())) {
-                result.add(photo);
-            }
-        }
-        return result;
     }
 
     public void updateMeals(Meals meals) {

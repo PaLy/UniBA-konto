@@ -17,6 +17,7 @@ import java.util.List;
 
 import sk.pluk64.unibakonto.FBUtils;
 import sk.pluk64.unibakonto.Utils;
+import sk.pluk64.unibakonto.http.Util;
 import sk.pluk64.unibakonto.meals.Menza;
 
 public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
@@ -27,7 +28,7 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
     }
 
     @Override
-    public List<FBPhoto> getPhotos() {
+    public List<FBPhoto> getPhotos() throws Utils.FBAuthenticationException, Util.ConnectionFailedException {
         GraphRequest getPostsRequest = createGetPostsRequest(jedalen.getFBid());
 
         GraphResponse graphResponse = getPostsRequest.executeAndWait();
@@ -35,7 +36,7 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
         return processResponse(graphResponse);
     }
 
-    private List<FBPhoto> processResponse(GraphResponse response) {
+    private List<FBPhoto> processResponse(GraphResponse response) throws Utils.FBAuthenticationException, Util.ConnectionFailedException {
         ArrayList<FBPhoto> result = new ArrayList<>();
 
         int REQUESTS_LIMIT = 10;
@@ -46,7 +47,13 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
             JSONObject responseJSONObject = response.getJSONObject();
 
             if (error != null) {
-                return null;
+                int errorCode = error.getErrorCode();
+                String errorType = error.getErrorType();
+                if (errorCode == 102 || errorCode == 190 || "OAuthException".equals(errorType)) {
+                    throw new Utils.FBAuthenticationException();
+                } else {
+                    throw new Util.ConnectionFailedException();
+                }
             } else if (responseJSONObject != null) {
                 JSONArray posts = responseJSONObject.optJSONArray("data");
                 for (int i = 0; i < posts.length(); i++) {

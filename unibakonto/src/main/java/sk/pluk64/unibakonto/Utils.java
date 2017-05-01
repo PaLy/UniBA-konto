@@ -2,6 +2,7 @@ package sk.pluk64.unibakonto;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.annotation.StringRes;
 import android.text.SpannableStringBuilder;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
@@ -22,6 +23,10 @@ public class Utils {
             noInternetConnection = Toast.makeText(context, R.string.connection_failed, Toast.LENGTH_LONG);
             noInternetConnection.show();
         }
+    }
+
+    public static void showToast(Context context, @StringRes int resId) {
+        Toast.makeText(context, resId, Toast.LENGTH_LONG).show();
     }
 
     public static String getCurrentTimeFormatted() {
@@ -134,5 +139,8 @@ public class Utils {
 
             return hoursDiff < x;
         }
+    }
+
+    public static class FBAuthenticationException extends Exception {
     }
 }
