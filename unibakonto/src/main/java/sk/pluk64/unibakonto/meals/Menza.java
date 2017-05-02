@@ -6,18 +6,29 @@ public enum Menza {
     EAM, VENZA;
 
     public Meals getMenu() throws Util.ConnectionFailedException {
+        Meals meals = null;
         switch (this) {
             case EAM:
                 try {
-                    return new MlynskaDolinaNewMealsProvider(EAM).getMenu();
+                    meals = new MlynskaDolinaNewMealsProvider(EAM).getMenu();
                 } catch (Util.ConnectionFailedException ignored) {
                 }
 
-                return new EamWebMealsProvider().getMenu();
+                if (meals == null || meals.menus == null || meals.menus.isEmpty()) {
+                    meals = new EamWebMealsProvider().getMenu();
+                }
+                break;
             case VENZA:
-                return new MlynskaDolinaNewMealsProvider(VENZA).getMenu();
+                meals = new MlynskaDolinaNewMealsProvider(VENZA).getMenu();
+                break;
             default:
                 return null;
+        }
+
+        if (meals != null && meals.menus != null && !meals.menus.isEmpty()) {
+            return meals;
+        } else {
+            throw new Util.ConnectionFailedException();
         }
     }
 
