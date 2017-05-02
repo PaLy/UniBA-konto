@@ -120,14 +120,30 @@ public class Utils {
     public static boolean isToday(Date time) {
         if (time == null) {
             return false;
+        } else {
+            Calendar nowTime = Calendar.getInstance();
+
+            Calendar thenTime = Calendar.getInstance();
+            thenTime.setTime(time);
+
+            return nowTime.get(Calendar.DAY_OF_YEAR) == thenTime.get(Calendar.DAY_OF_YEAR) &&
+                nowTime.get(Calendar.YEAR) == thenTime.get(Calendar.YEAR);
         }
-        Calendar nowTime = Calendar.getInstance();
+    }
 
-        Calendar thenTime = Calendar.getInstance();
-        thenTime.setTime(time);
+    public static boolean isYesterday(Date time) {
+        if (time == null) {
+            return false;
+        } else {
+            Calendar nowTime = Calendar.getInstance();
 
-        return nowTime.get(Calendar.DAY_OF_YEAR) == thenTime.get(Calendar.DAY_OF_YEAR) &&
-            nowTime.get(Calendar.YEAR) == thenTime.get(Calendar.YEAR);
+            Calendar thenTime = Calendar.getInstance();
+            thenTime.setTime(time);
+            thenTime.add(Calendar.DAY_OF_YEAR, 1);
+
+            return nowTime.get(Calendar.DAY_OF_YEAR) == thenTime.get(Calendar.DAY_OF_YEAR) &&
+                nowTime.get(Calendar.YEAR) == thenTime.get(Calendar.YEAR);
+        }
     }
 
     public static boolean isAtMostXHoursOld(Date time, long x) {

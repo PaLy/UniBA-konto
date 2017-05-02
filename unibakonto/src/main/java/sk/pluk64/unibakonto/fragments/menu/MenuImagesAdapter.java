@@ -161,13 +161,20 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<MenuImagesAdapter.Vi
 
         int pos = 0;
         String lastDay = "";
+        Calendar calendar = Calendar.getInstance();
         for (int i = 0; i < photos.size(); i++) {
             FBPhoto photo = photos.get(i);
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(photo.getCreatedTime());
-            String day = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault()).toUpperCase();
-            day = day.replaceAll("(.)", "$1\n").trim();
+            String day;
+            if (Utils.isToday(photo.getCreatedTime())) {
+                day = menuFragment.getString(R.string.today);
+            } else if (Utils.isYesterday(photo.getCreatedTime())) {
+                day = menuFragment.getString(R.string.yesterday);
+            } else {
+                calendar.setTime(photo.getCreatedTime());
+                day = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
+            }
+            day = day.toUpperCase().replaceAll("(.)", "$1\n").trim();
 
             if (pos == 0 || !lastDay.equals(day)) {
                 positionToItem.put(pos, day);
