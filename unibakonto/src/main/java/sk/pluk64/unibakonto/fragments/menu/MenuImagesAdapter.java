@@ -68,8 +68,9 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             return new PhotoWithOptionalCaptionViewHolder(view, textView, imageView);
         } else if (viewType == ViewType.DAY.id) {
-            TextView view = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.food_images_day, parent, false);
-            return new DayViewHolder(view);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.food_images_day, parent, false);
+            TextView textView = (TextView) view.findViewById(R.id.food_images_day);
+            return new DayViewHolder(view, textView);
         } else if (viewType == ViewType.POST_MESSAGE.id) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.food_images_post_message, parent, false);
             TextView textView = (TextView) view.findViewById(R.id.text);
@@ -228,9 +229,9 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private static class DayViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
 
-        DayViewHolder(TextView view) {
+        DayViewHolder(View view, TextView textView) {
             super(view);
-            this.textView = view;
+            this.textView = textView;
         }
     }
 
