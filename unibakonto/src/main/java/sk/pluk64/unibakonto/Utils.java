@@ -7,6 +7,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.DisplayMetrics;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.jsoup.select.Elements;
@@ -155,6 +156,16 @@ public class Utils {
 
             return hoursDiff < x;
         }
+    }
+
+    public static float getLineHeight(TextView textView) {
+        return textView.getPaint().getFontMetrics().bottom - textView.getPaint().getFontMetrics().top;
+    }
+
+    public static int getViewHeightFromTextHeight(TextView textView) {
+        int lineCount = textView.getLineCount();
+        float lineHeight = getLineHeight(textView);
+        return (int) Math.ceil(lineCount * lineHeight);
     }
 
     public static class FBAuthenticationException extends Exception {
