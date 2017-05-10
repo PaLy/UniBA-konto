@@ -61,7 +61,7 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
                     if (post != null) {
                         Date createdTime = FBUtils.parseDate(post.optString("created_time"));
 
-                        lastPostIsTooOld = !Utils.isAtMostXHoursOld(createdTime, 22);
+                        lastPostIsTooOld = !Utils.isAtMostXHoursOld(createdTime, 20);
 
                         if (!lastPostIsTooOld) {
                             if (hasOnlyOneAttachment(post)) {
