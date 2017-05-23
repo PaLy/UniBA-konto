@@ -57,6 +57,14 @@ public class AccountFragment extends Fragment {
         preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (updateDataTask != null) {
+            updateDataTask.cancel(true);
+        }
+    }
+
     private void updateData() {
         if (updateDataTask != null) {
             return;
@@ -154,6 +162,11 @@ public class AccountFragment extends Fragment {
                         activity.removeFragment(AccountFragment.this);
                     }
                 }
+                updateDataTask = null;
+            }
+
+            @Override
+            protected void onCancelled(Boolean success) {
                 updateDataTask = null;
             }
         };

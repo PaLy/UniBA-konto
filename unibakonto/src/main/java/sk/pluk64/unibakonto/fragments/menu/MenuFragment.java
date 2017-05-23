@@ -68,6 +68,14 @@ public class MenuFragment extends Fragment {
         adapter.setUpdateMenusListener((UpdateMenusListener) getActivity());
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (updateDataTask != null) {
+            updateDataTask.cancel(true);
+        }
+    }
+
     public void updateData() {
         if (updateDataTask != null) {
             return;
@@ -114,6 +122,10 @@ public class MenuFragment extends Fragment {
                     }
                 }
 
+                if (isCancelled()) {
+                    return null;
+                }
+
                 try {
                     return jedalen.getMenu();
                 } catch (Util.ConnectionFailedException e) {
@@ -149,6 +161,11 @@ public class MenuFragment extends Fragment {
                     updateRefreshTime(view);
                 }
                 swipeRefresh.setRefreshing(false);
+                updateDataTask = null;
+            }
+
+            @Override
+            protected void onCancelled(Meals meals) {
                 updateDataTask = null;
             }
         };
