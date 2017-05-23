@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 
+import com.facebook.appevents.AppEventsLogger;
 import com.google.gson.Gson;
 
 import java.util.List;
@@ -128,6 +129,8 @@ public class TabbedActivity extends AppCompatActivity implements UpdateMenusList
                 cardsDialog.show(getSupportFragmentManager(), "cards");
             }
         });
+
+        AppEventsLogger.activateApp(getApplication());
     }
 
     public void setForceRefresh(boolean forceRefresh) {
