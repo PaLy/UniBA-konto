@@ -117,12 +117,14 @@ public class MenuFragment extends Fragment {
                 try {
                     return jedalen.getMenu();
                 } catch (Util.ConnectionFailedException e) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showNoInternetConnection(getActivity().getApplicationContext());
-                        }
-                    });
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showNoInternetConnection(getActivity().getApplicationContext());
+                            }
+                        });
+                    }
                     return null;
                 }
             }
