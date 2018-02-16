@@ -23,7 +23,7 @@ import sk.pluk64.unibakonto.meals.Meals;
 
 class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
     private final MenuFragment menuFragment;
-    private MenuImagesAdapter menuImagesAdapter;
+    private final MenuImagesAdapter menuImagesAdapter;
     private UpdateMenusListener updateMenusListener;
 
     private enum ViewType {
@@ -41,7 +41,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
     private final SparseArray<ViewType> positionToViewType = new SparseArray<>();
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public View view;
+        public final View view;
 
         public ViewHolder(View v) {
             super(v);
@@ -117,7 +117,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
         } else if (viewType == ViewType.GALLERY.id) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fb_images, parent, false);
 
-            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler);
+            RecyclerView recyclerView = view.findViewById(R.id.recycler);
             recyclerView.setHasFixedSize(false);
             RecyclerView.LayoutManager layoutManager = new GridLayoutManager(parent.getContext(), 1, LinearLayoutManager.HORIZONTAL, false);
             recyclerView.setLayoutManager(layoutManager);
@@ -127,7 +127,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
         } else {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fb_login_button, parent, false);
 
-            LoginButton loginButton = (LoginButton) view.findViewById(R.id.login_button);
+            LoginButton loginButton = view.findViewById(R.id.login_button);
             loginButton.setReadPermissions(Collections.<String>emptyList());
             loginButton.setFragment(menuFragment);
             loginButton.registerCallback(menuFragment.fbCallbackManager, new FacebookCallback<LoginResult>() {
@@ -168,10 +168,10 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
             View view = holder.view;
             Meals.Meal meal = (Meals.Meal) positionToItem.get(position);
 
-            TextView nameView = (TextView) view.findViewById(R.id.meal_name);
+            TextView nameView = view.findViewById(R.id.meal_name);
             nameView.setText(meal.name);
 
-            TextView costView = (TextView) view.findViewById(R.id.meal_cost);
+            TextView costView = view.findViewById(R.id.meal_cost);
             costView.setText(meal.price);
         } else if (viewType == ViewType.FB_LOGIN) {
             holder.view.setVisibility(View.VISIBLE);

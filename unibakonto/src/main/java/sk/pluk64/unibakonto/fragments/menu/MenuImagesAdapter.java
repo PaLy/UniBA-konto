@@ -23,7 +23,7 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private final MenuFragment menuFragment;
     private int itemCount = 0;
     private final PicassoWrapper picassoWrapper;
-    private int imageWidth;
+    private final int imageWidth;
     private final SparseArray<Object> positionToItem = new SparseArray<>();
     private final SparseArray<ViewType> positionToViewType = new SparseArray<>();
 
@@ -59,20 +59,20 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         if (viewType == ViewType.PHOTO_WITH_OPTIONAL_CAPTION.id) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fb_image, parent, false);
 
-            ImageView imageView = (ImageView) view.findViewById(R.id.image);
+            ImageView imageView = view.findViewById(R.id.image);
             imageView.setLayoutParams(new LinearLayout.LayoutParams(imageWidth, LinearLayout.LayoutParams.WRAP_CONTENT));
 
-            TextView textView = (TextView) view.findViewById(R.id.text);
+            TextView textView = view.findViewById(R.id.text);
             textView.setMovementMethod(LinkMovementMethod.getInstance());
 
             return new PhotoWithOptionalCaptionViewHolder(view, textView, imageView);
         } else if (viewType == ViewType.DAY.id) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.food_images_day, parent, false);
-            TextView textView = (TextView) view.findViewById(R.id.food_images_day);
+            TextView textView = view.findViewById(R.id.food_images_day);
             return new DayViewHolder(view, textView);
         } else if (viewType == ViewType.POST_MESSAGE.id) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.food_images_post_message, parent, false);
-            TextView textView = (TextView) view.findViewById(R.id.text);
+            TextView textView = view.findViewById(R.id.text);
             // thanks to http://stackoverflow.com/questions/2734270/how-do-i-make-links-in-a-textview-clickable
             textView.setMovementMethod(LinkMovementMethod.getInstance());
 

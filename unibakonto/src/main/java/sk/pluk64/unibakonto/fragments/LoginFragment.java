@@ -7,8 +7,10 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -20,6 +22,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.lang.ref.WeakReference;
 
 import sk.pluk64.unibakonto.R;
 import sk.pluk64.unibakonto.TabbedActivity;
@@ -36,12 +40,12 @@ public class LoginFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
-        mUsernameView = (AutoCompleteTextView) view.findViewById(R.id.username);
+        mUsernameView = view.findViewById(R.id.username);
         mUsernameView.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
-        mPasswordView = (EditText) view.findViewById(R.id.password);
+        mPasswordView = view.findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -60,7 +64,7 @@ public class LoginFragment extends Fragment {
             mPasswordView.setText(up.password);
         }
 
-        Button mSignInButton = (Button) view.findViewById(R.id.email_sign_in_button);
+        Button mSignInButton = view.findViewById(R.id.email_sign_in_button);
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -82,12 +86,16 @@ public class LoginFragment extends Fragment {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public static class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
         private final UnibaKonto unibaKonto;
+        private final WeakReference<TabbedActivity> activityReference;
+        private final WeakReference<LoginFragment> fragmentReference;
         private boolean noInternet = false;
 
-        public UserLoginTask(String username, String password) {
+        public UserLoginTask(TabbedActivity myActivity, LoginFragment loginFragment, String username, String password) {
             unibaKonto = new UnibaKonto(username, password);
+            activityReference = new WeakReference<>(myActivity);
+            fragmentReference = new WeakReference<>(loginFragment);
         }
 
         @Override
@@ -96,42 +104,59 @@ public class LoginFragment extends Fragment {
                 unibaKonto.login();
             } catch (Util.ConnectionFailedException e) {
                 noInternet = true;
-                getMyActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Utils.showNoInternetConnection(getMyActivity().getApplicationContext());
-                    }
-                });
+                final TabbedActivity activity = activityReference.get();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showNoInternetConnection(activity.getApplicationContext());
+                        }
+                    });
+                }
             }
             return unibaKonto.isLoggedIn();
         }
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            TabbedActivity activity = getMyActivity();
-            if (activity == null) {
-                return;
-            }
-
-            showProgress(false);
-            if (success) {
-                activity.setIsLoggedIn(true);
-                activity.saveLoginDetails(unibaKonto.username, unibaKonto.password);
-                activity.setForceRefresh(true);
-                activity.removeFragment(LoginFragment.this);
-            } else if (!noInternet) {
-                mPasswordView.setError(getString(R.string.error_incorrect_username_or_password));
-                mPasswordView.requestFocus();
+            LoginFragment fragment = fragmentReference.get();
+            if (fragment != null) {
+                fragment.onLoginFinished(success, noInternet, unibaKonto);
             }
         }
 
         @Override
         protected void onCancelled() {
-            mAuthTask = null;
-            if (getActivity() != null) {
-                showProgress(false);
+            LoginFragment fragment = fragmentReference.get();
+            if (fragment != null) {
+                fragment.onLoginCancelled();
             }
+        }
+    }
+
+    private void onLoginCancelled() {
+        mAuthTask = null;
+        if (getActivity() != null) {
+            showProgress(false);
+        }
+    }
+
+    private void onLoginFinished(Boolean success, boolean noInternet, UnibaKonto unibaKonto) {
+        mAuthTask = null;
+        TabbedActivity activity = getMyActivity();
+        if (activity == null) {
+            return;
+        }
+
+        showProgress(false);
+        if (success) {
+            activity.setIsLoggedIn(true);
+            activity.saveLoginDetails(unibaKonto.username, unibaKonto.password);
+            activity.setForceRefresh(true);
+            activity.removeFragment(LoginFragment.this);
+        } else if (!noInternet) {
+            mPasswordView.setError(getString(R.string.error_incorrect_username_or_password));
+            mPasswordView.requestFocus();
         }
     }
 
@@ -143,32 +168,25 @@ public class LoginFragment extends Fragment {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
     /**
@@ -177,9 +195,14 @@ public class LoginFragment extends Fragment {
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mUsernameView.getWindowToken(), 0);
-        imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+        FragmentActivity activity = getActivity();
+        if (activity != null) {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(mUsernameView.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+            }
+        }
         if (mAuthTask != null) {
             return;
         }
@@ -215,7 +238,7 @@ public class LoginFragment extends Fragment {
             // perform the user login attempt.
             showProgress(true);
             getMyActivity().invalidateUnibaKonto();
-            mAuthTask = new UserLoginTask(username, password);
+            mAuthTask = new UserLoginTask(getMyActivity(), this, username, password);
             mAuthTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }

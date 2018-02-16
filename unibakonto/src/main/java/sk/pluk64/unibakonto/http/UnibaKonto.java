@@ -41,7 +41,7 @@ public class UnibaKonto {
     private static final String ID_TRANSACTIONS_HISTORY = "#ctl00_ContentPlaceHolderMain_gvAccountHistory";
 
     private static final String CARDS_PAGE = "https://konto.uniba.sk/Secure/UserCards.aspx";
-    public static final String ID_CARDS_TABLE = "#ctl00_ContentPlaceHolderMain_gvUserCards";
+    private static final String ID_CARDS_TABLE = "#ctl00_ContentPlaceHolderMain_gvUserCards";
 
     public final String username;
     public final String password;
@@ -302,7 +302,7 @@ public class UnibaKonto {
         private final String obj;
         private final String payed;
 
-        private static SimpleDateFormat dateFormat = new SimpleDateFormat("d. MM. yyyy HH:mm:ss");
+        private static final SimpleDateFormat dateFormat = new SimpleDateFormat("d. MM. yyyy HH:mm:ss");
 
         public TransactionItem(Element tableRow) {
             Iterator<Element> columns = tableRow.children().iterator();

@@ -133,33 +133,37 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
 
     private void parseAttachment(ArrayList<FBPhoto> result, Date createdTime, JSONObject attachment, String prefixMessage) {
         String attachmentType = attachment.optString("type");
-        if (attachmentType.equals("album")) {
-            JSONObject subattachments = attachment.optJSONObject("subattachments");
-            if (subattachments != null) {
-                parseAttachments(result, createdTime, subattachments);
-            }
-        } else if (attachmentType.equals("photo")) {
-            parsePhoto(result, attachment, createdTime, prefixMessage);
-        } else {
-            String url = attachment.optString("url");
-            String description = attachment.optString("description");
-            if (!prefixMessage.isEmpty() && !prefixMessage.equals(description)) {
-                if (description.isEmpty()) {
-                    description = prefixMessage;
-                } else {
-                    description = prefixMessage + "\n\n" + description;
+        switch (attachmentType) {
+            case "album":
+                JSONObject subattachments = attachment.optJSONObject("subattachments");
+                if (subattachments != null) {
+                    parseAttachments(result, createdTime, subattachments);
                 }
-            }
-            String caption;
-            if (url.isEmpty()) {
-                caption = description;
-            } else {
-                caption = description + "\n\n" + url;
-            }
-            result.add(new FBPhoto()
-                .setCreatedTime(createdTime)
-                .setCaption(caption)
-            );
+                break;
+            case "photo":
+                parsePhoto(result, attachment, createdTime, prefixMessage);
+                break;
+            default:
+                String url = attachment.optString("url");
+                String description = attachment.optString("description");
+                if (!prefixMessage.isEmpty() && !prefixMessage.equals(description)) {
+                    if (description.isEmpty()) {
+                        description = prefixMessage;
+                    } else {
+                        description = prefixMessage + "\n\n" + description;
+                    }
+                }
+                String caption;
+                if (url.isEmpty()) {
+                    caption = description;
+                } else {
+                    caption = description + "\n\n" + url;
+                }
+                result.add(new FBPhoto()
+                    .setCreatedTime(createdTime)
+                    .setCaption(caption)
+                );
+                break;
         }
     }
 

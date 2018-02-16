@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -17,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.facebook.CallbackManager;
-import com.facebook.FacebookException;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -27,7 +27,6 @@ import java.util.List;
 import sk.pluk64.unibakonto.R;
 import sk.pluk64.unibakonto.UpdateMenusListener;
 import sk.pluk64.unibakonto.Utils;
-import sk.pluk64.unibakonto.http.Util;
 import sk.pluk64.unibakonto.meals.Meals;
 import sk.pluk64.unibakonto.meals.Menza;
 
@@ -38,7 +37,7 @@ public class MenuFragment extends Fragment {
     //    private static final String PREF_MEALS_REFRESH_TIMESTAMP = "meals_refreshed_timestamp"; // DO NOT USE - could contain old data (string)
     private static final String PREF_MEALS_REFRESH_TIMESTAMP = "meals_refreshed_timestamp_date";
     private Menza jedalen;
-    private MenuListAdapter adapter = new MenuListAdapter(this);
+    private final MenuListAdapter adapter = new MenuListAdapter(this);
     private SwipeRefreshLayout swipeRefresh;
     private SharedPreferences preferences;
     private AsyncTask<Void, Void, Meals> updateDataTask;
@@ -63,7 +62,10 @@ public class MenuFragment extends Fragment {
         if (getArguments() != null) {
             jedalen = (Menza) getArguments().getSerializable(ARG_JEDALEN);
         }
-        preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        FragmentActivity activity = getActivity();
+        if (activity != null) {
+            preferences = activity.getPreferences(Context.MODE_PRIVATE);
+        }
         fbCallbackManager = CallbackManager.Factory.create();
         adapter.setUpdateMenusListener((UpdateMenusListener) getActivity());
     }
@@ -84,110 +86,26 @@ public class MenuFragment extends Fragment {
         if (view != null) {
             setRefreshing(view);
         }
-        updateDataTask = new AsyncTask<Void, Void, Meals>() {
-            private List<FBPhoto> photos;
-            private boolean needAuthenticate = false;
-
-            @Override
-            protected Meals doInBackground(Void... params) {
-                // TODO otestovat, co sa stane ak je FB nedostupny.
-                // jedalne listky by sa mali stiahnut aj bez FB
-
-                try {
-                    photos = new FBPageFeedFoodPhotosSupplier(jedalen).getPhotos();
-                    if (photos.isEmpty()) {
-                        photos = new FBPageUploadedImagesFoodPhotosSupplier(jedalen).getPhotos();
-                    }
-                } catch (FacebookException e) {
-                    final FragmentActivity activity = getActivity();
-                    if (activity != null) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showToast(activity.getApplicationContext(), R.string.internal_error);
-                            }
-                        });
-                    }
-                } catch (Utils.FBAuthenticationException e) {
-                    needAuthenticate = true;
-                } catch (Util.ConnectionFailedException e) {
-                    final FragmentActivity activity = getActivity();
-                    if (activity != null) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showNoInternetConnection(activity.getApplicationContext());
-                            }
-                        });
-                    }
-                }
-
-                if (isCancelled()) {
-                    return null;
-                }
-
-                try {
-                    return jedalen.getMenu();
-                } catch (Util.ConnectionFailedException e) {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showNoInternetConnection(getActivity().getApplicationContext());
-                            }
-                        });
-                    }
-                    return null;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Meals meals) {
-                if (needAuthenticate) {
-                    saveData(photos);
-                    adapter.showFBButton();
-                } else if (photos != null) {
-                    saveData(photos);
-                    adapter.updatePhotos(photos);
-                }
-
-                if (meals != null) {
-                    saveData(meals);
-                    adapter.updateMeals(meals);
-                }
-
-                View view = getView();
-                if (view != null) {
-                    updateRefreshTime(view);
-                }
-                swipeRefresh.setRefreshing(false);
-                updateDataTask = null;
-            }
-
-            @Override
-            protected void onCancelled(Meals meals) {
-                updateDataTask = null;
-            }
-        };
+        updateDataTask = new UpdateMenuDataTask(jedalen, getActivity(), this);
         updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void setRefreshing(View view) {
-        TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
+        TextView timestamp = view.findViewById(R.id.refresh_timestamp);
         timestamp.setText(getString(R.string.refreshing));
     }
 
     private void updateRefreshTime(View view) {
-        TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
+        TextView timestamp = view.findViewById(R.id.refresh_timestamp);
         String refreshTimeFormatted = Utils.getTimeFormatted(refreshTime, getString(R.string.never));
         timestamp.setText(getString(R.string.refreshed, refreshTimeFormatted));
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_menu, container, false);
-        RecyclerView listView = (RecyclerView) view.findViewById(R.id.menu_list);
+        RecyclerView listView = view.findViewById(R.id.menu_list);
 
         listView.setHasFixedSize(true);
         RecyclerView.LayoutManager tLayoutManager = new LinearLayoutManager(getContext());
@@ -197,7 +115,7 @@ public class MenuFragment extends Fragment {
         loadData();
         updateRefreshTime(view);
 
-        swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        swipeRefresh = view.findViewById(R.id.swipe_refresh);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -260,5 +178,31 @@ public class MenuFragment extends Fragment {
         preferences.edit()
             .putString(PREF_MEALS_PHOTOS + jedalen, jsonPhotos)
             .apply();
+    }
+
+    public void onUpdateTaskFinished(boolean needAuthenticate, Meals meals, List<FBPhoto> photos) {
+        if (needAuthenticate) {
+            saveData(photos);
+            adapter.showFBButton();
+        } else if (photos != null) {
+            saveData(photos);
+            adapter.updatePhotos(photos);
+        }
+
+        if (meals != null) {
+            saveData(meals);
+            adapter.updateMeals(meals);
+        }
+
+        View view = getView();
+        if (view != null) {
+            updateRefreshTime(view);
+        }
+        swipeRefresh.setRefreshing(false);
+        updateDataTask = null;
+    }
+
+    public void onUpdateTaskCancelled() {
+        updateDataTask = null;
     }
 }

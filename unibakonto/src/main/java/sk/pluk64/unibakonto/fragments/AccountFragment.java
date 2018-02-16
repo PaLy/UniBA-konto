@@ -5,8 +5,10 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,17 +34,16 @@ import sk.pluk64.unibakonto.R;
 import sk.pluk64.unibakonto.TabbedActivity;
 import sk.pluk64.unibakonto.Utils;
 import sk.pluk64.unibakonto.http.UnibaKonto;
-import sk.pluk64.unibakonto.http.Util;
 
 public class AccountFragment extends Fragment {
     public static final String PREF_BALANCES = "balances";
     public static final String PREF_TRANSACTIONS = "transactions";
 //    static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp"; // DO NOT USE - could contain old data (string)
     public static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp_date";
-    static final String PREF_CARDS = "cards";
+    private static final String PREF_CARDS = "cards";
     private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
-    private MyAdapter mAdapter = new MyAdapter();
-    SwipeRefreshLayout swipeRefresh;
+    private final MyAdapter mAdapter = new MyAdapter();
+    private SwipeRefreshLayout swipeRefresh;
     private SharedPreferences preferences;
     private AsyncTask<Void, Void, Boolean> updateDataTask;
     private List<UnibaKonto.CardInfo> cards;
@@ -54,7 +55,10 @@ public class AccountFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        FragmentActivity activity = getActivity();
+        if (activity != null) {
+            preferences = activity.getPreferences(Context.MODE_PRIVATE);
+        }
     }
 
     @Override
@@ -80,96 +84,7 @@ public class AccountFragment extends Fragment {
             activity.setForceRefresh(false);
         }
 
-        updateDataTask = new AsyncTask<Void, Void, Boolean>() {
-            public boolean noInternet = false;
-            private List<UnibaKonto.Transaction> updatedTransactions;
-
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                TabbedActivity activity = getMyActivity();
-                if (activity == null) {
-                    return false;
-                } else {
-                    UnibaKonto unibaKonto = activity.getUnibaKonto();
-                    if (!unibaKonto.isLoggedIn(true)) {
-                        try {
-                            unibaKonto.login();
-                        } catch (Util.ConnectionFailedException e) {
-                            noInternet = true;
-                            showNoInternetConnectionToastFromBackgroundThread();
-                        }
-                    }
-                    if (unibaKonto.isLoggedIn()) {
-                        try {
-                            balances = unibaKonto.getBalances();
-                            updatedTransactions = unibaKonto.getTransactions();
-                            cards = unibaKonto.getCards();
-                            return true;
-                        } catch (Util.ConnectionFailedException e) {
-                            noInternet = true;
-                            showNoInternetConnectionToastFromBackgroundThread();
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Boolean success) {
-                TabbedActivity activity = getMyActivity();
-                View view = getView();
-
-                if (activity != null) {
-                    activity.setCardsButtonEnabled(true);
-                }
-
-                if (success) {
-                    saveData(balances, updatedTransactions, cards);
-                    if (view != null) {
-                        updateViewBalances(view);
-                        updateRefreshTime(view);
-                    }
-                    MyAdapter adapter = AccountFragment.this.mAdapter;
-                    adapter.getData().clear();
-                    adapter.getData().addAll(updatedTransactions);
-                    adapter.notifyDataSetChanged();
-                    swipeRefresh.setRefreshing(false);
-                    if (activity != null) {
-                        activity.setLogoutButtonEnabled(true);
-                    }
-                } else if (noInternet) {
-                    if (activity != null) {
-                        activity.setLogoutButtonEnabled(true);
-                    }
-                    swipeRefresh.setRefreshing(false);
-                    if (view != null) {
-                        updateRefreshTime(view);
-                    }
-                } else {
-                    if (activity != null) {
-                        if (view != null) {
-                            // from whatever reason card view and swipeRefresh stay on screen after fragment replacement
-                            // this workaround will hide it
-                            // TODO could potentially leaks memory?
-                            view.findViewById(R.id.balances_card_view).setVisibility(View.GONE);
-                            view.findViewById(R.id.transactions_history).setVisibility(View.GONE);
-                            swipeRefresh.setRefreshing(false);
-                        }
-
-                        activity.setIsLoggedIn(false);
-                        activity.removeFragment(AccountFragment.this);
-                    }
-                }
-                updateDataTask = null;
-            }
-
-            @Override
-            protected void onCancelled(Boolean success) {
-                updateDataTask = null;
-            }
-        };
+        updateDataTask = new UpdateAccountDataTask(getMyActivity(), this);
         updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -218,23 +133,14 @@ public class AccountFragment extends Fragment {
     }
 
     private void setRefreshing(View view) {
-        TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
+        TextView timestamp = view.findViewById(R.id.refresh_timestamp);
         timestamp.setText(getString(R.string.refreshing));
     }
 
     private void updateRefreshTime(View view) {
-        TextView timestamp = (TextView) view.findViewById(R.id.refresh_timestamp);
+        TextView timestamp = view.findViewById(R.id.refresh_timestamp);
         String refreshTimeFormatted = Utils.getTimeFormatted(refreshTime, getString(R.string.never));
         timestamp.setText(getString(R.string.refreshed, refreshTimeFormatted));
-    }
-
-    private void showNoInternetConnectionToastFromBackgroundThread() {
-        getMyActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Utils.showNoInternetConnection(getMyActivity().getApplicationContext());
-            }
-        });
     }
 
     private TabbedActivity getMyActivity() {
@@ -250,7 +156,7 @@ public class AccountFragment extends Fragment {
         };
         for (Object[] vb : viewIdBalanceId) {
             UnibaKonto.Balance data = balances.get(vb[1]);
-            TextView textView = (TextView) view.findViewById((Integer) vb[0]);
+            TextView textView = view.findViewById((Integer) vb[0]);
             if (data != null) {
                 textView.setText(Html.fromHtml("<b>" + data.label + "</b>" + " " + data.price));
                 textView.setVisibility(View.VISIBLE);
@@ -262,11 +168,11 @@ public class AccountFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
-        RecyclerView transactionsView = (RecyclerView) view.findViewById(R.id.transactions_history);
+        RecyclerView transactionsView = view.findViewById(R.id.transactions_history);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         transactionsView.setHasFixedSize(true);
@@ -277,7 +183,7 @@ public class AccountFragment extends Fragment {
         loadData();
         updateRefreshTime(view);
 
-        swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        swipeRefresh = view.findViewById(R.id.swipe_refresh);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -302,14 +208,77 @@ public class AccountFragment extends Fragment {
         }
     }
 
+    public void onUpdateTaskFinished(Boolean success, boolean noInternet, Map<String, UnibaKonto.Balance> balances, List<UnibaKonto.Transaction> updatedTransactions, List<UnibaKonto.CardInfo> cards) {
+        if (balances == null) {
+            balances = this.balances;
+        } else {
+            this.balances = balances;
+        }
+        if (cards == null) {
+            cards = this.cards;
+        } else {
+            this.cards = cards;
+        }
+
+        TabbedActivity activity = getMyActivity();
+        View view = getView();
+
+        if (activity != null) {
+            activity.setCardsButtonEnabled(true);
+        }
+
+        if (success) {
+            saveData(balances, updatedTransactions, cards);
+            if (view != null) {
+                updateViewBalances(view);
+                updateRefreshTime(view);
+            }
+            AccountFragment.MyAdapter adapter = AccountFragment.this.mAdapter;
+            adapter.getData().clear();
+            adapter.getData().addAll(updatedTransactions);
+            adapter.notifyDataSetChanged();
+            swipeRefresh.setRefreshing(false);
+            if (activity != null) {
+                activity.setLogoutButtonEnabled(true);
+            }
+        } else if (noInternet) {
+            if (activity != null) {
+                activity.setLogoutButtonEnabled(true);
+            }
+            swipeRefresh.setRefreshing(false);
+            if (view != null) {
+                updateRefreshTime(view);
+            }
+        } else {
+            if (activity != null) {
+                if (view != null) {
+                    // from whatever reason card view and swipeRefresh stay on screen after fragment replacement
+                    // this workaround will hide it
+                    // TODO could potentially leaks memory?
+                    view.findViewById(R.id.balances_card_view).setVisibility(View.GONE);
+                    view.findViewById(R.id.transactions_history).setVisibility(View.GONE);
+                    swipeRefresh.setRefreshing(false);
+                }
+
+                activity.setIsLoggedIn(false);
+                activity.removeFragment(AccountFragment.this);
+            }
+        }
+        updateDataTask = null;
+    }
+
+    public void onUpdateTaskCancelled() {
+        updateDataTask = null;
+    }
+
     public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-        private List<UnibaKonto.Transaction> transactions = new ArrayList<>();
+        private final List<UnibaKonto.Transaction> transactions = new ArrayList<>();
 
         // Provide a reference to the views for each data item
         // Complex data items may need more than one view per item, and
         // you provide access to all the views for a data item in a view holder
         public static class ViewHolder extends RecyclerView.ViewHolder {
-            public CardView view;
+            public final CardView view;
 
             public ViewHolder(CardView v) {
                 super(v);
@@ -340,25 +309,25 @@ public class AccountFragment extends Fragment {
             CardView transactionsView = holder.view;
             Context context = transactionsView.getContext();
 
-            TableLayout transactionTable = (TableLayout) transactionsView.findViewById(R.id.transaction_table);
+            TableLayout transactionTable = transactionsView.findViewById(R.id.transaction_table);
             transactionTable.removeAllViews();
             for (UnibaKonto.TransactionItem transactionItem : transaction.transactionItems) {
                 TableRow transactionItemView = (TableRow) LayoutInflater.from(context)
                         .inflate(R.layout.transaction_item, transactionTable, false);
 
-                TextView descriptionView = (TextView) transactionItemView.findViewById(R.id.transaction_item_description);
+                TextView descriptionView = transactionItemView.findViewById(R.id.transaction_item_description);
                 descriptionView.setText(transactionItem.description);
 
-                TextView amountView = (TextView) transactionItemView.findViewById(R.id.transaction_item_price);
+                TextView amountView = transactionItemView.findViewById(R.id.transaction_item_price);
                 amountView.setText(String.format("%+,.2f€", transactionItem.parsedAmount));
 
                 transactionTable.addView(transactionItemView);
             }
 
-            TextView timestampView = (TextView) transactionsView.findViewById(R.id.transaction_timestamp);
+            TextView timestampView = transactionsView.findViewById(R.id.transaction_timestamp);
             timestampView.setText(transaction.getTimestamp());
 
-            TextView totalAmountView = (TextView) transactionsView.findViewById(R.id.transaction_total);
+            TextView totalAmountView = transactionsView.findViewById(R.id.transaction_total);
             double totalAmount = transaction.getTotalAmount();
             totalAmountView.setText(String.format("%+,.2f€", totalAmount));
             int color = Color.BLACK;

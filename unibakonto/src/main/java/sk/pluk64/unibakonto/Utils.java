@@ -34,7 +34,7 @@ public class Utils {
         return getTimeFormatted(getCurrentTime());
     }
 
-    public static String getTimeFormatted(Date time) {
+    private static String getTimeFormatted(Date time) {
         return getTimeFormatted(time, null);
     }
 
@@ -77,7 +77,7 @@ public class Utils {
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
-    public static final int MAX_LINK_LENGTH = 100;
+    private static final int MAX_LINK_LENGTH = 100;
 
     /**
      * By http://stackoverflow.com/questions/33203359/android-ellipsize-truncate-all-long-urls-in-a-textview
@@ -158,7 +158,7 @@ public class Utils {
         }
     }
 
-    public static float getLineHeight(TextView textView) {
+    private static float getLineHeight(TextView textView) {
         return textView.getPaint().getFontMetrics().bottom - textView.getPaint().getFontMetrics().top;
     }
 

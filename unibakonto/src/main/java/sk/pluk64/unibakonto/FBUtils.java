@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class FBUtils {
-    private static SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
+    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
 
     public static Date parseDate(String fbTime) {
         try {

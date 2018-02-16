@@ -34,8 +34,8 @@ import sk.pluk64.unibakonto.http.UnibaKonto;
 import sk.pluk64.unibakonto.meals.Menza;
 
 public class TabbedActivity extends AppCompatActivity implements UpdateMenusListener {
-    static final String PREF_USERNAME = "username";
-    static final String PREF_PASSWORD = "password";
+    private static final String PREF_USERNAME = "username";
+    private static final String PREF_PASSWORD = "password";
     private static final String PREF_LOGGED_IN = "logged_in";
     private static final String PREF_SELECTED_PAGE = "selected_page";
 
@@ -67,14 +67,14 @@ public class TabbedActivity extends AppCompatActivity implements UpdateMenusList
         preferences = getPreferences(MODE_PRIVATE);
         setContentView(R.layout.activity_tabbed);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setOffscreenPageLimit(2);
         mViewPager.setCurrentItem(getPreferences(MODE_PRIVATE).getInt(PREF_SELECTED_PAGE, 0));
@@ -89,7 +89,9 @@ public class TabbedActivity extends AppCompatActivity implements UpdateMenusList
                 preferences.edit().putInt(PREF_SELECTED_PAGE, position).apply();
                 final InputMethodManager imm = (InputMethodManager) getSystemService(
                         Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(mViewPager.getWindowToken(), 0);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(mViewPager.getWindowToken(), 0);
+                }
             }
 
             @Override
@@ -98,10 +100,10 @@ public class TabbedActivity extends AppCompatActivity implements UpdateMenusList
             }
         });
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-        logoutButton = (ImageButton) findViewById(R.id.icon_logout);
+        logoutButton = findViewById(R.id.icon_logout);
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,7 +124,7 @@ public class TabbedActivity extends AppCompatActivity implements UpdateMenusList
 
         final DialogFragment cardsDialog = new CardsDialog();
 
-        cardsButton = (ImageButton) findViewById(R.id.icon_card);
+        cardsButton = findViewById(R.id.icon_card);
         cardsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -284,7 +286,7 @@ public class TabbedActivity extends AppCompatActivity implements UpdateMenusList
         }
 
         @Override
-        public int getItemPosition(Object object) {
+        public int getItemPosition(@NonNull Object object) {
             if (object instanceof LoginFragment && isLoggedIn) {
                 return POSITION_NONE;
             }
