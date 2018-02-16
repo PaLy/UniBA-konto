@@ -50,7 +50,6 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private Picasso getPicasso() {
         if (picassoWrapper.picasso == null) {
             picassoWrapper.picasso = Picasso.with(menuFragment.getContext());
-            picassoWrapper.picasso.setIndicatorsEnabled(true);
         }
         return picassoWrapper.picasso;
     }
