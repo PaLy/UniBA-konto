@@ -38,4 +38,5 @@ dependencies {
 
     compile 'com.facebook.android:facebook-android-sdk:4.30.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.github.rubensousa:gravitysnaphelper:1.5'
 }

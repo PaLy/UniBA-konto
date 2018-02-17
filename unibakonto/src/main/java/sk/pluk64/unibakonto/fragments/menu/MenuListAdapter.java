@@ -3,7 +3,9 @@ package sk.pluk64.unibakonto.fragments.menu;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SnapHelper;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +15,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
 
 import java.util.Collections;
 import java.util.List;
@@ -122,6 +125,9 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
             RecyclerView.LayoutManager layoutManager = new GridLayoutManager(parent.getContext(), 1, LinearLayoutManager.HORIZONTAL, false);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.setAdapter(menuImagesAdapter);
+
+            SnapHelper snapHelper = new GravitySnapHelper(Gravity.START);
+            snapHelper.attachToRecyclerView(recyclerView);
         } else if (viewType == ViewType.NO_GALLERY_IMAGES.id) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.no_fb_images, parent, false);
         } else {
