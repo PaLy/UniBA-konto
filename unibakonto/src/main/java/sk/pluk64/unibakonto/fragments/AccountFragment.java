@@ -158,7 +158,7 @@ public class AccountFragment extends Fragment {
             UnibaKonto.Balance data = balances.get(vb[1]);
             TextView textView = view.findViewById((Integer) vb[0]);
             if (data != null) {
-                textView.setText(Html.fromHtml("<b>" + data.label + "</b>" + " " + data.price));
+                textView.setText(Utils.fromHtml("<b>" + data.label + "</b>" + " " + data.price));
                 textView.setVisibility(View.VISIBLE);
             } else {
                 textView.setText("");
