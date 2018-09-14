@@ -25,7 +25,7 @@ public enum Menza {
                 return null;
         }
 
-        if (meals != null && meals.menus != null && !meals.menus.isEmpty()) {
+        if (meals != null && meals.menus != null) {
             return meals;
         } else {
             throw new Util.ConnectionFailedException();

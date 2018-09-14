@@ -31,7 +31,7 @@ public class EamWebMealsProvider implements MealsProvider {
 
             Meals.Builder mealsBuilder = Meals.builder();
 
-            String date = Utils.getFirstOrEmpty(doc.select(".menu-title"));
+            String date = Utils.getFirstOrEmpty(doc.select(".active.menu-weekday"));
             mealsBuilder.newDay(date);
 
             Elements subMenus = doc.select(".field");
@@ -42,8 +42,12 @@ public class EamWebMealsProvider implements MealsProvider {
                 Elements items = subMenu.select(".field-item");
                 for (Element item : items) {
                     String mealName = Utils.getFirstOrEmpty(item.select(".dish-name"));
-                    String mealPrice = Utils.getFirstOrEmpty(item.select(".dish-price"));
-                    mealsBuilder.addMeal(new Meals.Meal(mealName, mealPrice));
+                    if ("LIVE JEDLÁ:".equals(mealName) || "PRÍLOHY:".equals(mealName)) {
+                        mealsBuilder.newSubMenu(mealName);
+                    } else {
+                        String mealPrice = Utils.getFirstOrEmpty(item.select(".dish-price"));
+                        mealsBuilder.addMeal(new Meals.Meal(mealName, mealPrice));
+                    }
                 }
             }
 

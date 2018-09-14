@@ -7,6 +7,11 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.URLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import sk.pluk64.unibakonto.Utils;
 import sk.pluk64.unibakonto.http.UnibaKonto;
@@ -48,12 +53,37 @@ public class MlynskaDolinaNewMealsProvider implements MealsProvider {
 
     private void parseDay(Meals.Builder mealsBuilder, Element day) {
         String dayTitle = Utils.getFirstOrEmpty(day.select(".et_pb_toggle_title"));
-        mealsBuilder.newDay(dayTitle);
 
-        Elements subMenus = day.select(".mdm_menu_cat_wrapper");
-        for (Element subMenu : subMenus) {
-            parseSubMenu(mealsBuilder, subMenu);
+        if (!isOldDay(dayTitle)) {
+            mealsBuilder.newDay(dayTitle);
+
+            Elements subMenus = day.select(".mdm_menu_cat_wrapper");
+            for (Element subMenu : subMenus) {
+                parseSubMenu(mealsBuilder, subMenu);
+            }
         }
+    }
+
+    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("d.M.yyyy", Locale.US);
+
+    private boolean isOldDay(String dayTitle) {
+        int dateStart = dayTitle.indexOf('(');
+        int dateEnd = dayTitle.indexOf(')');
+        if (dateStart != -1 && dateEnd != -1) {
+            String date = dayTitle.substring(dateStart + 1, dateEnd);
+            try {
+                Calendar today = Calendar.getInstance();
+
+                Date d = dateFormatter.parse(date);
+                Calendar cDate = Calendar.getInstance();
+                cDate.setTime(d);
+
+                return today.get(Calendar.YEAR) > cDate.get(Calendar.YEAR)
+                    || today.get(Calendar.YEAR) == cDate.get(Calendar.YEAR) && today.get(Calendar.DAY_OF_YEAR) > cDate.get(Calendar.DAY_OF_YEAR);
+            } catch (ParseException ignored) {
+            }
+        }
+        return false;
     }
 
     private void parseSubMenu(Meals.Builder mealsBuilder, Element subMenu) {

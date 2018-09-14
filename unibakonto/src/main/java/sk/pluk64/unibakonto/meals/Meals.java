@@ -41,6 +41,30 @@ public class Meals {
         }
 
         public Meals build() {
+            List<DayMenu> emptyMenus = new ArrayList<>();
+            for (DayMenu menu : menus) {
+                List<SubMenu> emptySubMenus = new ArrayList<>();
+                for (SubMenu subMenu : menu.subMenus) {
+                    List<Meal> emptyMeals = new ArrayList<>();
+                    for (Meal meal : subMenu.meals) {
+                        if ("".equals(meal.name)) {
+                            emptyMeals.add(meal);
+                        }
+                    }
+                    subMenu.meals.removeAll(emptyMeals);
+
+                    if (subMenu.meals.isEmpty()) {
+                        emptySubMenus.add(subMenu);
+                    }
+                }
+                menu.subMenus.removeAll(emptySubMenus);
+
+                if (menu.subMenus.isEmpty()) {
+                    emptyMenus.add(menu);
+                }
+            }
+            menus.removeAll(emptyMenus);
+
             return new Meals(menus);
         }
     }
