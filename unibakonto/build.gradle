@@ -8,8 +8,8 @@ android {
         applicationId "sk.pluk64.unibakonto"
         minSdkVersion 17
         targetSdkVersion 28
-        versionCode 30
-        versionName "2.2.2"
+        versionCode 31
+        versionName "2.2.3"
     }
     buildTypes {
         release {
