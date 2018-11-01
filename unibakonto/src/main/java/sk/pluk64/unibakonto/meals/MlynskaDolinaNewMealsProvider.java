@@ -23,10 +23,10 @@ public class MlynskaDolinaNewMealsProvider implements MealsProvider {
     public MlynskaDolinaNewMealsProvider(Menza menza) {
         switch (menza) {
             case EAM:
-                location = "http://mlynska-dolina.sk/stravovanie/eat-meet-denne-menu/";
+                location = "http://mlynska-dolina.sk/stravovanie/denne-menu-eat-meet/";
                 break;
             case VENZA:
-                location = "http://mlynska-dolina.sk/stravovanie/venza-denne-menu/";
+                location = "http://mlynska-dolina.sk/stravovanie/denne-menu-venza/";
                 break;
             default:
                 location = "";
