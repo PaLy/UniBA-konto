@@ -1,1 +1,1 @@
-include ':unibakonto'
+include ':unibakontoapp', ':unibakonto', ':unibakontoplayground'
