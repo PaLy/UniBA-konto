@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_ewallet"
+            android:icon="@drawable/ic_menu_home"
+            android:title="@string/e_wallet_menus"/>
+        <item
+            android:id="@+id/nav_statistics"
+            android:enabled="false"
+            android:icon="@drawable/ic_menu_statistics"
+            android:title="@string/my_statistics"
+            android:visible="false"/>
+    </group>
+
+    <item
+        android:id="@+id/venza_section"
+        android:title="@string/venza">
+        <menu>
+            <group
+                android:id="@+id/nav_group_venza"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_fb_venza"
+                    android:icon="@drawable/ic_facebook"
+                    android:title="@string/fb_venza"/>
+                <item
+                    android:id="@+id/nav_ig_venza"
+                    android:icon="@drawable/ic_instagram"
+                    android:title="@string/ig_venza"/>
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/eam_section"
+        android:title="@string/eam">
+        <menu>
+            <group
+                android:id="@+id/nav_group_eam"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_fb_eam"
+                    android:icon="@drawable/ic_facebook"
+                    android:title="@string/fb_eam"/>
+                <item
+                    android:id="@+id/nav_ig_eam"
+                    android:icon="@drawable/ic_instagram"
+                    android:title="@string/ig_eam"/>
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/logout_section"
+        android:title="@string/title_e_wallet">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_logout"
+                    android:icon="@drawable/ic_logout"
+                    android:title="@string/logout"/>
+            </group>
+        </menu>
+    </item>
+
+</menu>

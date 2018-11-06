@@ -8,24 +8,26 @@ import java.util.Map;
 
 import sk.pluk64.unibakonto.UnibaKonto;
 import sk.pluk64.unibakonto.Util;
-import sk.pluk64.unibakontoapp.TabbedActivity;
+import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.Utils;
 
 class UpdateAccountDataTask extends AsyncTask<Void, Void, Boolean> {
-    private final WeakReference<TabbedActivity> activityReference;
+    private final WeakReference<MainActivity> activityReference;
     private final WeakReference<AccountFragment> fragmentReference;
+    private final WeakReference<TabbedFragment> tabbedFragmentReference;
     private boolean noInternet = false;
     private List<UnibaKonto.Transaction> updatedTransactions;
     private Map<String, UnibaKonto.Balance> balances;
     private List<UnibaKonto.CardInfo> cards;
 
-    public UpdateAccountDataTask(TabbedActivity myActivity, AccountFragment accountFragment) {
+    public UpdateAccountDataTask(MainActivity myActivity, AccountFragment accountFragment, TabbedFragment tabbedFragment) {
         activityReference = new WeakReference<>(myActivity);
         fragmentReference = new WeakReference<>(accountFragment);
+        tabbedFragmentReference = new WeakReference<>(tabbedFragment);
     }
 
     private void showNoInternetConnectionToastFromBackgroundThread() {
-        final TabbedActivity activity = activityReference.get();
+        final MainActivity activity = activityReference.get();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -38,11 +40,11 @@ class UpdateAccountDataTask extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected Boolean doInBackground(Void... params) {
-        TabbedActivity activity = activityReference.get();
-        if (activity == null) {
+        TabbedFragment tabbedFragment = tabbedFragmentReference.get();
+        if (tabbedFragment == null) {
             return false;
         } else {
-            UnibaKonto unibaKonto = activity.getUnibaKonto();
+            UnibaKonto unibaKonto = tabbedFragment.getUnibaKonto();
             if (!unibaKonto.isLoggedIn(true)) {
                 try {
                     unibaKonto.login();

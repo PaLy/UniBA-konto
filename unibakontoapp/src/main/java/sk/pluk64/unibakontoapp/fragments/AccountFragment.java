@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 import sk.pluk64.unibakonto.UnibaKonto;
+import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.R;
-import sk.pluk64.unibakontoapp.TabbedActivity;
 import sk.pluk64.unibakontoapp.Utils;
 
 public class AccountFragment extends Fragment {
@@ -47,6 +47,7 @@ public class AccountFragment extends Fragment {
     private AsyncTask<Void, Void, Boolean> updateDataTask;
     private List<UnibaKonto.CardInfo> cards;
     private Date refreshTime;
+    private TabbedFragment parentFragment;
 
     public AccountFragment() {
     }
@@ -76,14 +77,13 @@ public class AccountFragment extends Fragment {
         if (view != null) {
             setRefreshing(view);
         }
-        TabbedActivity activity = getMyActivity();
+        MainActivity activity = getMyActivity();
         if (activity != null) {
             activity.setLogoutButtonEnabled(false);
-            activity.setCardsButtonEnabled(false);
-            activity.setForceRefresh(false);
+            parentFragment.setForceRefresh(false);
         }
 
-        updateDataTask = new UpdateAccountDataTask(getMyActivity(), this);
+        updateDataTask = new UpdateAccountDataTask(activity, this, parentFragment);
         updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -142,8 +142,8 @@ public class AccountFragment extends Fragment {
         timestamp.setText(getString(R.string.refreshed, refreshTimeFormatted));
     }
 
-    private TabbedActivity getMyActivity() {
-        return ((TabbedActivity) getActivity());
+    private MainActivity getMyActivity() {
+        return ((MainActivity) getActivity());
     }
 
     private void updateViewBalances(View view) {
@@ -169,6 +169,7 @@ public class AccountFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        parentFragment = (TabbedFragment) getParentFragment();
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
         RecyclerView transactionsView = view.findViewById(R.id.transactions_history);
@@ -197,7 +198,7 @@ public class AccountFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (Utils.isTimeDiffMoreThanXHours(refreshTime, 2) ||
-                getMyActivity() != null && getMyActivity().isForceRefresh()) {
+                getMyActivity() != null && parentFragment.isForceRefresh()) {
             swipeRefresh.post(new Runnable() {
                 @Override
                 public void run() {
@@ -219,12 +220,8 @@ public class AccountFragment extends Fragment {
             this.cards = cards;
         }
 
-        TabbedActivity activity = getMyActivity();
+        MainActivity activity = getMyActivity();
         View view = getView();
-
-        if (activity != null) {
-            activity.setCardsButtonEnabled(true);
-        }
 
         if (success) {
             saveData(balances, updatedTransactions, cards);
@@ -260,7 +257,7 @@ public class AccountFragment extends Fragment {
                 }
 
                 activity.setIsLoggedIn(false);
-                activity.removeFragment(AccountFragment.this);
+                parentFragment.removeFragment(AccountFragment.this);
             }
         }
         updateDataTask = null;

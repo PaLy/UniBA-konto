@@ -43,15 +43,19 @@ public class MenuFragment extends Fragment {
     private AsyncTask<Void, Void, Meals> updateDataTask;
     private Date refreshTime;
     CallbackManager fbCallbackManager;
+    private UpdateMenusListener updateMenusListener;
 
     public MenuFragment() {
     }
 
-    public static MenuFragment newInstance(Menza jedalen) {
+    public static MenuFragment newInstance(Menza jedalen, UpdateMenusListener updateMenusListener) {
         MenuFragment f = new MenuFragment();
+
         Bundle args = new Bundle();
         args.putSerializable(ARG_JEDALEN, jedalen);
         f.setArguments(args);
+
+        f.updateMenusListener = updateMenusListener;
 
         return f;
     }
@@ -67,7 +71,7 @@ public class MenuFragment extends Fragment {
             preferences = activity.getPreferences(Context.MODE_PRIVATE);
         }
         fbCallbackManager = CallbackManager.Factory.create();
-        adapter.setUpdateMenusListener((UpdateMenusListener) getActivity());
+        adapter.setUpdateMenusListener(updateMenusListener);
     }
 
     @Override

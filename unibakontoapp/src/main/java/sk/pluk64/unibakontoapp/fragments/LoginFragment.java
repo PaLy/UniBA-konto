@@ -27,8 +27,8 @@ import java.lang.ref.WeakReference;
 
 import sk.pluk64.unibakonto.UnibaKonto;
 import sk.pluk64.unibakonto.Util;
+import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.R;
-import sk.pluk64.unibakontoapp.TabbedActivity;
 import sk.pluk64.unibakontoapp.Utils;
 
 public class LoginFragment extends Fragment {
@@ -37,10 +37,12 @@ public class LoginFragment extends Fragment {
     private View mLoginFormView;
     private View mProgressView;
     private UserLoginTask mAuthTask;
+    private TabbedFragment parentFragment;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        parentFragment = (TabbedFragment) getParentFragment();
         View view = inflater.inflate(R.layout.fragment_login, container, false);
         mUsernameView = view.findViewById(R.id.username);
         mUsernameView.setImeOptions(EditorInfo.IME_ACTION_NEXT);
@@ -56,7 +58,7 @@ public class LoginFragment extends Fragment {
                 return false;
             }
         });
-        TabbedActivity.UsernamePassword up = getMyActivity().getUsernamePassword();
+        TabbedFragment.UsernamePassword up = parentFragment.getUsernamePassword();
         if (up.username != null) {
             mUsernameView.setText(up.username);
         }
@@ -78,8 +80,8 @@ public class LoginFragment extends Fragment {
 
     }
 
-    private TabbedActivity getMyActivity() {
-        return ((TabbedActivity) getActivity());
+    private MainActivity getMyActivity() {
+        return ((MainActivity) getActivity());
     }
 
     /**
@@ -88,11 +90,11 @@ public class LoginFragment extends Fragment {
      */
     public static class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
         private final UnibaKonto unibaKonto;
-        private final WeakReference<TabbedActivity> activityReference;
+        private final WeakReference<MainActivity> activityReference;
         private final WeakReference<LoginFragment> fragmentReference;
         private boolean noInternet = false;
 
-        public UserLoginTask(TabbedActivity myActivity, LoginFragment loginFragment, String username, String password) {
+        public UserLoginTask(MainActivity myActivity, LoginFragment loginFragment, String username, String password) {
             unibaKonto = new UnibaKonto(username, password);
             activityReference = new WeakReference<>(myActivity);
             fragmentReference = new WeakReference<>(loginFragment);
@@ -104,7 +106,7 @@ public class LoginFragment extends Fragment {
                 unibaKonto.login();
             } catch (Util.ConnectionFailedException e) {
                 noInternet = true;
-                final TabbedActivity activity = activityReference.get();
+                final MainActivity activity = activityReference.get();
                 if (activity != null) {
                     activity.runOnUiThread(new Runnable() {
                         @Override
@@ -143,7 +145,7 @@ public class LoginFragment extends Fragment {
 
     private void onLoginFinished(Boolean success, boolean noInternet, UnibaKonto unibaKonto) {
         mAuthTask = null;
-        TabbedActivity activity = getMyActivity();
+        MainActivity activity = getMyActivity();
         if (activity == null) {
             return;
         }
@@ -151,9 +153,9 @@ public class LoginFragment extends Fragment {
         showProgress(false);
         if (success) {
             activity.setIsLoggedIn(true);
-            activity.saveLoginDetails(unibaKonto.username, unibaKonto.password);
-            activity.setForceRefresh(true);
-            activity.removeFragment(LoginFragment.this);
+            parentFragment.saveLoginDetails(unibaKonto.username, unibaKonto.password);
+            parentFragment.setForceRefresh(true);
+            parentFragment.removeFragment(LoginFragment.this);
         } else if (!noInternet) {
             mPasswordView.setError(getString(R.string.error_incorrect_username_or_password));
             mPasswordView.requestFocus();
@@ -237,7 +239,7 @@ public class LoginFragment extends Fragment {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            getMyActivity().invalidateUnibaKonto();
+            parentFragment.invalidateUnibaKonto();
             mAuthTask = new UserLoginTask(getMyActivity(), this, username, password);
             mAuthTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }

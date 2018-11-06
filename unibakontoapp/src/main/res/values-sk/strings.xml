@@ -22,4 +22,16 @@
     <string name="internal_error">Internal error :(</string>
     <string name="today">Dnes</string>
     <string name="yesterday">Včera</string>
+    <string name="my_statistics">Moje štatistiky</string>
+    <string name="navigation_drawer_open">Otvoriť hlavné menu</string>
+    <string name="navigation_drawer_close">Zatvoriť hlavné menu</string>
+    <string name="nav_header_title">UniBA konto</string>
+    <string name="nav_header_desc">Logo</string>
+    <string name="e_wallet_menus"><![CDATA[E-peňaženka & menu]]></string>
+    <string name="fb_venza">FB Venza</string>
+    <string name="ig_venza">IG Venza</string>
+    <string name="fb_eam"><![CDATA[FB Eat & Meet]]></string>
+    <string name="ig_eam"><![CDATA[IG Eat & Meet]]></string>
+    <string name="eam"><![CDATA[Eat & Meet]]></string>
+    <string name="venza">Venza</string>
 </resources>
