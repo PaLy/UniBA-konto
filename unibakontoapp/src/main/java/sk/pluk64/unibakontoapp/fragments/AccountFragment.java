@@ -32,10 +32,12 @@ import java.util.Map;
 import sk.pluk64.unibakonto.UnibaKonto;
 import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.R;
+import sk.pluk64.unibakontoapp.RefreshClientDataUiListener;
 import sk.pluk64.unibakontoapp.Utils;
 
 public class AccountFragment extends Fragment {
     public static final String PREF_BALANCES = "balances";
+    public static final String PREF_CLIENT_NAME = "client_name";
     public static final String PREF_TRANSACTIONS = "transactions";
 //    static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp"; // DO NOT USE - could contain old data (string)
     public static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp_date";
@@ -48,6 +50,7 @@ public class AccountFragment extends Fragment {
     private List<UnibaKonto.CardInfo> cards;
     private Date refreshTime;
     private TabbedFragment parentFragment;
+    private RefreshClientDataUiListener refreshClientDataUiListener;
 
     public AccountFragment() {
     }
@@ -87,7 +90,7 @@ public class AccountFragment extends Fragment {
         updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void saveData(Map<String, UnibaKonto.Balance> balances, List<UnibaKonto.Transaction> transactions, List<UnibaKonto.CardInfo> cards) {
+    private void saveData(Map<String, UnibaKonto.Balance> balances, String clientName, List<UnibaKonto.Transaction> transactions, List<UnibaKonto.CardInfo> cards) {
         Gson gson = new Gson();
         String jsonBalances = gson.toJson(balances);
         String jsonTransactions = gson.toJson(transactions);
@@ -96,6 +99,7 @@ public class AccountFragment extends Fragment {
         String jsonRefreshTime = gson.toJson(refreshTime);
         preferences.edit()
                 .putString(PREF_BALANCES, jsonBalances)
+                .putString(PREF_CLIENT_NAME, clientName)
                 .putString(PREF_TRANSACTIONS, jsonTransactions)
                 .putString(PREF_CARDS, jsonCards)
                 .putString(PREF_ACCOUNT_REFRESH_TIMESTAMP, jsonRefreshTime)
@@ -208,7 +212,7 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    public void onUpdateTaskFinished(Boolean success, boolean noInternet, Map<String, UnibaKonto.Balance> balances, List<UnibaKonto.Transaction> updatedTransactions, List<UnibaKonto.CardInfo> cards) {
+    public void onUpdateTaskFinished(Boolean success, boolean noInternet, Map<String, UnibaKonto.Balance> balances, String clientName, List<UnibaKonto.Transaction> updatedTransactions, List<UnibaKonto.CardInfo> cards) {
         if (balances == null) {
             balances = this.balances;
         } else {
@@ -224,11 +228,12 @@ public class AccountFragment extends Fragment {
         View view = getView();
 
         if (success) {
-            saveData(balances, updatedTransactions, cards);
+            saveData(balances, clientName, updatedTransactions, cards);
             if (view != null) {
                 updateViewBalances(view);
                 updateRefreshTime(view);
             }
+            refreshClientDataUiListener.refreshClientDataUI();
             AccountFragment.MyAdapter adapter = AccountFragment.this.mAdapter;
             adapter.getData().clear();
             adapter.getData().addAll(updatedTransactions);
@@ -265,6 +270,10 @@ public class AccountFragment extends Fragment {
 
     public void onUpdateTaskCancelled() {
         updateDataTask = null;
+    }
+
+    public void setRefreshClientDataUiListener(RefreshClientDataUiListener refreshClientDataUiListener) {
+        this.refreshClientDataUiListener = refreshClientDataUiListener;
     }
 
     public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {

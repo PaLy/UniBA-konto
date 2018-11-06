@@ -14,20 +14,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.facebook.appevents.AppEventsLogger;
 
+import sk.pluk64.unibakontoapp.fragments.AccountFragment;
 import sk.pluk64.unibakontoapp.fragments.CardsDialog;
 import sk.pluk64.unibakontoapp.fragments.TabbedFragment;
 
 public class MainActivity extends AppCompatActivity
-    implements NavigationView.OnNavigationItemSelectedListener {
+    implements NavigationView.OnNavigationItemSelectedListener, RefreshClientDataUiListener {
     private static final String PREF_LOGGED_IN = "logged_in";
     private static final String TAG_TABBED_FRAGMENT = "TABBED_FRAGMENT";
 
     private SharedPreferences preferences;
     private boolean isLoggedIn = false;
     private MenuItem logoutSection;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,13 +47,15 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_ewallet);
         showTabbedFragment();
 
         logoutSection = navigationView.getMenu().findItem(R.id.logout_section);
         setIsLoggedIn(getPrefLoggedIn());
+
+        refreshClientDataUI();
 
         AppEventsLogger.activateApp(getApplication());
     }
@@ -134,7 +139,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showTabbedFragment() {
-        replaceFragment(new TabbedFragment(), TAG_TABBED_FRAGMENT);
+        TabbedFragment tabbedFragment = new TabbedFragment();
+        tabbedFragment.setRefreshClientDataUiListener(this);
+        replaceFragment(tabbedFragment, TAG_TABBED_FRAGMENT);
     }
 
     private void replaceFragment(TabbedFragment fragment, String tag) {
@@ -152,6 +159,7 @@ public class MainActivity extends AppCompatActivity
         preferences.edit().putBoolean(PREF_LOGGED_IN, isLoggedIn).apply();
 
         setLogoutButtonEnabled(isLoggedIn);
+        refreshClientDataUI();
     }
 
     public void setLogoutButtonEnabled(boolean enabled) {
@@ -161,5 +169,20 @@ public class MainActivity extends AppCompatActivity
 
     private boolean getPrefLoggedIn() {
         return preferences.getBoolean(PREF_LOGGED_IN, false);
+    }
+
+    @Override
+    public void refreshClientDataUI() {
+        String clientName;
+        if (!getPrefLoggedIn()) {
+            clientName = "";
+        } else {
+            clientName = preferences.getString(AccountFragment.PREF_CLIENT_NAME, "");
+        }
+
+        TextView clientNameView = navigationView.getHeaderView(0).findViewById(R.id.client_name);
+        if (clientNameView != null) {
+            clientNameView.setText(clientName);
+        }
     }
 }

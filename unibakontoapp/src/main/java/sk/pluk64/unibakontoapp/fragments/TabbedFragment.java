@@ -20,6 +20,7 @@ import java.util.Map;
 import sk.pluk64.unibakonto.UnibaKonto;
 import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.R;
+import sk.pluk64.unibakontoapp.RefreshClientDataUiListener;
 import sk.pluk64.unibakontoapp.UpdateMenusListener;
 import sk.pluk64.unibakontoapp.fragments.menu.MenuFragment;
 import sk.pluk64.unibakontoapp.meals.Menza;
@@ -50,6 +51,7 @@ public class TabbedFragment extends Fragment implements UpdateMenusListener {
     private SharedPreferences preferences;
     private boolean forceRefresh = false;
     private MainActivity activity;
+    private RefreshClientDataUiListener refreshClientDataUiListener;
 
     @Override
     public void onAttach(Context context) {
@@ -167,6 +169,10 @@ public class TabbedFragment extends Fragment implements UpdateMenusListener {
         }
     }
 
+    public void setRefreshClientDataUiListener(RefreshClientDataUiListener refreshClientDataUiListener) {
+        this.refreshClientDataUiListener = refreshClientDataUiListener;
+    }
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -182,6 +188,7 @@ public class TabbedFragment extends Fragment implements UpdateMenusListener {
             if (position == 0) {
                 if (isLoggedIn() && !(curFragmentPos0 instanceof AccountFragment)) {
                     curFragmentPos0 = new AccountFragment();
+                    ((AccountFragment) curFragmentPos0).setRefreshClientDataUiListener(refreshClientDataUiListener);
                 }
                 if (!isLoggedIn() && !(curFragmentPos0 instanceof LoginFragment)){
                     curFragmentPos0 = new LoginFragment();

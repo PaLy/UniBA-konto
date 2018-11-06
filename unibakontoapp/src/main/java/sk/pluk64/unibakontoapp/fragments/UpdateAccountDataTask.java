@@ -18,6 +18,7 @@ class UpdateAccountDataTask extends AsyncTask<Void, Void, Boolean> {
     private boolean noInternet = false;
     private List<UnibaKonto.Transaction> updatedTransactions;
     private Map<String, UnibaKonto.Balance> balances;
+    private String clientName;
     private List<UnibaKonto.CardInfo> cards;
 
     public UpdateAccountDataTask(MainActivity myActivity, AccountFragment accountFragment, TabbedFragment tabbedFragment) {
@@ -56,6 +57,7 @@ class UpdateAccountDataTask extends AsyncTask<Void, Void, Boolean> {
             if (unibaKonto.isLoggedIn()) {
                 try {
                     balances = unibaKonto.getBalances();
+                    clientName = unibaKonto.getClientName();
                     updatedTransactions = unibaKonto.getTransactions();
                     cards = unibaKonto.getCards();
                     return true;
@@ -74,7 +76,7 @@ class UpdateAccountDataTask extends AsyncTask<Void, Void, Boolean> {
     protected void onPostExecute(Boolean success) {
         AccountFragment fragment = fragmentReference.get();
         if (fragment != null) {
-            fragment.onUpdateTaskFinished(success, noInternet, balances, updatedTransactions, cards);
+            fragment.onUpdateTaskFinished(success, noInternet, balances, clientName, updatedTransactions, cards);
         }
     }
 

@@ -35,6 +35,8 @@ public class UnibaKonto {
     public static final String ID_DEPOSIT2 = "#ctl00_ContentPlaceHolderMain_lblFund2";
     public static final String ID_ZALOHA = "#ctl00_ContentPlaceHolderMain_lblZaloha";
     private static final String ID_VAR_SYMBOL = "#ctl00_ContentPlaceHolderMain_lblVarSymbol";
+    private static final String ID_NAME = "#ctl00_ContentPlaceHolderMain_lblName";
+    private static final String ID_SURNAME = "#ctl00_ContentPlaceHolderMain_lblSurname";
 
     private static final String TRANSACTIONS_PAGE = "https://konto.uniba.sk/Secure/Operace.aspx";
     private static final String ID_TRANSACTIONS_HISTORY = "#ctl00_ContentPlaceHolderMain_gvAccountHistory";
@@ -127,7 +129,7 @@ public class UnibaKonto {
 
     public Map<String, Balance> getBalances() throws Util.ConnectionFailedException {
         Map<String, Balance> result = new LinkedHashMap<>();
-        Document doc = documents.getRefreshed(CLIENT_INF_PAGE);
+        Document doc = documents.get(CLIENT_INF_PAGE);
 
         String[] ids = {ID_ACCOUNT, ID_DEPOSIT, ID_DEPOSIT2, ID_ZALOHA};
 
@@ -142,6 +144,26 @@ public class UnibaKonto {
             }
         }
         return result;
+    }
+
+    public String getClientName() throws Util.ConnectionFailedException {
+        Document doc = documents.get(CLIENT_INF_PAGE);
+
+        StringBuilder result = new StringBuilder();
+
+        String[] ids = {ID_NAME, ID_SURNAME};
+        for (String id : ids) {
+            Elements names = doc.select(id);
+            Element name = names.first();
+            if (name != null) {
+                if (result.length() > 0) {
+                    result.append(" ");
+                }
+                result.append(name.text());
+            }
+        }
+
+        return result.toString();
     }
 
     public class Balance {
