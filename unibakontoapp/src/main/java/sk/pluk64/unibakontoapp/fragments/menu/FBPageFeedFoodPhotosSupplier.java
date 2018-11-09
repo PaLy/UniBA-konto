@@ -31,7 +31,7 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
 
     @Override
     public List<FBPhoto> getPhotos() throws Utils.FBAuthenticationException, Util.ConnectionFailedException {
-        GraphRequest getPostsRequest = createGetPostsRequest(jedalen.getFBid());
+        GraphRequest getPostsRequest = createGetPostsRequest(jedalen.getFbId());
 
         GraphResponse graphResponse = getPostsRequest.executeAndWait();
 
@@ -236,12 +236,16 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
                     if (!prefixMessage.isEmpty() && !prefixMessage.equals(description)) {
                         description = prefixMessage + "\n\n" +  description;
                     }
+
+                    String url = subattachment.optString("url");
+
                     FBPhoto photo = new FBPhoto()
                         .setWidth(width)
                         .setHeight(height)
                         .setSource(src)
                         .setCaption(description)
-                        .setCreatedTime(createdTime);
+                        .setCreatedTime(createdTime)
+                        .setFbUrl(url);
                     result.add(photo);
                 }
             }

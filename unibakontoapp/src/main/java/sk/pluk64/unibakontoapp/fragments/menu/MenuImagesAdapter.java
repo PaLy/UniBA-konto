@@ -197,7 +197,7 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             }
 
             positionToItem.put(pos, photo);
-            if (photo.getSource() == null) { // TODO lepsi check
+            if (photo.getSource().isEmpty()) {
                 positionToViewType.put(pos, ViewType.POST_MESSAGE);
             } else {
                 positionToViewType.put(pos, ViewType.PHOTO_WITH_OPTIONAL_CAPTION);

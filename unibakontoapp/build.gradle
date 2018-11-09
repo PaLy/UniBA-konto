@@ -46,5 +46,5 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.5.2'
     implementation 'com.github.rubensousa:gravitysnaphelper:1.5'
     implementation project(':unibakonto')
-    implementation 'net.sourceforge.streamsupport:streamsupport:1.6.3'
+    implementation 'net.sourceforge.streamsupport:android-retrostreams:1.6.3'
 }

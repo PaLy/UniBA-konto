@@ -3,12 +3,13 @@ package sk.pluk64.unibakontoapp.fragments.menu;
 import java.util.Date;
 
 public class FBPhoto {
-    private String source;
+    private String source = "";
     private int width = 0;
     private int height = 0;
     private Date createdTime;
-    private String caption;
+    private String caption = "";
     private int seqNo;
+    private String fbUrl = "";
 
     public FBPhoto setSource(String source) {
         this.source = source;
@@ -62,5 +63,14 @@ public class FBPhoto {
 
     public int getSeqNo() {
         return seqNo;
+    }
+
+    public FBPhoto setFbUrl(String fbUrl) {
+        this.fbUrl = fbUrl;
+        return this;
+    }
+
+    public String getFbUrl() {
+        return fbUrl;
     }
 }

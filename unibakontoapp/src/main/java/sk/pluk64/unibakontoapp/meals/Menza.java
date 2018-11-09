@@ -32,7 +32,7 @@ public enum Menza {
         }
     }
 
-    public String getFBid() {
+    public String getFbId() {
         switch (this) {
             case EAM:
                 return "164741110224671";

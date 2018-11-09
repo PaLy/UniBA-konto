@@ -15,14 +15,14 @@ import sk.pluk64.unibakontoapp.meals.Meals;
 import sk.pluk64.unibakontoapp.meals.Menza;
 
 class UpdateMenuDataTask extends AsyncTask<Void, Void, Meals> {
-    private final Menza jedalen;
+    private final Menza menza;
     private final WeakReference<FragmentActivity> activityReference;
     private final WeakReference<MenuFragment> menuFragmentReference;
     private List<FBPhoto> photos;
     private boolean needAuthenticate = false;
 
-    public UpdateMenuDataTask(Menza jedalen, FragmentActivity activity, MenuFragment menuFragment) {
-        this.jedalen = jedalen;
+    public UpdateMenuDataTask(Menza menza, FragmentActivity activity, MenuFragment menuFragment) {
+        this.menza = menza;
         activityReference = new WeakReference<>(activity);
         menuFragmentReference = new WeakReference<>(menuFragment);
     }
@@ -33,9 +33,11 @@ class UpdateMenuDataTask extends AsyncTask<Void, Void, Meals> {
         // jedalne listky by sa mali stiahnut aj bez FB
 
         try {
-            photos = new FBPageFeedFoodPhotosSupplier(jedalen).getPhotos();
+            photos = new FBPageFeedFoodPhotosSupplier(menza).getPhotos();
             if (photos.isEmpty()) {
-                photos = new FBPageUploadedImagesFoodPhotosSupplier(jedalen).getPhotos();
+                photos = new FBPageUploadedImagesFoodPhotosSupplier(menza).getPhotos();
+            } else {
+                photos = new HigherResolutionFbPhotosSupplier(menza, photos).getPhotos();
             }
         } catch (FacebookException e) {
             final FragmentActivity activity = activityReference.get();
@@ -66,7 +68,7 @@ class UpdateMenuDataTask extends AsyncTask<Void, Void, Meals> {
         }
 
         try {
-            return jedalen.getMenu();
+            return menza.getMenu();
         } catch (Util.ConnectionFailedException e) {
             final FragmentActivity activity = activityReference.get();
             if (activity != null) {

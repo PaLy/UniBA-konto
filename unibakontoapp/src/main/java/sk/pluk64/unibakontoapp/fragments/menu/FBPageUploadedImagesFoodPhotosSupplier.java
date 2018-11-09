@@ -26,15 +26,15 @@ import sk.pluk64.unibakontoapp.Utils;
 import sk.pluk64.unibakontoapp.meals.Menza;
 
 public class FBPageUploadedImagesFoodPhotosSupplier implements FoodPhotosSupplier {
-    private final Menza jedalen;
+    private final Menza menza;
 
-    public FBPageUploadedImagesFoodPhotosSupplier(Menza jedalen) {
-        this.jedalen = jedalen;
+    public FBPageUploadedImagesFoodPhotosSupplier(Menza menza) {
+        this.menza = menza;
     }
 
     @Override
     public List<FBPhoto> getPhotos() throws Utils.FBAuthenticationException, Util.ConnectionFailedException {
-        GraphRequest getPhotosRequest = createGetPhotosRequest(jedalen.getFBid());
+        GraphRequest getPhotosRequest = createGetPhotosRequest(menza.getFbId());
 
         GraphResponse photosResponse = getPhotosRequest.executeAndWait();
 
@@ -82,11 +82,11 @@ public class FBPageUploadedImagesFoodPhotosSupplier implements FoodPhotosSupplie
                             lastPhotoIsTooOld = !Utils.isAtMostXHoursOld(createdTime, 20);
 
                             if (!lastPhotoIsTooOld) {
-                                JSONObject chosenSource = chooseFBPhotoSource(photo);
+                                JSONObject chosenImage = chooseBestFbPhotoImage(photo);
                                 result.add(new FBPhoto()
-                                    .setSource(chosenSource.getString("source"))
-                                    .setWidth(chosenSource.getInt("width"))
-                                    .setHeight(chosenSource.getInt("height"))
+                                    .setSource(chosenImage.getString("source"))
+                                    .setWidth(chosenImage.getInt("width"))
+                                    .setHeight(chosenImage.getInt("height"))
                                     .setCreatedTime(createdTime)
                                     .setCaption(photo.optString("name"))
                                 );
@@ -140,23 +140,31 @@ public class FBPageUploadedImagesFoodPhotosSupplier implements FoodPhotosSupplie
         return (x < y) ? -1 : ((x == y) ? 0 : 1);
     }
 
-    @Nullable
-    private JSONObject chooseFBPhotoSource(JSONObject photo) throws JSONException {
+    @NonNull
+    static JSONObject chooseBestFbPhotoImage(JSONObject photo) throws JSONException {
         JSONArray images = photo.getJSONArray("images");
 
-        int maxWidth = 800;
+        int maxWidth = 999999;
         int bestWidth = 0;
-        JSONObject chosenSource = null;
+        JSONObject chosenImage = null;
 
         for (int j = 0; j < images.length(); j++) {
-            JSONObject image = images.getJSONObject(j);
-            int width = image.getInt("width");
-            if (bestWidth == 0 || (width > bestWidth && width <= maxWidth) || (bestWidth > maxWidth && width < bestWidth)) {
-                bestWidth = width;
-                chosenSource = image;
+            try {
+                JSONObject image = images.getJSONObject(j);
+                int width = image.getInt("width");
+                if (bestWidth == 0 || (width > bestWidth && width <= maxWidth) || (bestWidth > maxWidth && width < bestWidth)) {
+                    bestWidth = width;
+                    chosenImage = image;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
         // photos widths: 480, 960, 800, 640, 426, 720, 320, 405, 130, 168, 2048, 1440, 173, 300, 1080, 960,
-        return chosenSource;
+
+        if (chosenImage == null) {
+            throw new JSONException("");
+        }
+        return chosenImage;
     }
 }
