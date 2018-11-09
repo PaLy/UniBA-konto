@@ -1,7 +1,7 @@
 package sk.pluk64.unibakontoapp.fragments.menu;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookRequestError;
@@ -13,12 +13,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import sk.pluk64.unibakonto.Util;
 import sk.pluk64.unibakontoapp.FBUtils;
 import sk.pluk64.unibakontoapp.Utils;
 import sk.pluk64.unibakontoapp.meals.Menza;
@@ -31,7 +33,7 @@ public class FBPageUploadedImagesFoodPhotosSupplier implements FoodPhotosSupplie
     }
 
     @Override
-    public List<FBPhoto> getPhotos() {
+    public List<FBPhoto> getPhotos() throws Utils.FBAuthenticationException, Util.ConnectionFailedException {
         GraphRequest getPhotosRequest = createGetPhotosRequest(jedalen.getFBid());
 
         GraphResponse photosResponse = getPhotosRequest.executeAndWait();
@@ -47,12 +49,12 @@ public class FBPageUploadedImagesFoodPhotosSupplier implements FoodPhotosSupplie
             HttpMethod.GET
         );
         Bundle params = new Bundle();
-        params.putString("fields", "id, created_time, images, name");
+        params.putString("fields", "created_time, images, name");
         request.setParameters(params);
         return request;
     }
 
-    private List<FBPhoto> processPhotosResponse(GraphResponse response) {
+    private List<FBPhoto> processPhotosResponse(GraphResponse response) throws Utils.FBAuthenticationException, Util.ConnectionFailedException {
         ArrayList<FBPhoto> result = new ArrayList<>();
 
         boolean lastPhotoIsTooOld = false;
@@ -63,32 +65,36 @@ public class FBPageUploadedImagesFoodPhotosSupplier implements FoodPhotosSupplie
             JSONObject responseJSONObject = response.getJSONObject();
 
             if (error != null) {
-                return null;
+                FBPageFeedFoodPhotosSupplier.resolveFBRequestError(error);
             } else if (responseJSONObject != null) {
+                JSONArray photos = null;
                 try {
-                    JSONArray photos = responseJSONObject.getJSONArray("data");
+                    photos = responseJSONObject.getJSONArray("data");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (photos != null) {
                     for (int i = 0; i < photos.length(); i++) {
-                        JSONObject photo = photos.getJSONObject(i);
+                        try {
+                            JSONObject photo = photos.getJSONObject(i);
 
-                        Date createdTime = FBUtils.parseDate(photo.optString("created_time"));
-                        lastPhotoIsTooOld = !Utils.isToday(createdTime);
+                            Date createdTime = FBUtils.parseDate(photo.getString("created_time"));
+                            lastPhotoIsTooOld = !Utils.isAtMostXHoursOld(createdTime, 20);
 
-                        if (!lastPhotoIsTooOld) {
-                            JSONObject chosenSource = chooseFBPhotoSource(photo);
-                            if (chosenSource != null) {
+                            if (!lastPhotoIsTooOld) {
+                                JSONObject chosenSource = chooseFBPhotoSource(photo);
                                 result.add(new FBPhoto()
-                                    .setID(photo.getString("id"))
                                     .setSource(chosenSource.getString("source"))
-                                    .setWidth(chosenSource.optInt("width"))
-                                    .setHeight(chosenSource.optInt("height"))
+                                    .setWidth(chosenSource.getInt("width"))
+                                    .setHeight(chosenSource.getInt("height"))
                                     .setCreatedTime(createdTime)
                                     .setCaption(photo.optString("name"))
                                 );
                             }
+                        } catch (JSONException | ParseException e) {
+                            e.printStackTrace();
                         }
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
             }
 

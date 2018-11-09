@@ -9,8 +9,10 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -47,41 +49,46 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
             JSONObject responseJSONObject = response.getJSONObject();
 
             if (error != null) {
-                int errorCode = error.getErrorCode();
-                String errorType = error.getErrorType();
-                if (errorCode == 102 || errorCode == 190 || "OAuthException".equals(errorType)) {
-                    throw new Utils.FBAuthenticationException();
-                } else {
-                    throw new Util.ConnectionFailedException();
-                }
+                return resolveFBRequestError(error);
             } else if (responseJSONObject != null) {
-                JSONArray posts = responseJSONObject.optJSONArray("data");
-                for (int i = 0; i < posts.length(); i++) {
-                    JSONObject post = posts.optJSONObject(i);
-                    if (post != null) {
-                        Date createdTime = FBUtils.parseDate(post.optString("created_time"));
+                JSONArray posts = null;
+                try {
+                    posts = responseJSONObject.getJSONArray("data");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (posts != null) {
+                    for (int i = 0; i < posts.length(); i++) {
+                        try {
+                            JSONObject post = posts.getJSONObject(i);
+                            if (post != null) {
+                                Date createdTime = FBUtils.parseDate(post.getString("created_time"));
 
-                        lastPostIsTooOld = !Utils.isAtMostXHoursOld(createdTime, 20);
+                                lastPostIsTooOld = !Utils.isAtMostXHoursOld(createdTime, 20);
 
-                        if (!lastPostIsTooOld) {
-                            if (hasOnlyOneAttachment(post)) {
-                                parseSingleAttachment(result, createdTime, post);
-                            } else {
-                                if (!someAttachmentDescriptionEqualsPostMessage(post)) {
-                                    String message = post.optString("message");
-                                    if (!message.isEmpty()) {
-                                        result.add(new FBPhoto()
-                                            .setCaption(message)
-                                            .setCreatedTime(createdTime)
-                                        );
+                                if (!lastPostIsTooOld) {
+                                    if (hasOnlyOneAttachment(post)) {
+                                        parseSingleAttachment(result, createdTime, post);
+                                    } else {
+                                        if (!someAttachmentDescriptionEqualsPostMessage(post)) {
+                                            String message = post.optString("message");
+                                            if (!message.isEmpty()) {
+                                                result.add(new FBPhoto()
+                                                    .setCaption(message)
+                                                    .setCreatedTime(createdTime)
+                                                );
+                                            }
+                                        }
+
+                                        JSONObject attachments = post.optJSONObject("attachments");
+                                        if (attachments != null) {
+                                            parseAttachments(result, createdTime, attachments);
+                                        }
                                     }
                                 }
-
-                                JSONObject attachments = post.optJSONObject("attachments");
-                                if (attachments != null) {
-                                    parseAttachments(result, createdTime, attachments);
-                                }
                             }
+                        } catch (JSONException | ParseException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -99,6 +106,16 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
         }
 
         return result;
+    }
+
+    static List<FBPhoto> resolveFBRequestError(FacebookRequestError error) throws Utils.FBAuthenticationException, Util.ConnectionFailedException {
+        int errorCode = error.getErrorCode();
+        String errorType = error.getErrorType();
+        if (errorCode == 102 || errorCode == 190 || "OAuthException".equals(errorType)) {
+            throw new Utils.FBAuthenticationException();
+        } else {
+            throw new Util.ConnectionFailedException();
+        }
     }
 
     private void parseSingleAttachment(ArrayList<FBPhoto> result, Date createdTime, JSONObject post) {
