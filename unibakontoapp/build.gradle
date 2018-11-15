@@ -8,7 +8,7 @@ android {
         applicationId "sk.pluk64.unibakonto"
         minSdkVersion 17
         targetSdkVersion 28
-        versionCode 33
+        versionCode 34
         versionName "3.0.0"
         vectorDrawables.useSupportLibrary = true
     }
