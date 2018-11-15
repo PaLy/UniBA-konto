@@ -105,8 +105,12 @@ public class MlynskaDolinaNewMealsProvider implements MealsProvider {
                         .replace("\u00a0", "");
 
         String[] split = parsedMealPrice.split("/");
-        if (split.length == 2 && split[0].equals(split[1])) {
-            parsedMealPrice = split[0];
+        if (split.length == 2) {
+            String first = split[0].trim();
+            String second = split[1].trim();
+            if (first.equals(second)) {
+                parsedMealPrice = first;
+            }
         }
 
         mealsBuilder.addMeal(new Meals.Meal(mealName, parsedMealPrice));
