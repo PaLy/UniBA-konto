@@ -13,18 +13,14 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UnibaKonto {
+public class UnibaKonto implements IsUnibaKonto {
     private static final String MOJA_UNIBA_LOGIN_PAGE = "https://moja.uniba.sk//cosauth/cosauth.php";
     private static final String UNIBA_LOGIN_PAGE = "https://login.uniba.sk/cosign.cgi";
     private static final String KONTO_LOGIN_PAGE = "https://konto.uniba.sk/";
@@ -48,8 +44,8 @@ public class UnibaKonto {
     private static final String CARDS_PAGE = "https://konto.uniba.sk/Secure/UserCards.aspx";
     private static final String ID_CARDS_TABLE = "#ctl00_ContentPlaceHolderMain_gvUserCards";
 
-    public final String username;
-    public final String password;
+    private final String username;
+    private final String password;
     private final ParsedDocumentCache documents = new ParsedDocumentCache();
 
     public UnibaKonto(String username, String password) {
@@ -57,6 +53,17 @@ public class UnibaKonto {
         this.password = password;
     }
 
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
     public void login() throws Util.ConnectionFailedException {
         CookieHandler.setDefault(new CookieManager());
         documents.cache.clear();
@@ -76,6 +83,7 @@ public class UnibaKonto {
         httpPost(KONTO_LOGIN_PAGE + parsedData.action, parsedData.postData);
     }
 
+    @Override
     public Boolean isLoggedIn(boolean refresh) {
         if (refresh) {
             try {
@@ -88,6 +96,7 @@ public class UnibaKonto {
         }
     }
 
+    @Override
     public Boolean isLoggedIn() {
         try {
             return !documents.get(CLIENT_INF_PAGE).select(ID_VAR_SYMBOL).isEmpty();
@@ -127,6 +136,7 @@ public class UnibaKonto {
         System.out.println(((CookieManager) CookieHandler.getDefault()).getCookieStore().getCookies());
     }
 
+    @Override
     public Map<String, Balance> getBalances() throws Util.ConnectionFailedException {
         Map<String, Balance> result = new LinkedHashMap<>();
         Document doc = documents.get(CLIENT_INF_PAGE);
@@ -146,6 +156,7 @@ public class UnibaKonto {
         return result;
     }
 
+    @Override
     public String getClientName() throws Util.ConnectionFailedException {
         Document doc = documents.get(CLIENT_INF_PAGE);
 
@@ -166,16 +177,7 @@ public class UnibaKonto {
         return result.toString();
     }
 
-    public class Balance {
-        public final String label;
-        public final String price;
-
-        private Balance(String label, String price) {
-            this.label = label;
-            this.price = price;
-        }
-    }
-
+    @Override
     public List<Transaction> getAllTransactions() throws Util.ConnectionFailedException {
         Elements forms = documents.get(TRANSACTIONS_PAGE).select(ID_TRANSACTIONS_FORM);
         Element form = forms.first();
@@ -216,11 +218,12 @@ public class UnibaKonto {
         return Collections.emptyList();
     }
 
+    @Override
     public List<Transaction> getTransactions() throws Util.ConnectionFailedException {
         return parseTransactions(documents.getRefreshed(TRANSACTIONS_PAGE));
     }
 
-    public List<Transaction> parseTransactions(Document page) {
+    private List<Transaction> parseTransactions(Document page) {
         Elements table = page.select(ID_TRANSACTIONS_HISTORY);
         Element first = table.first();
         Elements tableRows;
@@ -241,8 +244,8 @@ public class UnibaKonto {
         }
         for (int i = 1; i < items.size(); i++) {
             TransactionItem curItem = items.get(i);
-            long curItemTime = curItem.parsedTimestamp.getTime();
-            long prevItemTime = items.get(i - 1).parsedTimestamp.getTime();
+            long curItemTime = curItem.getParsedTimestamp().getTime();
+            long prevItemTime = items.get(i - 1).getParsedTimestamp().getTime();
 
             if (Math.abs(curItemTime - prevItemTime) < 10 * 1000) { // 10 seconds
                 result.get(result.size() - 1).add(curItem);
@@ -253,6 +256,7 @@ public class UnibaKonto {
         return result;
     }
 
+    @Override
     public List<CardInfo> getCards() throws Util.ConnectionFailedException {
         Elements tables = documents.getRefreshed(CARDS_PAGE).select(ID_CARDS_TABLE);
         Element firstTable = tables.first();
@@ -274,38 +278,6 @@ public class UnibaKonto {
             }
         }
         return cards;
-    }
-
-    public static class CardInfo {
-        public final String number;
-        private final String released;
-        private final String validFrom;
-        public final String validUntil;
-
-        public CardInfo(String number, String released, String validFrom, String validUntil) {
-            this.number = divideBy4Digits(number);
-            this.released = released;
-            this.validFrom = validFrom;
-            this.validUntil = validUntil;
-        }
-
-        private String divideBy4Digits(String number) {
-            StringBuilder resultBuilder = new StringBuilder();
-
-            int BLOCK_LENGTH = 4;
-            int length = number.length();
-            int firstBlockLength = length % BLOCK_LENGTH;
-            resultBuilder.append(number.substring(0, firstBlockLength));
-
-            for (int i = firstBlockLength; i < length; i += BLOCK_LENGTH) {
-                if (i > 0) {
-                    resultBuilder.append(" ");
-                }
-                resultBuilder.append(number.substring(i, i + BLOCK_LENGTH));
-            }
-
-            return resultBuilder.toString();
-        }
     }
 
     private static class KontoParsedData {
@@ -356,80 +328,6 @@ public class UnibaKonto {
         public Document getRefreshed(String location) throws Util.ConnectionFailedException {
             refresh(location);
             return get(location);
-        }
-    }
-
-    public static class TransactionItem {
-        public final String timestamp;
-        public final Date parsedTimestamp;
-        public final String service;
-        public final String shortcut;
-        public final String description;
-        public final String amount;
-        public final double parsedAmount;
-        public final String method;
-        public final String obj;
-        public final String payed;
-
-        private static final SimpleDateFormat dateFormat = new SimpleDateFormat("d. MM. yyyy HH:mm:ss");
-
-        public TransactionItem(Element tableRow) {
-            Iterator<Element> columns = tableRow.children().iterator();
-
-            timestamp = columns.next().text();
-            service = columns.next().text();
-            shortcut = columns.next().text();
-            description = columns.next().text();
-            amount = columns.next().text();
-            method = columns.next().text();
-            obj = columns.next().text();
-            payed = columns.next().text();
-
-            Date parsedTimestamp = null;
-            try {
-                parsedTimestamp = dateFormat.parse(timestamp);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            this.parsedTimestamp = parsedTimestamp;
-
-            parsedAmount = Double.parseDouble(amount.replace(',', '.'));
-        }
-    }
-
-    public class Transaction {
-        public final List<TransactionItem> transactionItems = new ArrayList<>();
-
-        public Transaction(TransactionItem... transactionItems) {
-            Collections.addAll(this.transactionItems, transactionItems);
-        }
-
-        public void add(TransactionItem item) {
-            transactionItems.add(0, item); // TODO not effective
-        }
-
-        public String getTimestamp() {
-            if (transactionItems.isEmpty()) {
-                return "";
-            } else {
-                return transactionItems.get(transactionItems.size() - 1).timestamp;
-            }
-        }
-
-        public Date getParsedTimestamp() {
-            if (transactionItems.isEmpty()) {
-                return null;
-            } else {
-                return transactionItems.get(transactionItems.size() - 1).parsedTimestamp;
-            }
-        }
-
-        public double getTotalAmount() {
-            double res = 0;
-            for (TransactionItem transactionItem : transactionItems) {
-                res += transactionItem.parsedAmount;
-            }
-            return res;
         }
     }
 }

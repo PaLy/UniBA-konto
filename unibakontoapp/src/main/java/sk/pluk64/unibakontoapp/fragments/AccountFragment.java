@@ -29,6 +29,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import sk.pluk64.unibakonto.Balance;
+import sk.pluk64.unibakonto.CardInfo;
+import sk.pluk64.unibakonto.Transaction;
+import sk.pluk64.unibakonto.TransactionItem;
 import sk.pluk64.unibakonto.UnibaKonto;
 import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.MainActivity;
@@ -43,12 +47,12 @@ public class AccountFragment extends Fragment {
 //    static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp"; // DO NOT USE - could contain old data (string)
     public static final String PREF_ACCOUNT_REFRESH_TIMESTAMP = "account_refresh_timestamp_date";
     private static final String PREF_CARDS = "cards";
-    private Map<String, UnibaKonto.Balance> balances = Collections.emptyMap();
+    private Map<String, Balance> balances = Collections.emptyMap();
     private final MyAdapter mAdapter = new MyAdapter();
     private SwipeRefreshLayout swipeRefresh;
     private SharedPreferences preferences;
     private AsyncTask<Void, Void, Boolean> updateDataTask;
-    private List<UnibaKonto.CardInfo> cards;
+    private List<CardInfo> cards;
     private Date refreshTime;
     private TabbedFragment parentFragment;
     private RefreshClientDataUiListener refreshClientDataUiListener;
@@ -91,7 +95,7 @@ public class AccountFragment extends Fragment {
         updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void saveData(Map<String, UnibaKonto.Balance> balances, String clientName, List<UnibaKonto.Transaction> transactions, List<UnibaKonto.CardInfo> cards) {
+    private void saveData(Map<String, Balance> balances, String clientName, List<Transaction> transactions, List<CardInfo> cards) {
         Gson gson = new Gson();
         String jsonBalances = gson.toJson(balances);
         String jsonTransactions = gson.toJson(transactions);
@@ -111,14 +115,14 @@ public class AccountFragment extends Fragment {
         Gson gson = new Gson();
 
         String jsonBalances = preferences.getString(PREF_BALANCES, "null");
-        balances = gson.fromJson(jsonBalances, new TypeToken<Map<String, UnibaKonto.Balance>>(){}.getType());
+        balances = gson.fromJson(jsonBalances, new TypeToken<Map<String, Balance>>(){}.getType());
         if (balances == null) {
             balances = Collections.emptyMap();
         }
 
         String jsonTransactions = preferences.getString(PREF_TRANSACTIONS, "null");
-        List<UnibaKonto.Transaction> transactions =
-                gson.fromJson(jsonTransactions, new TypeToken<List<UnibaKonto.Transaction>>(){}.getType());
+        List<Transaction> transactions =
+                gson.fromJson(jsonTransactions, new TypeToken<List<Transaction>>(){}.getType());
         if (transactions != null) {
             mAdapter.getData().clear();
             mAdapter.getData().addAll(transactions);
@@ -131,9 +135,9 @@ public class AccountFragment extends Fragment {
         refreshTime = gson.fromJson(jsonRefreshTime, new TypeToken<Date>(){}.getType());
     }
 
-    public static List<UnibaKonto.CardInfo> loadCards(SharedPreferences preferences, Gson gson) {
+    public static List<CardInfo> loadCards(SharedPreferences preferences, Gson gson) {
         String jsonCards = preferences.getString(PREF_CARDS, "null");
-        return gson.fromJson(jsonCards, new TypeToken<List<UnibaKonto.CardInfo>>(){}.getType());
+        return gson.fromJson(jsonCards, new TypeToken<List<CardInfo>>(){}.getType());
     }
 
     private void setRefreshing(View view) {
@@ -159,7 +163,7 @@ public class AccountFragment extends Fragment {
                 {R.id.text_zaloha, UnibaKonto.ID_ZALOHA}
         };
         for (Object[] vb : viewIdBalanceId) {
-            UnibaKonto.Balance data = balances.get(vb[1]);
+            Balance data = balances.get(vb[1]);
             TextView textView = view.findViewById((Integer) vb[0]);
             if (data != null) {
                 textView.setText(Utils.fromHtml("<b>" + data.label + "</b>" + " " + data.price));
@@ -213,7 +217,7 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    public void onUpdateTaskFinished(Boolean success, boolean noInternet, Map<String, UnibaKonto.Balance> balances, String clientName, List<UnibaKonto.Transaction> updatedTransactions, List<UnibaKonto.CardInfo> cards) {
+    public void onUpdateTaskFinished(Boolean success, boolean noInternet, Map<String, Balance> balances, String clientName, List<Transaction> updatedTransactions, List<CardInfo> cards) {
         if (balances == null) {
             balances = this.balances;
         } else {
@@ -278,7 +282,7 @@ public class AccountFragment extends Fragment {
     }
 
     public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-        private final List<UnibaKonto.Transaction> transactions = new ArrayList<>();
+        private final List<Transaction> transactions = new ArrayList<>();
 
         // Provide a reference to the views for each data item
         // Complex data items may need more than one view per item, and
@@ -296,7 +300,7 @@ public class AccountFragment extends Fragment {
         public MyAdapter() {
         }
 
-        public List<UnibaKonto.Transaction> getData() {
+        public List<Transaction> getData() {
             return transactions;
         }
 
@@ -311,13 +315,13 @@ public class AccountFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            UnibaKonto.Transaction transaction = transactions.get(position);
+            Transaction transaction = transactions.get(position);
             CardView transactionsView = holder.view;
             Context context = transactionsView.getContext();
 
             TableLayout transactionTable = transactionsView.findViewById(R.id.transaction_table);
             transactionTable.removeAllViews();
-            for (UnibaKonto.TransactionItem transactionItem : transaction.transactionItems) {
+            for (TransactionItem transactionItem : transaction.transactionItems) {
                 TableRow transactionItemView = (TableRow) LayoutInflater.from(context)
                         .inflate(R.layout.transaction_item, transactionTable, false);
 

@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import java.util.Map;
 
+import sk.pluk64.unibakonto.IsUnibaKonto;
 import sk.pluk64.unibakonto.UnibaKonto;
 import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.R;
@@ -46,7 +47,7 @@ public class TabbedFragment extends Fragment implements UpdateMenusListener {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-    private UnibaKonto unibaKonto = null;
+    private IsUnibaKonto unibaKonto = null;
     private Fragment curFragmentPos0;
     private SharedPreferences preferences;
     private boolean forceRefresh = false;
@@ -239,7 +240,7 @@ public class TabbedFragment extends Fragment implements UpdateMenusListener {
     }
 
 
-    public UnibaKonto getUnibaKonto() {
+    public IsUnibaKonto getUnibaKonto() {
         if (unibaKonto == null) {
             UsernamePassword up = getUsernamePassword();
             unibaKonto = new UnibaKonto(up.username, up.password);

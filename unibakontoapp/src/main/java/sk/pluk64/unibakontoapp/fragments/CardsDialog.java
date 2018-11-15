@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 
 import java.util.List;
 
-import sk.pluk64.unibakonto.UnibaKonto;
+import sk.pluk64.unibakonto.CardInfo;
 import sk.pluk64.unibakontoapp.R;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -45,10 +45,10 @@ public class CardsDialog extends DialogFragment {
 
     public SpannableStringBuilder getFormattedCardsData() {
         SharedPreferences preferences = activity.getPreferences(MODE_PRIVATE);
-        List<UnibaKonto.CardInfo> cardInfos = AccountFragment.loadCards(preferences, new Gson());
+        List<CardInfo> cardInfos = AccountFragment.loadCards(preferences, new Gson());
         SpannableStringBuilder resultBuilder = new SpannableStringBuilder();
         if (cardInfos != null) {
-            for (UnibaKonto.CardInfo cardInfo : cardInfos) {
+            for (CardInfo cardInfo : cardInfos) {
                 SpannableString ss = new SpannableString(cardInfo.number);
                 ss.setSpan(new RelativeSizeSpan(1.6f), 0, ss.length(), 0);
 

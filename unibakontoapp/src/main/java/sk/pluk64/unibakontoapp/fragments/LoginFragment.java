@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
 
+import sk.pluk64.unibakonto.IsUnibaKonto;
 import sk.pluk64.unibakonto.UnibaKonto;
 import sk.pluk64.unibakonto.Util;
 import sk.pluk64.unibakontoapp.MainActivity;
@@ -88,7 +89,7 @@ public class LoginFragment extends Fragment {
      * the user.
      */
     public static class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-        private final UnibaKonto unibaKonto;
+        private final IsUnibaKonto unibaKonto;
         private final WeakReference<MainActivity> activityReference;
         private final WeakReference<LoginFragment> fragmentReference;
         private boolean noInternet = false;
@@ -142,7 +143,7 @@ public class LoginFragment extends Fragment {
         }
     }
 
-    private void onLoginFinished(Boolean success, boolean noInternet, UnibaKonto unibaKonto) {
+    private void onLoginFinished(Boolean success, boolean noInternet, IsUnibaKonto unibaKonto) {
         mAuthTask = null;
         MainActivity activity = getMyActivity();
         if (activity == null) {
@@ -152,7 +153,7 @@ public class LoginFragment extends Fragment {
         showProgress(false);
         if (success) {
             activity.setIsLoggedIn(true);
-            parentFragment.saveLoginDetails(unibaKonto.username, unibaKonto.password);
+            parentFragment.saveLoginDetails(unibaKonto.getUsername(), unibaKonto.getPassword());
             parentFragment.setForceRefresh(true);
             parentFragment.removeFragment(LoginFragment.this);
         } else if (!noInternet) {

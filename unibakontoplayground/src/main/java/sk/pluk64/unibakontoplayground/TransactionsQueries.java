@@ -12,25 +12,26 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import sk.pluk64.unibakonto.UnibaKonto;
+import sk.pluk64.unibakonto.Transaction;
+import sk.pluk64.unibakonto.TransactionItem;
 
 public class TransactionsQueries {
-    static long mealsCount(List<UnibaKonto.Transaction> transactions) {
+    static long mealsCount(List<Transaction> transactions) {
         return mealsCount(transactions, x -> true);
     }
 
-    static long mealsCount(List<UnibaKonto.Transaction> transactions, Predicate<UnibaKonto.TransactionItem> tiFilter) {
+    static long mealsCount(List<Transaction> transactions, Predicate<TransactionItem> tiFilter) {
         return transactionItems(transactions)
             .filter(ti -> "MEN".equals(ti.service))
             .filter(tiFilter)
             .count();
     }
 
-    private static Map<String, Long> mostBoughtMeals(List<UnibaKonto.Transaction> transactions) {
+    private static Map<String, Long> mostBoughtMeals(List<Transaction> transactions) {
         return mostBoughtMeals(transactions, x -> true);
     }
 
-    static Map<String, Long> mostBoughtMeals(List<UnibaKonto.Transaction> transactions, Predicate<UnibaKonto.TransactionItem> tiFilter) {
+    static Map<String, Long> mostBoughtMeals(List<Transaction> transactions, Predicate<TransactionItem> tiFilter) {
         Map<String, Long> map = transactionItems(transactions)
             .filter(tiFilter)
             .filter(ti -> "MEN".equals(ti.service))
@@ -53,7 +54,7 @@ public class TransactionsQueries {
             ));
     }
 
-    static double avgTransactionFoodCost(List<UnibaKonto.Transaction> transactions) {
+    static double avgTransactionFoodCost(List<Transaction> transactions) {
         return transactions.stream()
             .mapToDouble(t ->
                 t.transactionItems.stream()
@@ -65,32 +66,32 @@ public class TransactionsQueries {
             .orElse(0);
     }
 
-    static double totalRecharges(List<UnibaKonto.Transaction> transactions) {
+    static double totalRecharges(List<Transaction> transactions) {
         return sumAmountByService(transactions, "DOB");
     }
 
-    static double totalAccommodationCost(List<UnibaKonto.Transaction> transactions) {
+    static double totalAccommodationCost(List<Transaction> transactions) {
         return sumAmountByService(transactions, "UBY");
     }
 
-    static double totalFoodCost(List<UnibaKonto.Transaction> transactions) {
+    static double totalFoodCost(List<Transaction> transactions) {
         return sumAmountByService(transactions, "MEN");
     }
 
-    private static double sumAmountByService(List<UnibaKonto.Transaction> transactions, String service) {
+    private static double sumAmountByService(List<Transaction> transactions, String service) {
         return transactionItems(transactions)
             .filter(ti -> service.equals(ti.service))
             .mapToDouble(ti -> ti.parsedAmount)
             .sum();
     }
 
-    private static Stream<UnibaKonto.TransactionItem> transactionItems(List<UnibaKonto.Transaction> transactions) {
+    private static Stream<TransactionItem> transactionItems(List<Transaction> transactions) {
         return transactions.stream()
             .map(t -> t.transactionItems)
             .flatMap(Collection::stream);
     }
 
-    private static Map<String, List<String>> descriptionsByShortcut(List<UnibaKonto.Transaction> transactions) {
+    private static Map<String, List<String>> descriptionsByShortcut(List<Transaction> transactions) {
         return transactionItems(transactions)
             .collect(
                 Collectors.groupingBy(
@@ -103,21 +104,21 @@ public class TransactionsQueries {
             );
     }
 
-    static long mealsTransactionsCount(List<UnibaKonto.Transaction> transactions) {
+    static long mealsTransactionsCount(List<Transaction> transactions) {
         return mealsTransactionsCount(transactions, x -> true);
     }
 
-    static long mealsTransactionsCount(List<UnibaKonto.Transaction> transactions, Predicate<UnibaKonto.TransactionItem> tiFilter) {
+    static long mealsTransactionsCount(List<Transaction> transactions, Predicate<TransactionItem> tiFilter) {
         return transactions.stream()
             .filter(t -> t.transactionItems.stream().map(ti -> ti.service).anyMatch("MEN"::equals))
             .filter(t -> t.transactionItems.stream().anyMatch(tiFilter))
             .count();
     }
 
-    static Map<Integer, Long> menzaVisitsByHour(List<UnibaKonto.Transaction> transactions) {
+    static Map<Integer, Long> menzaVisitsByHour(List<Transaction> transactions) {
         Map<Integer, Long> map = transactions.stream()
             .filter(t -> t.transactionItems.stream().map(ti -> ti.service).anyMatch("MEN"::equals))
-            .map(UnibaKonto.Transaction::getParsedTimestamp)
+            .map(Transaction::getParsedTimestamp)
             .filter(Objects::nonNull)
             .map(date -> {
                 Calendar calendar = Calendar.getInstance();

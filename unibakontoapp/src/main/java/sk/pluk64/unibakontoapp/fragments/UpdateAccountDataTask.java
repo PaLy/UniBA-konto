@@ -6,7 +6,10 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 
-import sk.pluk64.unibakonto.UnibaKonto;
+import sk.pluk64.unibakonto.Balance;
+import sk.pluk64.unibakonto.CardInfo;
+import sk.pluk64.unibakonto.IsUnibaKonto;
+import sk.pluk64.unibakonto.Transaction;
 import sk.pluk64.unibakonto.Util;
 import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.Utils;
@@ -16,10 +19,10 @@ class UpdateAccountDataTask extends AsyncTask<Void, Void, Boolean> {
     private final WeakReference<AccountFragment> fragmentReference;
     private final WeakReference<TabbedFragment> tabbedFragmentReference;
     private boolean noInternet = false;
-    private List<UnibaKonto.Transaction> updatedTransactions;
-    private Map<String, UnibaKonto.Balance> balances;
+    private List<Transaction> updatedTransactions;
+    private Map<String, Balance> balances;
     private String clientName;
-    private List<UnibaKonto.CardInfo> cards;
+    private List<CardInfo> cards;
 
     public UpdateAccountDataTask(MainActivity myActivity, AccountFragment accountFragment, TabbedFragment tabbedFragment) {
         activityReference = new WeakReference<>(myActivity);
@@ -45,7 +48,7 @@ class UpdateAccountDataTask extends AsyncTask<Void, Void, Boolean> {
         if (tabbedFragment == null) {
             return false;
         } else {
-            UnibaKonto unibaKonto = tabbedFragment.getUnibaKonto();
+            IsUnibaKonto unibaKonto = tabbedFragment.getUnibaKonto();
             if (!unibaKonto.isLoggedIn(true)) {
                 try {
                     unibaKonto.login();

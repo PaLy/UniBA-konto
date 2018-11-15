@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import sk.pluk64.unibakonto.Transaction;
 import sk.pluk64.unibakonto.UnibaKonto;
 import sk.pluk64.unibakonto.Util;
 
@@ -22,7 +23,7 @@ public class AllTransactionsPG {
     public static void main(String[] args) {
 //        exportAllTransactions(readLogin());
 
-        List<UnibaKonto.Transaction> transactions = importTransactions("all_transactions.json");
+        List<Transaction> transactions = importTransactions("all_transactions.json");
 
 //        writeAsJsonToFile(descriptionsByShortcut(transactions), "descriptions_by_shortcut.json");
 
@@ -72,7 +73,7 @@ public class AllTransactionsPG {
         return new UnibaKonto(username, password);
     }
 
-    private static List<UnibaKonto.Transaction> importTransactions(String filepath) {
+    private static List<Transaction> importTransactions(String filepath) {
         byte[] file = new byte[0];
         try {
             file = Files.readAllBytes(Paths.get(filepath));
@@ -83,7 +84,7 @@ public class AllTransactionsPG {
         String transactions = new String(file, Charset.defaultCharset());
         return new Gson().fromJson(
             transactions,
-            new TypeToken<List<UnibaKonto.Transaction>>() {
+            new TypeToken<List<Transaction>>() {
             }.getType()
         );
     }
@@ -92,7 +93,7 @@ public class AllTransactionsPG {
         try {
             unibaKonto.login();
             if (unibaKonto.isLoggedIn()) {
-                List<UnibaKonto.Transaction> allTransactions = unibaKonto.getAllTransactions();
+                List<Transaction> allTransactions = unibaKonto.getAllTransactions();
                 writeAsJsonToFile(allTransactions, "all_transactions.json");
             }
         } catch (Util.ConnectionFailedException e) {
