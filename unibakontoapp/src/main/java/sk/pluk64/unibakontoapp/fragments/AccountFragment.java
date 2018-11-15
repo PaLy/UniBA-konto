@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import sk.pluk64.unibakonto.UnibaKonto;
+import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.R;
 import sk.pluk64.unibakontoapp.RefreshClientDataUiListener;
@@ -95,7 +96,7 @@ public class AccountFragment extends Fragment {
         String jsonBalances = gson.toJson(balances);
         String jsonTransactions = gson.toJson(transactions);
         String jsonCards = gson.toJson(cards);
-        refreshTime = Utils.getCurrentTime();
+        refreshTime = DateUtils.getCurrentTime();
         String jsonRefreshTime = gson.toJson(refreshTime);
         preferences.edit()
                 .putString(PREF_BALANCES, jsonBalances)
@@ -142,7 +143,7 @@ public class AccountFragment extends Fragment {
 
     private void updateRefreshTime(View view) {
         TextView timestamp = view.findViewById(R.id.refresh_timestamp);
-        String refreshTimeFormatted = Utils.getTimeFormatted(refreshTime, getString(R.string.never));
+        String refreshTimeFormatted = DateUtils.getReadableTime(refreshTime, getString(R.string.never), getContext());
         timestamp.setText(getString(R.string.refreshed, refreshTimeFormatted));
     }
 
@@ -201,7 +202,7 @@ public class AccountFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (Utils.isTimeDiffMoreThanXHours(refreshTime, 2) ||
+        if (DateUtils.isTimeDiffMoreThanXHours(refreshTime, 2) ||
                 getMyActivity() != null && parentFragment.isForceRefresh()) {
             swipeRefresh.post(new Runnable() {
                 @Override

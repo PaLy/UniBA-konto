@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import sk.pluk64.unibakonto.Util;
+import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.FBUtils;
 import sk.pluk64.unibakontoapp.Utils;
 import sk.pluk64.unibakontoapp.meals.Menza;
@@ -64,7 +65,7 @@ public class FBPageFeedFoodPhotosSupplier implements FoodPhotosSupplier {
                             if (post != null) {
                                 Date createdTime = FBUtils.parseDate(post.getString("created_time"));
 
-                                lastPostIsTooOld = !Utils.isAtMostXHoursOld(createdTime, 20);
+                                lastPostIsTooOld = !DateUtils.isAtMostXHoursOld(createdTime, 20);
 
                                 if (!lastPostIsTooOld) {
                                     if (hasOnlyOneAttachment(post)) {

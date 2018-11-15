@@ -22,8 +22,8 @@
     <string name="above_fb_login_button">To view images of meals, you need to</string>
     <string name="no_fb_images">No images for today\'s menu.</string>
     <string name="internal_error">Internal error :(</string>
-    <string name="today">Today</string>
-    <string name="yesterday">Yesterday</string>
+    <string name="today">today</string>
+    <string name="yesterday">yesterday</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">UniBA konto</string>

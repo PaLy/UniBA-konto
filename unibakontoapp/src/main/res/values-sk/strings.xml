@@ -20,8 +20,8 @@
     <string name="above_fb_login_button">Pre zobrazenie obrázkov jedál je potrebné</string>
     <string name="no_fb_images">Žiadne obrázky pre dnešné menu.</string>
     <string name="internal_error">Internal error :(</string>
-    <string name="today">Dnes</string>
-    <string name="yesterday">Včera</string>
+    <string name="today">dnes</string>
+    <string name="yesterday">včera</string>
     <string name="my_statistics">Moje štatistiky</string>
     <string name="navigation_drawer_open">Otvoriť hlavné menu</string>
     <string name="navigation_drawer_close">Zatvoriť hlavné menu</string>

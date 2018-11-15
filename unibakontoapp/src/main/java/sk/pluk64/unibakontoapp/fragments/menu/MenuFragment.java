@@ -23,9 +23,9 @@ import com.google.gson.reflect.TypeToken;
 import java.util.Date;
 import java.util.List;
 
+import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.R;
 import sk.pluk64.unibakontoapp.UpdateMenusListener;
-import sk.pluk64.unibakontoapp.Utils;
 import sk.pluk64.unibakontoapp.meals.Meals;
 import sk.pluk64.unibakontoapp.meals.Menza;
 
@@ -123,7 +123,7 @@ public class MenuFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (Utils.isTimeDiffMoreThanXHours(refreshTime, 1)) {
+        if (DateUtils.isTimeDiffMoreThanXHours(refreshTime, 1)) {
             swipeRefresh.post(new Runnable() {
                 @Override
                 public void run() {
@@ -136,7 +136,7 @@ public class MenuFragment extends Fragment {
     private void saveData(Meals meals) {
         Gson gson = new Gson();
         String jsonMeals = gson.toJson(meals);
-        refreshTime = Utils.getCurrentTime();
+        refreshTime = DateUtils.getCurrentTime();
         String jsonCurrentTime = gson.toJson(refreshTime);
         preferences.edit()
             .putString(PREF_MEALS + jedalen, jsonMeals)

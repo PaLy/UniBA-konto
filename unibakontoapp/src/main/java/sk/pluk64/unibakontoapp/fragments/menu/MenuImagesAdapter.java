@@ -16,6 +16,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.R;
 import sk.pluk64.unibakontoapp.Utils;
 
@@ -179,9 +180,9 @@ public class MenuImagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             FBPhoto photo = photos.get(i);
 
             String day;
-            if (Utils.isToday(photo.getCreatedTime())) {
+            if (DateUtils.isToday(photo.getCreatedTime())) {
                 day = menuFragment.getString(R.string.today);
-            } else if (Utils.isYesterday(photo.getCreatedTime())) {
+            } else if (DateUtils.isYesterday(photo.getCreatedTime())) {
                 day = menuFragment.getString(R.string.yesterday);
             } else {
                 calendar.setTime(photo.getCreatedTime());

@@ -21,9 +21,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.R;
 import sk.pluk64.unibakontoapp.UpdateMenusListener;
-import sk.pluk64.unibakontoapp.Utils;
 import sk.pluk64.unibakontoapp.meals.Meals;
 
 class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
@@ -114,7 +114,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
     }
 
     void updateRefreshTime(Date refreshTime) {
-        String refreshTimeFormatted = Utils.getTimeFormatted(refreshTime, menuFragment.getString(R.string.never));
+        String refreshTimeFormatted = DateUtils.getReadableTime(refreshTime, menuFragment.getString(R.string.never), menuFragment.getContext());
         positionToItem.put(REFRESH_TIMESTAMP_POSITION, menuFragment.getString(R.string.refreshed, refreshTimeFormatted));
         notifyDataSetChanged();
     }

@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import sk.pluk64.unibakonto.Util;
+import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.FBUtils;
 import sk.pluk64.unibakontoapp.Utils;
 import sk.pluk64.unibakontoapp.meals.Menza;
@@ -79,7 +80,7 @@ public class FBPageUploadedImagesFoodPhotosSupplier implements FoodPhotosSupplie
                             JSONObject photo = photos.getJSONObject(i);
 
                             Date createdTime = FBUtils.parseDate(photo.getString("created_time"));
-                            lastPhotoIsTooOld = !Utils.isAtMostXHoursOld(createdTime, 20);
+                            lastPhotoIsTooOld = !DateUtils.isAtMostXHoursOld(createdTime, 20);
 
                             if (!lastPhotoIsTooOld) {
                                 JSONObject chosenImage = chooseBestFbPhotoImage(photo);
