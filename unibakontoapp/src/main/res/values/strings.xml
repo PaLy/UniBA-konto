@@ -20,7 +20,7 @@
     <string name="facebook_app_id">1911896499081932</string>
     <string name="fb_login_protocol_scheme">fb1911896499081932</string>
     <string name="above_fb_login_button">To view images of meals, you need to</string>
-    <string name="no_fb_images">No images for today\'s menu yet.</string>
+    <string name="no_fb_images">No images for today\'s menu.</string>
     <string name="internal_error">Internal error :(</string>
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>

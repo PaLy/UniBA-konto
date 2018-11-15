@@ -18,19 +18,23 @@ import com.facebook.login.widget.LoginButton;
 import com.github.rubensousa.gravitysnaphelper.GravitySnapHelper;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import sk.pluk64.unibakontoapp.R;
 import sk.pluk64.unibakontoapp.UpdateMenusListener;
+import sk.pluk64.unibakontoapp.Utils;
 import sk.pluk64.unibakontoapp.meals.Meals;
 
 class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
+    private static final int REFRESH_TIMESTAMP_POSITION = 0;
+    private static final int FB_FEED_POSITION = 1;
     private final MenuFragment menuFragment;
     private final MenuImagesAdapter menuImagesAdapter;
     private UpdateMenusListener updateMenusListener;
 
     private enum ViewType {
-        DAY_NAME(0), SUBMENU_NAME(1), MEAL(2), GALLERY(3), FB_LOGIN(4), NO_GALLERY_IMAGES(5);
+        DAY_NAME(0), SUBMENU_NAME(1), MEAL(2), GALLERY(3), FB_LOGIN(4), NO_GALLERY_IMAGES(5), REFRESH_TIMESTAMP(6);
 
         final int id;
 
@@ -55,8 +59,9 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
     public MenuListAdapter(MenuFragment menuFragment) {
         this.menuFragment = menuFragment;
         menuImagesAdapter = new MenuImagesAdapter(menuFragment);
-        positionToViewType.put(0, ViewType.FB_LOGIN);
-        itemCount = 1;
+        positionToViewType.put(REFRESH_TIMESTAMP_POSITION, ViewType.REFRESH_TIMESTAMP);
+        positionToViewType.put(FB_FEED_POSITION, ViewType.FB_LOGIN);
+        itemCount = 2;
     }
 
     public void setUpdateMenusListener(UpdateMenusListener updateMenusListener) {
@@ -64,16 +69,16 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
     }
 
     public void showFBButton() {
-        positionToViewType.put(0, ViewType.FB_LOGIN);
+        positionToViewType.put(FB_FEED_POSITION, ViewType.FB_LOGIN);
         notifyDataSetChanged();
     }
 
     public void updatePhotos(List<FBPhoto> photos) {
         if (photos != null) {
             if (photos.isEmpty()) {
-                positionToViewType.put(0, ViewType.NO_GALLERY_IMAGES);
+                positionToViewType.put(FB_FEED_POSITION, ViewType.NO_GALLERY_IMAGES);
             } else {
-                positionToViewType.put(0, ViewType.GALLERY);
+                positionToViewType.put(FB_FEED_POSITION, ViewType.GALLERY);
             }
             menuImagesAdapter.updateData(photos);
             notifyDataSetChanged();
@@ -81,7 +86,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
     }
 
     public void updateMeals(Meals meals) {
-        int pos = 1;
+        int pos = 2;
         if (meals != null) {
             for (Meals.DayMenu dayMenu : meals.menus) {
                 positionToItem.put(pos, dayMenu.dayName);
@@ -100,6 +105,17 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
             }
         }
         itemCount = pos;
+        notifyDataSetChanged();
+    }
+
+    void setRefreshing() {
+        positionToItem.put(REFRESH_TIMESTAMP_POSITION, menuFragment.getString(R.string.refreshing));
+        notifyDataSetChanged();
+    }
+
+    void updateRefreshTime(Date refreshTime) {
+        String refreshTimeFormatted = Utils.getTimeFormatted(refreshTime, menuFragment.getString(R.string.never));
+        positionToItem.put(REFRESH_TIMESTAMP_POSITION, menuFragment.getString(R.string.refreshed, refreshTimeFormatted));
         notifyDataSetChanged();
     }
 
@@ -130,7 +146,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
             snapHelper.attachToRecyclerView(recyclerView);
         } else if (viewType == ViewType.NO_GALLERY_IMAGES.id) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.no_fb_images, parent, false);
-        } else {
+        } else if (viewType == ViewType.FB_LOGIN.id) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fb_login_button, parent, false);
 
             LoginButton loginButton = view.findViewById(R.id.login_button);
@@ -157,6 +173,10 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
                     // TODO
                 }
             });
+        } else if (viewType == ViewType.REFRESH_TIMESTAMP.id) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.refreshed_timestamp_menu, parent, false);
+        } else {
+            view = null;
         }
         return new ViewHolder(view);
     }
@@ -181,6 +201,9 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
             costView.setText(meal.price);
         } else if (viewType == ViewType.FB_LOGIN) {
             holder.view.setVisibility(View.VISIBLE);
+        } else if (viewType == ViewType.REFRESH_TIMESTAMP) {
+            TextView view = (TextView) holder.view;
+            view.setText((CharSequence) positionToItem.get(position));
         }
     }
 

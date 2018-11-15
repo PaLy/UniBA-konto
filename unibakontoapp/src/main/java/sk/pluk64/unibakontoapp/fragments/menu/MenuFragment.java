@@ -15,7 +15,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.facebook.CallbackManager;
 import com.google.gson.Gson;
@@ -86,23 +85,9 @@ public class MenuFragment extends Fragment {
         if (updateDataTask != null) {
             return;
         }
-        View view = getView();
-        if (view != null) {
-            setRefreshing(view);
-        }
+        adapter.setRefreshing();
         updateDataTask = new UpdateMenuDataTask(jedalen, getActivity(), this);
         updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    private void setRefreshing(View view) {
-        TextView timestamp = view.findViewById(R.id.refresh_timestamp);
-        timestamp.setText(getString(R.string.refreshing));
-    }
-
-    private void updateRefreshTime(View view) {
-        TextView timestamp = view.findViewById(R.id.refresh_timestamp);
-        String refreshTimeFormatted = Utils.getTimeFormatted(refreshTime, getString(R.string.never));
-        timestamp.setText(getString(R.string.refreshed, refreshTimeFormatted));
     }
 
     @Nullable
@@ -117,7 +102,7 @@ public class MenuFragment extends Fragment {
         listView.setAdapter(adapter);
 
         loadData();
-        updateRefreshTime(view);
+        adapter.updateRefreshTime(refreshTime);
 
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -198,10 +183,7 @@ public class MenuFragment extends Fragment {
             adapter.updateMeals(meals);
         }
 
-        View view = getView();
-        if (view != null) {
-            updateRefreshTime(view);
-        }
+        adapter.updateRefreshTime(refreshTime);
         swipeRefresh.setRefreshing(false);
         updateDataTask = null;
     }
