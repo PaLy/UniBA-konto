@@ -1,6 +1,6 @@
 package sk.pluk64.unibakontoapp;
 
-import android.support.v4.util.Consumer;
+import androidx.core.util.Consumer;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;

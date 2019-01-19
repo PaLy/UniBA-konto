@@ -1,7 +1,7 @@
 package sk.pluk64.unibakontoapp.fragments.menu;
 
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.FragmentActivity;
 
 import com.facebook.FacebookException;
 

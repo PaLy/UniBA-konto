@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/swipe_refresh"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                       android:id="@+id/swipe_refresh"
+                                                       android:layout_width="match_parent"
+                                                       android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,17 +15,17 @@
 
         <include layout="@layout/refreshed_timestamp_row" />
 
-        <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/balances_card_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            card_view:cardElevation="4dp">
+        <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                                           android:id="@+id/balances_card_view"
+                                           android:layout_width="match_parent"
+                                           android:layout_height="wrap_content"
+                                           android:layout_gravity="center_horizontal"
+                                           card_view:cardElevation="4dp">
 
-            <android.support.v7.widget.GridLayout xmlns:grid="http://schemas.android.com/apk/res-auto"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="4dp">
+            <androidx.gridlayout.widget.GridLayout xmlns:grid="http://schemas.android.com/apk/res-auto"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="match_parent"
+                                                   android:padding="4dp">
 
 
                 <TextView
@@ -61,10 +61,10 @@
                     grid:layout_column="1"
                     grid:layout_columnWeight="1"
                     grid:layout_row="1" />
-            </android.support.v7.widget.GridLayout>
-        </android.support.v7.widget.CardView>
+            </androidx.gridlayout.widget.GridLayout>
+        </androidx.cardview.widget.CardView>
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/transactions_history"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -72,4 +72,4 @@
             android:paddingTop="8dp"
             android:scrollbars="vertical" />
     </LinearLayout>
-</android.support.v4.widget.SwipeRefreshLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

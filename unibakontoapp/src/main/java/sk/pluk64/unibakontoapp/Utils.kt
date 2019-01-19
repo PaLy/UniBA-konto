@@ -3,7 +3,7 @@ package sk.pluk64.unibakontoapp
 import android.content.Context
 import android.content.res.Resources
 import android.os.Build
-import android.support.annotation.StringRes
+import androidx.annotation.StringRes
 import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.Spanned
