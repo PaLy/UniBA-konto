@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.util.Consumer;
 import android.support.v4.view.GravityCompat;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 
 import com.facebook.appevents.AppEventsLogger;
 
+import java9.util.stream.StreamSupport;
 import sk.pluk64.unibakontoapp.fragments.AccountFragment;
 import sk.pluk64.unibakontoapp.fragments.CardsDialog;
 import sk.pluk64.unibakontoapp.fragments.TabbedFragment;
@@ -89,8 +91,26 @@ public class MainActivity extends AppCompatActivity
             new CardsDialog().show(getSupportFragmentManager(), "cards");
             return true;
         }
+        if (id == R.id.action_menu_refresh) {
+            refreshVisibleFragments();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean isRefreshableFragmentVisible =
+            StreamSupport.stream(getSupportFragmentManager().getFragments())
+                .anyMatch(fragment ->
+                    fragment.isVisible()
+                        && fragment instanceof Refreshable
+                        && ((Refreshable) fragment).canRefresh()
+                );
+
+        menu.findItem(R.id.action_menu_refresh).setVisible(isRefreshableFragmentVisible);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -131,6 +151,14 @@ public class MainActivity extends AppCompatActivity
         startActivity(browserIntent);
     }
 
+    private void refreshVisibleFragments() {
+        StreamSupport.stream(getSupportFragmentManager().getFragments())
+            .filter(Fragment::isVisible)
+            .filter(Refreshable.class::isInstance)
+            .map(fragment -> (Refreshable) fragment)
+            .forEach(Refreshable::refresh);
+    }
+
     private void ifTabbedFragmentVisible(Consumer<TabbedFragment> action) {
         TabbedFragment tabbedFragment = (TabbedFragment) getSupportFragmentManager().findFragmentByTag(TAG_TABBED_FRAGMENT);
         if (tabbedFragment != null && tabbedFragment.isVisible()) {
@@ -148,6 +176,8 @@ public class MainActivity extends AppCompatActivity
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.app_content, fragment, tag);
         fragmentTransaction.commit();
+
+        invalidateOptionsMenu();
     }
 
     public boolean isLoggedIn() {

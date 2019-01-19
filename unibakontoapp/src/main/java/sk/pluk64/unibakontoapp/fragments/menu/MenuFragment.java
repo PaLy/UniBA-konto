@@ -25,11 +25,12 @@ import java.util.List;
 
 import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.R;
-import sk.pluk64.unibakontoapp.UpdateMenusListener;
+import sk.pluk64.unibakontoapp.Refreshable;
+import sk.pluk64.unibakontoapp.RefreshMenusListener;
 import sk.pluk64.unibakontoapp.meals.Meals;
 import sk.pluk64.unibakontoapp.meals.Menza;
 
-public class MenuFragment extends Fragment {
+public class MenuFragment extends Fragment implements Refreshable {
     private static final String ARG_JEDALEN = "jedalen";
     private static final String PREF_MEALS = "meals";
     private static final String PREF_MEALS_PHOTOS = "meals_photos";
@@ -42,19 +43,19 @@ public class MenuFragment extends Fragment {
     private AsyncTask<Void, Void, Meals> updateDataTask;
     private Date refreshTime;
     CallbackManager fbCallbackManager;
-    private UpdateMenusListener updateMenusListener;
+    private RefreshMenusListener refreshMenusListener;
 
     public MenuFragment() {
     }
 
-    public static MenuFragment newInstance(Menza jedalen, UpdateMenusListener updateMenusListener) {
+    public static MenuFragment newInstance(Menza jedalen, RefreshMenusListener refreshMenusListener) {
         MenuFragment f = new MenuFragment();
 
         Bundle args = new Bundle();
         args.putSerializable(ARG_JEDALEN, jedalen);
         f.setArguments(args);
 
-        f.updateMenusListener = updateMenusListener;
+        f.refreshMenusListener = refreshMenusListener;
 
         return f;
     }
@@ -70,7 +71,7 @@ public class MenuFragment extends Fragment {
             preferences = activity.getPreferences(Context.MODE_PRIVATE);
         }
         fbCallbackManager = CallbackManager.Factory.create();
-        adapter.setUpdateMenusListener(updateMenusListener);
+        adapter.setRefreshMenusListener(refreshMenusListener);
     }
 
     @Override
@@ -81,13 +82,19 @@ public class MenuFragment extends Fragment {
         }
     }
 
-    public void updateData() {
+    @Override
+    public void refresh() {
         if (updateDataTask != null) {
             return;
         }
         adapter.setRefreshing();
         updateDataTask = new UpdateMenuDataTask(jedalen, getActivity(), this);
         updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Override
+    public boolean canRefresh() {
+        return true;
     }
 
     @Nullable
@@ -108,7 +115,7 @@ public class MenuFragment extends Fragment {
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                updateData();
+                refresh();
             }
         });
         return view;
@@ -127,7 +134,7 @@ public class MenuFragment extends Fragment {
             swipeRefresh.post(new Runnable() {
                 @Override
                 public void run() {
-                    updateData();
+                    refresh();
                 }
             });
         }

@@ -38,9 +38,10 @@ import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.R;
 import sk.pluk64.unibakontoapp.RefreshClientDataUiListener;
+import sk.pluk64.unibakontoapp.Refreshable;
 import sk.pluk64.unibakontoapp.Utils;
 
-public class AccountFragment extends Fragment {
+public class AccountFragment extends Fragment implements Refreshable {
     public static final String PREF_BALANCES = "balances";
     public static final String PREF_CLIENT_NAME = "client_name";
     public static final String PREF_TRANSACTIONS = "transactions";
@@ -77,7 +78,8 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    private void updateData() {
+    @Override
+    public void refresh() {
         if (updateDataTask != null) {
             return;
         }
@@ -93,6 +95,11 @@ public class AccountFragment extends Fragment {
 
         updateDataTask = new UpdateAccountDataTask(activity, this, parentFragment);
         updateDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Override
+    public boolean canRefresh() {
+        return true;
     }
 
     private void saveData(Map<String, Balance> balances, String clientName, List<Transaction> transactions, List<CardInfo> cards) {
@@ -196,7 +203,7 @@ public class AccountFragment extends Fragment {
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                updateData();
+                refresh();
             }
         });
         updateViewBalances(view);
@@ -211,7 +218,7 @@ public class AccountFragment extends Fragment {
             swipeRefresh.post(new Runnable() {
                 @Override
                 public void run() {
-                    updateData();
+                    refresh();
                 }
             });
         }

@@ -22,16 +22,19 @@ import sk.pluk64.unibakonto.UnibaKonto;
 import sk.pluk64.unibakontoapp.MainActivity;
 import sk.pluk64.unibakontoapp.R;
 import sk.pluk64.unibakontoapp.RefreshClientDataUiListener;
-import sk.pluk64.unibakontoapp.UpdateMenusListener;
+import sk.pluk64.unibakontoapp.Refreshable;
+import sk.pluk64.unibakontoapp.RefreshMenusListener;
 import sk.pluk64.unibakontoapp.fragments.menu.MenuFragment;
 import sk.pluk64.unibakontoapp.meals.Menza;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class TabbedFragment extends Fragment implements UpdateMenusListener {
+public class TabbedFragment extends Fragment implements RefreshMenusListener, Refreshable {
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
     private static final String PREF_SELECTED_PAGE = "selected_page";
+
+    private static final int CHILD_FRAGMENTS_COUNT = 3;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -99,6 +102,8 @@ public class TabbedFragment extends Fragment implements UpdateMenusListener {
                 if (imm != null) {
                     imm.hideSoftInputFromWindow(mViewPager.getWindowToken(), 0);
                 }
+
+                activity.invalidateOptionsMenu();
             }
 
             @Override
@@ -120,15 +125,48 @@ public class TabbedFragment extends Fragment implements UpdateMenusListener {
     }
 
     @Override
-    public void updateMenus() {
-        for (int i = 1; i < 3; i++) {
-            Fragment fragment = getChildFragmentManager().findFragmentByTag(
-                    "android:switcher:" + mViewPager.getId() + ":" + mSectionsPagerAdapter.getItemId(i)
-            );
+    public void refreshMenus() {
+        for (int i = 0; i < CHILD_FRAGMENTS_COUNT; i++) {
+            Fragment fragment = getFragmentByPosition(i);
+
             if (fragment instanceof MenuFragment) {
-                ((MenuFragment) fragment).updateData();
+                ((MenuFragment) fragment).refresh();
             }
         }
+    }
+
+    private Fragment getFragmentByPosition(int i) {
+        return getFragmentByPagerItemId(mSectionsPagerAdapter.getItemId(i));
+    }
+
+    private Fragment getFragmentByPagerItemId(long itemId) {
+        return getChildFragmentManager().findFragmentByTag(
+            "android:switcher:" + mViewPager.getId() + ":" + itemId
+        );
+    }
+
+    private Fragment getCurrentFragment() {
+        return getFragmentByPagerItemId(mViewPager.getCurrentItem());
+    }
+
+    private void refreshCurrentFragment() {
+        Fragment fragment = getCurrentFragment();
+
+        if (fragment instanceof Refreshable) {
+            ((Refreshable) fragment).refresh();
+        }
+    }
+
+    @Override
+    public void refresh() {
+        refreshCurrentFragment();
+    }
+
+
+    @Override
+    public boolean canRefresh() {
+        Fragment currentFragment = getCurrentFragment();
+        return currentFragment instanceof Refreshable && ((Refreshable) currentFragment).canRefresh();
     }
 
     private void deleteUserData() {
@@ -204,7 +242,7 @@ public class TabbedFragment extends Fragment implements UpdateMenusListener {
 
         @Override
         public int getCount() {
-            return 3;
+            return CHILD_FRAGMENTS_COUNT;
         }
 
         @Override
@@ -237,6 +275,8 @@ public class TabbedFragment extends Fragment implements UpdateMenusListener {
                 .remove(oldFragment)
                 .commitNow();
         mSectionsPagerAdapter.notifyDataSetChanged();
+
+        activity.invalidateOptionsMenu();
     }
 
 

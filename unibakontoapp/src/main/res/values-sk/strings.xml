@@ -12,6 +12,7 @@
     <string name="refreshed">Aktualizované: %s</string>
     <string name="never">nikdy</string>
     <string name="refreshing">Aktualizuje sa…</string>
+    <string name="refresh">Aktualizovať</string>
     <string name="title_card">Číslo karty (ISIC)</string>
     <string name="valid_until">Platná do</string>
     <string name="ok">OK</string>

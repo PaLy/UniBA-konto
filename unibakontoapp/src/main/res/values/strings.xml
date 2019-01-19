@@ -12,6 +12,7 @@
     <string name="refreshed">Refreshed: %s</string>
     <string name="never">never</string>
     <string name="refreshing">Refreshing…</string>
+    <string name="refresh">Refresh</string>
     <string name="title_card">Card number (ISIC)</string>
     <string name="valid_until">Valid until</string>
     <string name="ok">OK</string>

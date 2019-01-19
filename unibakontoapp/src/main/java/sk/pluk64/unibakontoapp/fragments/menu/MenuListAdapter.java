@@ -23,7 +23,7 @@ import java.util.List;
 
 import sk.pluk64.unibakontoapp.DateUtils;
 import sk.pluk64.unibakontoapp.R;
-import sk.pluk64.unibakontoapp.UpdateMenusListener;
+import sk.pluk64.unibakontoapp.RefreshMenusListener;
 import sk.pluk64.unibakontoapp.meals.Meals;
 
 class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
@@ -31,7 +31,7 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
     private static final int FB_FEED_POSITION = 1;
     private final MenuFragment menuFragment;
     private final MenuImagesAdapter menuImagesAdapter;
-    private UpdateMenusListener updateMenusListener;
+    private RefreshMenusListener refreshMenusListener;
 
     private enum ViewType {
         DAY_NAME(0), SUBMENU_NAME(1), MEAL(2), GALLERY(3), FB_LOGIN(4), NO_GALLERY_IMAGES(5), REFRESH_TIMESTAMP(6);
@@ -64,8 +64,8 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
         itemCount = 2;
     }
 
-    public void setUpdateMenusListener(UpdateMenusListener updateMenusListener) {
-        this.updateMenusListener = updateMenusListener;
+    public void setRefreshMenusListener(RefreshMenusListener refreshMenusListener) {
+        this.refreshMenusListener = refreshMenusListener;
     }
 
     public void showFBButton() {
@@ -155,10 +155,10 @@ class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.ViewHolder> {
             loginButton.registerCallback(menuFragment.fbCallbackManager, new FacebookCallback<LoginResult>() {
                 @Override
                 public void onSuccess(LoginResult loginResult) {
-                    if (updateMenusListener != null) {
-                        updateMenusListener.updateMenus();
+                    if (refreshMenusListener != null) {
+                        refreshMenusListener.refreshMenus();
                     } else {
-                        menuFragment.updateData();
+                        menuFragment.refresh();
                     }
                     view.setVisibility(View.GONE);
                 }
