@@ -4,6 +4,6 @@
 /build
 /release
 /captures
-UniBA-konto.iml
+*.iml
 .idea
 *.json
