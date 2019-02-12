@@ -26,7 +26,6 @@
     <string name="my_statistics">Moje štatistiky</string>
     <string name="navigation_drawer_open">Otvoriť hlavné menu</string>
     <string name="navigation_drawer_close">Zatvoriť hlavné menu</string>
-    <string name="nav_header_title">UniBA konto</string>
     <string name="nav_header_desc">Logo</string>
     <string name="e_wallet_menus"><![CDATA[E-peňaženka & menu]]></string>
     <string name="fb_venza">FB Venza</string>
@@ -35,4 +34,26 @@
     <string name="ig_eam"><![CDATA[IG Eat & Meet]]></string>
     <string name="eam"><![CDATA[Eat & Meet]]></string>
     <string name="venza">Venza</string>
+    <string name="total_spent">Spolu výdavky</string>
+    <string name="on_food">Na jedlo</string>
+    <string name="on_accommodation">Na ubytovanie</string>
+    <string name="on_other">Na ostatné</string>
+    <string name="whenIVisitCanteens">Kedy navštevujem jedálne</string>
+    <string name="visitsCount">Návštev</string>
+    <string name="whatIEatMostly">Čo jem najčastejšie</string>
+    <string name="chicken">Kuracie</string>
+    <string name="pork">Bravčové</string>
+    <string name="beef">Hovädzie</string>
+    <string name="rice">Ryža</string>
+    <string name="potatoes">Zemiaky</string>
+    <string name="soup">Polievka</string>
+    <string name="salad">Šalát</string>
+    <string name="turkey">Morčacie</string>
+    <string name="cheese">Syr</string>
+    <string name="drink">Nápoje</string>
+    <string name="fish">Rybacie</string>
+    <string name="other">Ostatné</string>
+    <string name="knodel">Knedľa</string>
+    <string name="eggBarley">Tarhoňa</string>
+    <string name="count">Počet</string>
 </resources>

@@ -10,10 +10,8 @@
             android:title="@string/e_wallet_menus"/>
         <item
             android:id="@+id/nav_statistics"
-            android:enabled="false"
             android:icon="@drawable/ic_menu_statistics"
-            android:title="@string/my_statistics"
-            android:visible="false"/>
+            android:title="@string/my_statistics"/>
     </group>
 
     <item
