@@ -46,7 +46,7 @@ class AccountFragment : Fragment(), Refreshable {
 
     private var balances: Balances = Balances.EMPTY
     private val mAdapter = MyAdapter()
-    private var updateDataTask: AsyncTask<Void, Void, Boolean>? = null
+    private var updateDataTask: AccountDataTask? = null
     private var cards: List<CardInfo>? = null
     private var refreshTime: Date? = null
     private var parentFragment: EwalletAndMenusFragment? = null
@@ -221,7 +221,7 @@ class AccountFragment : Fragment(), Refreshable {
 
         // Create new views (invoked by the layout manager)
         override fun onCreateViewHolder(parent: ViewGroup,
-                                        viewType: Int): MyAdapter.ViewHolder {
+                                        viewType: Int): ViewHolder {
             val v = LayoutInflater.from(parent.context)
                 .inflate(R.layout.transaction, parent, false)
             return ViewHolder(v as CardView)

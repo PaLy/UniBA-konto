@@ -6,7 +6,7 @@ import sk.pluk64.unibakontoapp.MainActivity
 import sk.pluk64.unibakontoapp.Utils
 import java.lang.ref.WeakReference
 
-abstract class UnibaKontoAsyncTask<T>(activity: MainActivity) : AsyncTask<Void, Void, T>() {
+abstract class UnibaKontoAsyncTask<T>(activity: MainActivity) : AsyncTask<Void, Void, T?>() {
     private val activity: WeakReference<MainActivity> = WeakReference(activity)
     private var failed = false
 

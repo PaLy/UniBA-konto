@@ -13,7 +13,7 @@ import sk.pluk64.unibakontoapp.Utils
 import sk.pluk64.unibakontoapp.meals.Canteen
 import sk.pluk64.unibakontoapp.meals.Meals
 
-internal class UpdateMenuDataTask(private val canteen: Canteen, activity: FragmentActivity, menuFragment: MenuFragment) : AsyncTask<Void, Void, Meals>() {
+internal class UpdateMenuDataTask(private val canteen: Canteen, activity: FragmentActivity, menuFragment: MenuFragment) : AsyncTask<Void, Void, Meals?>() {
     private val activityReference: WeakReference<FragmentActivity> = WeakReference(activity)
     private val menuFragmentReference: WeakReference<MenuFragment> = WeakReference(menuFragment)
     private var photos: List<FBPhoto> = emptyList()
@@ -54,12 +54,12 @@ internal class UpdateMenuDataTask(private val canteen: Canteen, activity: Fragme
 
     }
 
-    override fun onPostExecute(meals: Meals) {
+    override fun onPostExecute(meals: Meals?) {
         val menuFragment = menuFragmentReference.get()
         menuFragment?.onUpdateTaskFinished(needAuthenticate, meals, photos)
     }
 
-    override fun onCancelled(meals: Meals) {
+    override fun onCancelled(meals: Meals?) {
         val menuFragment = menuFragmentReference.get()
         menuFragment?.onUpdateTaskCancelled()
     }

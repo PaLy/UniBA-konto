@@ -41,7 +41,7 @@ class MenuFragment : Fragment(), Refreshable {
 
     private lateinit var canteen: Canteen
     private val adapter = MenuListAdapter(this)
-    private var updateDataTask: AsyncTask<Void, Void, Meals>? = null
+    private var updateDataTask: UpdateMenuDataTask? = null
     private var refreshTime: Date? = null
     val fbCallbackManager by lazy {
         CallbackManager.Factory.create()

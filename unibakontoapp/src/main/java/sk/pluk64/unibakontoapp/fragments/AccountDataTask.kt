@@ -20,7 +20,7 @@ internal class AccountDataTask(myActivity: MainActivity, accountFragment: Accoun
         activity?.runOnUiThread { Utils.showNoInternetConnection(activity.applicationContext) }
     }
 
-    override fun doInBackground(vararg params: Void): Boolean? {
+    override fun doInBackground(vararg params: Void): Boolean {
         val activity = activityReference.get()
         if (activity == null) {
             return false
@@ -53,12 +53,12 @@ internal class AccountDataTask(myActivity: MainActivity, accountFragment: Accoun
         }
     }
 
-    override fun onPostExecute(success: Boolean?) {
+    override fun onPostExecute(success: Boolean) {
         val fragment = fragmentReference.get()
-        fragment?.onUpdateTaskFinished(success ?: false, noInternet, balances, clientName, updatedTransactions, cards)
+        fragment?.onUpdateTaskFinished(success, noInternet, balances, clientName, updatedTransactions, cards)
     }
 
-    override fun onCancelled(success: Boolean?) {
+    override fun onCancelled(success: Boolean) {
         val fragment = fragmentReference.get()
         fragment?.onUpdateTaskCancelled()
     }
