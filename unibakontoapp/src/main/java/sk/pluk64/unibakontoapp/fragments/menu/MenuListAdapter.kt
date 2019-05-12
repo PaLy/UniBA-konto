@@ -17,6 +17,7 @@ import kotlinx.android.synthetic.main.fb_images.view.*
 import kotlinx.android.synthetic.main.fb_login_button.view.*
 import kotlinx.android.synthetic.main.menu_item_meal.view.*
 import sk.pluk64.unibakontoapp.DateUtils
+import sk.pluk64.unibakontoapp.FBUtils
 import sk.pluk64.unibakontoapp.R
 import sk.pluk64.unibakontoapp.RefreshMenusListener
 import sk.pluk64.unibakontoapp.meals.Meals
@@ -31,7 +32,8 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
     private val positionToViewType = SparseArray<ViewType>()
 
     private enum class ViewType(internal val id: Int) {
-        DAY_NAME(0), SUBMENU_NAME(1), MEAL(2), GALLERY(3), FB_LOGIN(4), NO_GALLERY_IMAGES(5), REFRESH_TIMESTAMP(6)
+        DAY_NAME(0), SUBMENU_NAME(1), MEAL(2), GALLERY(3), FB_LOGIN(4), NO_GALLERY_IMAGES(5), REFRESH_TIMESTAMP(6),
+        GALLERY_LOADING(7)
     }
 
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view)
@@ -89,6 +91,9 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
 
     fun setRefreshing() {
         positionToItem.put(REFRESH_TIMESTAMP_POSITION, menuFragment.getString(R.string.refreshing))
+        if (positionToViewType[FB_FEED_POSITION] == ViewType.FB_LOGIN && FBUtils.isLoggedIn()) {
+            positionToViewType.put(FB_FEED_POSITION, ViewType.GALLERY_LOADING)
+        }
         notifyDataSetChanged()
     }
 
@@ -118,6 +123,7 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
                 view
             }
             ViewType.NO_GALLERY_IMAGES.id -> LayoutInflater.from(parent.context).inflate(R.layout.no_fb_images, parent, false)
+            ViewType.GALLERY_LOADING.id -> View(parent.context) // empty
             ViewType.FB_LOGIN.id -> {
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.fb_login_button, parent, false)
 
@@ -173,6 +179,7 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
             }
             ViewType.GALLERY -> return
             ViewType.NO_GALLERY_IMAGES -> return
+            ViewType.GALLERY_LOADING -> return
             null -> return
         }
     }

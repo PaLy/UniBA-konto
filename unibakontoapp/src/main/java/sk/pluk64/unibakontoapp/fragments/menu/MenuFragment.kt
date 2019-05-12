@@ -117,8 +117,12 @@ class MenuFragment : Fragment(), Refreshable {
         val meals = preferences.getMeals(PreferencesKeys.meals(canteen))
         adapter.updateMeals(meals)
 
-        val photos = preferences.getList(PreferencesKeys.mealsPhotos(canteen), FBPhoto.serializer())
-        adapter.updatePhotos(photos)
+        if (FBUtils.isLoggedIn()) {
+            val photos = preferences.getList(PreferencesKeys.mealsPhotos(canteen), FBPhoto.serializer())
+            adapter.updatePhotos(photos)
+        } else {
+            adapter.showFBButton()
+        }
 
         refreshTime = preferences.getDate(PreferencesKeys.mealsRefreshTimestamp(canteen))
     }

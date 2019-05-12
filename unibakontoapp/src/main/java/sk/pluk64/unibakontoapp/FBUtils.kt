@@ -1,5 +1,6 @@
 package sk.pluk64.unibakontoapp
 
+import com.facebook.AccessToken
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -19,4 +20,8 @@ object FBUtils {
 
     }
 
+    fun isLoggedIn(): Boolean {
+        val accessToken = AccessToken.getCurrentAccessToken()
+        return accessToken != null && !accessToken.isExpired
+    }
 }
