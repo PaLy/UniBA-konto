@@ -7,7 +7,10 @@ import java.util.Date
 import java.util.Locale
 
 object FBUtils {
-    private val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US)
+    // SimpleDateFormat is not thread-safe!
+    // Always new instance will fix it
+    private val dateFormatter
+        get() = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US)
 
     @Throws(ParseException::class)
     fun parseDate(fbTime: String): Date {
