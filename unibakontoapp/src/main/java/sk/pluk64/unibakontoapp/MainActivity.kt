@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -23,6 +24,7 @@ import sk.pluk64.unibakontoapp.fragments.CardsDialog
 import sk.pluk64.unibakontoapp.fragments.LoginFragment
 import sk.pluk64.unibakontoapp.fragments.statistics.StatisticsFragment
 import sk.pluk64.unibakontoapp.fragments.EwalletAndMenusFragment
+import sk.pluk64.unibakontoapp.fragments.SetThemeDialog
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, RefreshClientDataUiListener {
 
@@ -63,6 +65,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(
+            preferences.getInt(PreferencesKeys.THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        )
         super.onCreate(savedInstanceState)
         checkFirstRun()
 
@@ -87,7 +92,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-        nav_view.setCheckedItem(R.id.nav_ewallet)
 
         logoutSection = nav_view.menu.findItem(R.id.logout_section)
         isLoggedIn = prefLoggedIn
@@ -98,7 +102,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         unibaKonto = createUnibaKonto()
 
-        showEwalletAndMenus()
+        showLastOpenedFragment()
     }
 
     private fun checkFirstRun() {
@@ -150,6 +154,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         if (id == R.id.action_menu_refresh) {
             refreshVisibleFragments()
+            return true
+        }
+        if (id == R.id.action_menu_set_theme) {
+            SetThemeDialog().show(supportFragmentManager, "setTheme")
             return true
         }
 
@@ -226,6 +234,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun showStatisticsFragment() {
+        preferences.edit().putString(PreferencesKeys.SELECTED_MAIN_FRAGMENT, TAG_STATISTICS_FRAGMENT).apply()
+
         supportActionBar?.title = getString(R.string.my_statistics)
 
         val showStatistics = {
@@ -242,7 +252,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    private fun showLastOpenedFragment() {
+        val lastOpened = preferences.getString(PreferencesKeys.SELECTED_MAIN_FRAGMENT, TAG_TABBED_FRAGMENT)
+        when (lastOpened) {
+            TAG_TABBED_FRAGMENT -> {
+                nav_view.setCheckedItem(R.id.nav_ewallet)
+                showEwalletAndMenus()
+            }
+            TAG_STATISTICS_FRAGMENT -> {
+                nav_view.setCheckedItem(R.id.nav_statistics)
+                showStatisticsFragment()
+            }
+        }
+    }
+
     private fun showEwalletAndMenus() {
+        preferences.edit().putString(PreferencesKeys.SELECTED_MAIN_FRAGMENT, TAG_TABBED_FRAGMENT).apply()
+
         supportActionBar?.title = getString(R.string.e_wallet_menus)
 
         val ewalletAndMenus = EwalletAndMenusFragment()

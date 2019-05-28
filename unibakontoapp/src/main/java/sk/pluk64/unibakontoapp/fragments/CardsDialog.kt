@@ -19,7 +19,7 @@ class CardsDialog : DialogFragment() {
     lateinit var activity: MainActivity
         private set
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is MainActivity) {
             activity = context

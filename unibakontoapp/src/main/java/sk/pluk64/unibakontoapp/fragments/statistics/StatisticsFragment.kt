@@ -16,6 +16,8 @@ import kotlinx.android.synthetic.main.statistics_card.view.*
 import sk.pluk64.unibakonto.Transaction
 import sk.pluk64.unibakonto.TransactionsQueries
 import sk.pluk64.unibakontoapp.*
+import sk.pluk64.unibakontoapp.anychart.themes.AnyChartDarkBlueTheme
+import sk.pluk64.unibakontoapp.anychart.themes.AnyChartTheme
 import sk.pluk64.unibakontoapp.asynctask.FunAsyncTask
 import sk.pluk64.unibakontoapp.asynctask.ParallelAsyncTasks
 import sk.pluk64.unibakontoapp.preferencesutils.getDate
@@ -27,7 +29,7 @@ class StatisticsFragment : Fragment(), Refreshable {
     private lateinit var activity: MainActivity
     private lateinit var mView: View
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is MainActivity) {
             activity = context
@@ -40,6 +42,9 @@ class StatisticsFragment : Fragment(), Refreshable {
 
     private fun updateCanteensVisitsUI(entries: List<DataEntry>) {
         APIlib.getInstance().setActiveAnyChartView(mView.canteenVisitsHistogram)
+        if (Utils.isDarkMode(resources)) {
+            AnyChartTheme.set(AnyChartDarkBlueTheme())
+        }
 
         val chart = AnyChart.column()
         val series = chart.column(entries)
@@ -51,12 +56,19 @@ class StatisticsFragment : Fragment(), Refreshable {
     }
 
     private fun updateMostEatenMealsUI(entries: List<DataEntry>) {
+        val isDarkMode = Utils.isDarkMode(resources)
+
         APIlib.getInstance().setActiveAnyChartView(mView.foodTypes)
+        if (isDarkMode) {
+            AnyChartTheme.set(AnyChartDarkBlueTheme())
+        }
 
         val chart = AnyChart.venn()
         chart.data(entries)
         chart.tooltip().format(getString(R.string.count) + ": {%value}")
-        chart.labels().fontColor("#757575")
+        if (!isDarkMode) {
+            chart.labels().fontColor("#757575")
+        }
         chart.title(getString(R.string.whatIEatMostly))
 
         mView.foodTypes.setChart(chart)
@@ -70,6 +82,11 @@ class StatisticsFragment : Fragment(), Refreshable {
         view.onFood.header.text = getString(R.string.on_food)
         view.onAccommodation.header.text = getString(R.string.on_accommodation)
         view.onOther.header.text = getString(R.string.on_other)
+
+        if (Utils.isDarkMode(resources)) {
+            mView.canteenVisitsHistogram.setBackgroundColor("#37474f")
+            mView.foodTypes.setBackgroundColor("#37474f")
+        }
 
         view.swipeRefresh.setOnRefreshListener { refresh() }
 

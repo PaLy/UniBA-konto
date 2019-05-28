@@ -46,7 +46,7 @@ class EwalletAndMenusFragment : Fragment(), RefreshMenusListener, Refreshable {
     private val isLoggedIn: Boolean
         get() = activity.isLoggedIn
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is MainActivity) {
             activity = context
@@ -153,7 +153,7 @@ class EwalletAndMenusFragment : Fragment(), RefreshMenusListener, Refreshable {
      */
     inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
-        override fun getItem(position: Int): Fragment? {
+        override fun getItem(position: Int): Fragment {
             if (position == 0) {
                 if (isLoggedIn && curFragmentPos0 !is AccountFragment) {
                     curFragmentPos0 = AccountFragment()
@@ -169,7 +169,7 @@ class EwalletAndMenusFragment : Fragment(), RefreshMenusListener, Refreshable {
                     }
                     curFragmentPos0 = loginFragment
                 }
-                return curFragmentPos0
+                return curFragmentPos0!!
             } else return if (position == 1) {
                 MenuFragment.newInstance(Canteen.VENZA, this@EwalletAndMenusFragment)
             } else {

@@ -9,8 +9,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.11.3'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.10.0"
-    
-    compile('com.google.guava:guava:27.0-android'){
+    implementation ('com.google.guava:guava:27.1-android') {
         exclude group: "com.google.guava"
     }
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"

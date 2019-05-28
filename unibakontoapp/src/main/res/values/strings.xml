@@ -58,4 +58,8 @@
     <string name="knodel">Knödel</string>
     <string name="eggBarley">Egg Barley</string>
     <string name="count">Count</string>
+    <string name="set_theme">Set theme</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="system_theme">System default</string>
 </resources>

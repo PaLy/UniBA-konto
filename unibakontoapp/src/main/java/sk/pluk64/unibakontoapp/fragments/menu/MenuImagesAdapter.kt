@@ -143,7 +143,7 @@ class MenuImagesAdapter(private val menuFragment: MenuFragment) : RecyclerView.A
                 DateUtils.isToday(photo.createdTime) -> menuFragment.getString(R.string.today)
                 DateUtils.isYesterday(photo.createdTime) -> menuFragment.getString(R.string.yesterday)
                 else -> {
-                    calendar.time = photo.createdTime
+                    calendar.time = photo.createdTime!!
                     calendar.getDisplayName(
                         Calendar.DAY_OF_WEEK,
                         Calendar.LONG,

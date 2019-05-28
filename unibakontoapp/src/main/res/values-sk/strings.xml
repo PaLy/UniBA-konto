@@ -56,4 +56,8 @@
     <string name="knodel">Knedľa</string>
     <string name="eggBarley">Tarhoňa</string>
     <string name="count">Počet</string>
+    <string name="set_theme">Nastaviť tému</string>
+    <string name="light">Svetlá</string>
+    <string name="dark">Tmavá</string>
+    <string name="system_theme">Systémová</string>
 </resources>

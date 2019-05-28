@@ -33,7 +33,7 @@ class AccountFragment : Fragment(), Refreshable {
         private set
     private lateinit var mView: View
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is MainActivity) {
             activity = context

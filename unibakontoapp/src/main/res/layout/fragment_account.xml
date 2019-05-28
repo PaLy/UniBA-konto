@@ -10,8 +10,7 @@
         android:layout_height="match_parent"
         android:clickable="true"
         android:orientation="vertical"
-        android:focusable="true"
-        android:background="#fff">
+        android:focusable="true">
 
         <include layout="@layout/refreshed_timestamp_row" />
 

@@ -9,6 +9,7 @@ class PreferencesKeys {
         const val USERNAME = "username"
         const val PASSWORD = "password"
         const val SELECTED_PAGE_TABBED_FRAGMENT = "selected_page"
+        const val SELECTED_MAIN_FRAGMENT = "selected_main_fragment"
 
         const val BALANCES = "balances"
         const val CLIENT_NAME = "client_name"
@@ -18,6 +19,7 @@ class PreferencesKeys {
         const val TRANSACTIONS_REFRESH_TIMESTAMP = "transactions_refresh_timestamp"
         const val ALL_TRANSACTIONS_REFRESH_TIMESTAMP = "all_transactions_refresh_timestamp_date"
         const val CARDS = "cards"
+        const val THEME = "theme"
 
         const val LOGGED_IN = "logged_in"
 

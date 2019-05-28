@@ -32,7 +32,7 @@ class LoginFragment : Fragment() {
     private val preferences by lazy { activity.getPreferences(Context.MODE_PRIVATE) }
     private lateinit var mView: View
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is MainActivity) {
             activity = context
@@ -118,7 +118,7 @@ class LoginFragment : Fragment() {
             activity.saveLoginDetails(unibaKonto.username, unibaKonto.password)
             onSuccess()
         } else if (!noInternet) {
-            mView.password.error = getString(R.string.error_incorrect_username_or_password)
+            mView.passwordWrapper.error = getString(R.string.error_incorrect_username_or_password)
             mView.password.requestFocus()
         }
     }

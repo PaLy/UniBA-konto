@@ -15,7 +15,13 @@ object FBUtils {
     @Throws(ParseException::class)
     fun parseDate(fbTime: String): Date {
         try {
-            return dateFormatter.parse(fbTime)
+            val date = dateFormatter.parse(fbTime)
+            if (date != null) {
+                return date
+            } else {
+                System.err.println(fbTime)
+                throw ParseException("", -1)
+            }
         } catch (e: RuntimeException) {
             System.err.println(fbTime)
             throw ParseException("", -1)
