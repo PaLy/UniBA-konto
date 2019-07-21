@@ -100,6 +100,7 @@ class MlynskaDolinaNewMealsProvider(canteen: Canteen) : MealsProvider {
 
     companion object {
 
-        private val dateFormatter = SimpleDateFormat("d.M.yyyy", Locale.US)
+        private val dateFormatter
+            get() = SimpleDateFormat("d.M.yyyy", Locale.US)
     }
 }

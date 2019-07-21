@@ -53,6 +53,7 @@ data class TransactionItem(
             return TransactionItem(timestamp, service, shortcut, description, amount, method, obj, payed)
         }
 
-        private val DATE_FORMAT = SimpleDateFormat("d. MM. yyyy HH:mm:ss")
+        private val DATE_FORMAT
+            get() = SimpleDateFormat("d. MM. yyyy HH:mm:ss")
     }
 }
