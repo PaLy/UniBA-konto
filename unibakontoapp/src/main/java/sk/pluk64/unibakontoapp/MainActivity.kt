@@ -187,6 +187,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 R.id.nav_logout -> {
                     isLoggedIn = false
                     ifTabbedFragmentVisible { it.onLogout() }
+                    ifStatisticsFragmentVisible { showStatisticsFragment() }
                     showSelected = false
                 }
                 R.id.nav_fb_eam -> {
@@ -230,6 +231,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val tabbedFragment = supportFragmentManager.findFragmentByTag(TAG_TABBED_FRAGMENT) as EwalletAndMenusFragment?
         if (tabbedFragment != null && tabbedFragment.isVisible) {
             action.invoke(tabbedFragment)
+        }
+    }
+
+    private fun ifStatisticsFragmentVisible(action: (StatisticsFragment) -> Unit) {
+        val statisticsFragment = supportFragmentManager.findFragmentByTag(TAG_STATISTICS_FRAGMENT) as StatisticsFragment?
+        if (statisticsFragment != null && statisticsFragment.isVisible) {
+            action.invoke(statisticsFragment)
         }
     }
 
