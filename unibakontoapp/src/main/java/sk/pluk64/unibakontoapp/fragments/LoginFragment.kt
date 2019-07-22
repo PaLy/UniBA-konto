@@ -164,8 +164,8 @@ class LoginFragment : Fragment() {
         }
 
         // Reset errors.
-        mView.username.error = null
-        mView.password.error = null
+        mView.usernameWrapper.error = null
+        mView.passwordWrapper.error = null
 
         // Store values at the time of the login attempt.
         val username = mView.username.text.toString()
@@ -176,11 +176,11 @@ class LoginFragment : Fragment() {
 
         // Check for a valid username.
         if (TextUtils.isEmpty(username)) {
-            mView.username.error = getString(R.string.error_field_required)
+            mView.usernameWrapper.error = getString(R.string.error_field_required)
             focusView = mView.username
             cancel = true
         } else if (TextUtils.isEmpty(password)) {
-            mView.username.error = getString(R.string.error_field_required)
+            mView.passwordWrapper.error = getString(R.string.error_field_required)
             focusView = mView.password
             cancel = true
         }
