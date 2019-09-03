@@ -11,8 +11,8 @@ android {
         applicationId "sk.pluk64.unibakonto"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 40
-        versionName "4.1.1"
+        versionCode 41
+        versionName "4.2.0"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
     }
