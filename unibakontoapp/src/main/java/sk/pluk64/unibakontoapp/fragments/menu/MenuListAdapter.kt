@@ -43,8 +43,7 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
             positionToViewType.put(it, ViewType.REFRESH_TIMESTAMP)
             positionToItem.put(it, "")
         }
-        positionToViewType.put(FB_FEED_POSITION, ViewType.FB_LOGIN)
-        itemCount = 2
+        itemCount = 1
     }
 
     fun setRefreshMenusListener(refreshMenusListener: RefreshMenusListener) {
@@ -67,7 +66,7 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
     }
 
     fun updateMeals(meals: Meals?) {
-        var pos = 2
+        var pos = 1
         if (meals != null) {
             for (dayMenu in meals.menus) {
                 positionToItem.put(pos, dayMenu.dayName)
@@ -91,9 +90,6 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
 
     fun setRefreshing() {
         positionToItem.put(REFRESH_TIMESTAMP_POSITION, menuFragment.getString(R.string.refreshing))
-        if (positionToViewType[FB_FEED_POSITION] == ViewType.FB_LOGIN && FBUtils.isLoggedIn()) {
-            positionToViewType.put(FB_FEED_POSITION, ViewType.GALLERY_LOADING)
-        }
         notifyDataSetChanged()
     }
 
@@ -124,32 +120,6 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
             }
             ViewType.NO_GALLERY_IMAGES.id -> LayoutInflater.from(parent.context).inflate(R.layout.no_fb_images, parent, false)
             ViewType.GALLERY_LOADING.id -> View(parent.context) // empty
-            ViewType.FB_LOGIN.id -> {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.fb_login_button, parent, false)
-
-                with(view.login_button) {
-                    setReadPermissions(emptyList())
-                    fragment = menuFragment
-                    registerCallback(
-                        menuFragment.fbCallbackManager,
-                        object : FacebookCallback<LoginResult> {
-                            override fun onSuccess(loginResult: LoginResult) {
-                                refreshMenusListener?.refreshMenus()
-                                    ?: menuFragment.refresh()
-                                view.visibility = View.GONE
-                            }
-
-                            override fun onCancel() {
-                                // TODO
-                            }
-
-                            override fun onError(exception: FacebookException) {
-                                // TODO
-                            }
-                        })
-                }
-                view
-            }
             ViewType.REFRESH_TIMESTAMP.id -> LayoutInflater.from(parent.context).inflate(R.layout.refreshed_timestamp_menu, parent, false)
             else -> throw Throwable()
         }.run { ViewHolder(this) }

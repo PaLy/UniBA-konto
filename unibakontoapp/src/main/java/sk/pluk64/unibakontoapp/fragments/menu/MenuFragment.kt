@@ -1,7 +1,6 @@
 package sk.pluk64.unibakontoapp.fragments.menu
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.os.Bundle
@@ -10,16 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.facebook.CallbackManager
 import kotlinx.android.synthetic.main.fragment_menu.view.*
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
 import sk.pluk64.unibakontoapp.*
 import sk.pluk64.unibakontoapp.meals.Canteen
 import sk.pluk64.unibakontoapp.meals.Meals
 import sk.pluk64.unibakontoapp.preferencesutils.DateSerializer
 import sk.pluk64.unibakontoapp.preferencesutils.getDate
-import sk.pluk64.unibakontoapp.preferencesutils.getList
 import sk.pluk64.unibakontoapp.preferencesutils.getMeals
 import java.util.*
 
@@ -43,9 +39,6 @@ class MenuFragment : Fragment(), Refreshable {
     private val adapter = MenuListAdapter(this)
     private var updateDataTask: UpdateMenuDataTask? = null
     private var refreshTime: Date? = null
-    val fbCallbackManager by lazy {
-        CallbackManager.Factory.create()
-    }
     private var refreshMenusListener: RefreshMenusListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,11 +83,6 @@ class MenuFragment : Fragment(), Refreshable {
         return view
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        fbCallbackManager.onActivityResult(requestCode, resultCode, data)
-    }
-
     override fun onResume() {
         super.onResume()
         if (DateUtils.isTimeDiffMoreThanXHours(refreshTime, 1)) {
@@ -117,31 +105,10 @@ class MenuFragment : Fragment(), Refreshable {
         val meals = preferences.getMeals(PreferencesKeys.meals(canteen))
         adapter.updateMeals(meals)
 
-        if (FBUtils.isLoggedIn()) {
-            val photos = preferences.getList(PreferencesKeys.mealsPhotos(canteen), FBPhoto.serializer())
-            adapter.updatePhotos(photos)
-        } else {
-            adapter.showFBButton()
-        }
-
         refreshTime = preferences.getDate(PreferencesKeys.mealsRefreshTimestamp(canteen))
     }
 
-    private fun saveData(photosWithSources: List<FBPhoto>) {
-        val jsonPhotos = Json.stringify(FBPhoto.serializer().list, photosWithSources)
-        preferences.edit()
-            .putString(PreferencesKeys.mealsPhotos(canteen), jsonPhotos)
-            .apply()
-    }
-
-    fun onUpdateTaskFinished(needAuthenticate: Boolean, meals: Meals?, photos: List<FBPhoto>) {
-        if (needAuthenticate) {
-            saveData(photos)
-            adapter.showFBButton()
-        } else {
-            saveData(photos)
-            adapter.updatePhotos(photos)
-        }
+    fun onUpdateTaskFinished(meals: Meals?) {
 
         meals?.let {
             saveData(it)
