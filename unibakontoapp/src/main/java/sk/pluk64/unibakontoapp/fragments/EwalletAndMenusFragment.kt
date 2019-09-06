@@ -201,10 +201,14 @@ class EwalletAndMenusFragment : Fragment(), RefreshMenusListener, Refreshable {
     }
 
     fun removeFragment(oldFragment: Fragment) {
-        childFragmentManager.beginTransaction()
-            .remove(oldFragment)
-            .commitNow()
-        mSectionsPagerAdapter.notifyDataSetChanged()
+        if (oldFragment.isAdded) {
+            childFragmentManager.beginTransaction()
+                .remove(oldFragment)
+                .commitNow()
+        }
+        if (isAdded) {
+            mSectionsPagerAdapter.notifyDataSetChanged()
+        }
 
         activity.invalidateOptionsMenu()
     }

@@ -112,14 +112,18 @@ class LoginFragment : Fragment() {
     private fun onLoginFinished(success: Boolean, noInternet: Boolean, unibaKonto: IsUnibaKonto) {
         mAuthTask = null
 
-        showProgress(false)
+        if (isAdded) {
+            showProgress(false)
+        }
         if (success) {
             activity.isLoggedIn = true
             activity.saveLoginDetails(unibaKonto.username, unibaKonto.password)
             onSuccess()
         } else if (!noInternet) {
-            mView.passwordWrapper.error = getString(R.string.error_incorrect_username_or_password)
-            mView.password.requestFocus()
+            if (isAdded) {
+                mView.passwordWrapper.error = getString(R.string.error_incorrect_username_or_password)
+                mView.password.requestFocus()
+            }
         }
     }
 
