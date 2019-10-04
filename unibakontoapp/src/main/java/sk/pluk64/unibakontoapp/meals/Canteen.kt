@@ -12,7 +12,7 @@ enum class Canteen {
                 EAM -> {
                     var meals: Meals? = null
                     try {
-                        meals = MlynskaDolinaNewMealsProvider(EAM).menu
+                        meals = MlynyUnibaMealsProvider(EAM).menu
                     } catch (ignored: Util.ConnectionFailedException) {
                     }
 
@@ -22,7 +22,7 @@ enum class Canteen {
                         meals
                     }
                 }
-                VENZA -> MlynskaDolinaNewMealsProvider(VENZA).menu
+                VENZA -> MlynyUnibaMealsProvider(VENZA).menu
             }
         }
 
