@@ -33,4 +33,20 @@ enum class Canteen {
                 VENZA -> "1744845135734777"
             }
         }
+
+    val fbUri: String
+        get() {
+            return when (this) {
+                EAM -> "https://www.facebook.com/eatandmeetmlyny/"
+                VENZA -> "https://www.facebook.com/venza.mlyny/"
+            }
+        }
+
+    val igUri: String
+        get() {
+            return when (this) {
+                EAM -> "https://www.instagram.com/eatandmeetmlyny/"
+                VENZA -> "https://www.instagram.com/venza.na.mlynoch/"
+            }
+        }
 }

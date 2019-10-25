@@ -62,4 +62,6 @@
     <string name="light">Light</string>
     <string name="dark">Dark</string>
     <string name="system_theme">System default</string>
+    <string name="hide_soc_networks">Hide soc. networks</string>
+    <string name="show_soc_networks">Show soc. networks</string>
 </resources>

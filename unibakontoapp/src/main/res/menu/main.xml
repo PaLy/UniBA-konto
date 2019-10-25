@@ -17,4 +17,9 @@
         android:orderInCategory="3"
         android:title="@string/set_theme"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_menu_hide_soc_networks"
+        android:orderInCategory="4"
+        android:title=""
+        app:showAsAction="never"/>
 </menu>

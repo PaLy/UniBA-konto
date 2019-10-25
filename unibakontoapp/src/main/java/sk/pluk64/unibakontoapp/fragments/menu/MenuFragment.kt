@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_menu.view.*
 import kotlinx.serialization.json.Json
 import sk.pluk64.unibakontoapp.*
+import sk.pluk64.unibakontoapp.fragments.SocNetworksHiddenChangeListener
 import sk.pluk64.unibakontoapp.meals.Canteen
 import sk.pluk64.unibakontoapp.meals.Meals
 import sk.pluk64.unibakontoapp.preferencesutils.DateSerializer
@@ -19,7 +20,7 @@ import sk.pluk64.unibakontoapp.preferencesutils.getDate
 import sk.pluk64.unibakontoapp.preferencesutils.getMeals
 import java.util.*
 
-class MenuFragment : Fragment(), Refreshable {
+class MenuFragment : Fragment(), Refreshable, SocNetworksHiddenChangeListener {
     lateinit var activity: MainActivity
         private set
     private lateinit var mView: View
@@ -31,11 +32,12 @@ class MenuFragment : Fragment(), Refreshable {
         }
     }
 
-    private val preferences: SharedPreferences by lazy {
+    val preferences: SharedPreferences by lazy {
         activity.getPreferences(Context.MODE_PRIVATE)
     }
 
-    private lateinit var canteen: Canteen
+    lateinit var canteen: Canteen
+        private set
     private val adapter = MenuListAdapter(this)
     private var updateDataTask: UpdateMenuDataTask? = null
     private var refreshTime: Date? = null
@@ -122,6 +124,10 @@ class MenuFragment : Fragment(), Refreshable {
 
     fun onUpdateTaskCancelled() {
         updateDataTask = null
+    }
+
+    override fun onSocNetworksHiddenChange() {
+        adapter.notifyDataSetChanged()
     }
 
     companion object {

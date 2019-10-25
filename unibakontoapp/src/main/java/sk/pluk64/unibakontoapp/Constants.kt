@@ -20,6 +20,7 @@ class PreferencesKeys {
         const val ALL_TRANSACTIONS_REFRESH_TIMESTAMP = "all_transactions_refresh_timestamp_date"
         const val CARDS = "cards"
         const val THEME = "theme"
+        const val SOC_NETWORKS_HIDDEN = "soc_networks_hidden"
 
         const val LOGGED_IN = "logged_in"
 

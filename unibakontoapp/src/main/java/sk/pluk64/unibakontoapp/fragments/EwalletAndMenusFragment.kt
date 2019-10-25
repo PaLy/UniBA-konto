@@ -20,7 +20,7 @@ import sk.pluk64.unibakontoapp.*
 import sk.pluk64.unibakontoapp.fragments.menu.MenuFragment
 import sk.pluk64.unibakontoapp.meals.Canteen
 
-class EwalletAndMenusFragment : Fragment(), RefreshMenusListener, Refreshable {
+class EwalletAndMenusFragment : Fragment(), RefreshMenusListener, Refreshable, SocNetworksHiddenChangeListener {
 
     private lateinit var activity: MainActivity
     private val preferences by lazy { activity.getPreferences(MODE_PRIVATE) }
@@ -120,6 +120,15 @@ class EwalletAndMenusFragment : Fragment(), RefreshMenusListener, Refreshable {
 
     override fun refresh() {
         refreshCurrentFragment()
+    }
+
+
+    override fun onSocNetworksHiddenChange() {
+        childFragmentManager.fragments
+            .asSequence()
+            .filter { it.isVisible }
+            .filterIsInstance<SocNetworksHiddenChangeListener>()
+            .forEach { it.onSocNetworksHiddenChange() }
     }
 
 

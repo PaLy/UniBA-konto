@@ -60,4 +60,6 @@
     <string name="light">Svetlá</string>
     <string name="dark">Tmavá</string>
     <string name="system_theme">Systémová</string>
+    <string name="hide_soc_networks">Skryť soc. siete</string>
+    <string name="show_soc_networks">Zobraziť soc. siete</string>
 </resources>

@@ -15,44 +15,6 @@
     </group>
 
     <item
-        android:id="@+id/venza_section"
-        android:title="@string/venza">
-        <menu>
-            <group
-                android:id="@+id/nav_group_venza"
-                android:checkableBehavior="single">
-                <item
-                    android:id="@+id/nav_fb_venza"
-                    android:icon="@drawable/ic_facebook"
-                    android:title="@string/fb_venza"/>
-                <item
-                    android:id="@+id/nav_ig_venza"
-                    android:icon="@drawable/ic_instagram"
-                    android:title="@string/ig_venza"/>
-            </group>
-        </menu>
-    </item>
-
-    <item
-        android:id="@+id/eam_section"
-        android:title="@string/eam">
-        <menu>
-            <group
-                android:id="@+id/nav_group_eam"
-                android:checkableBehavior="single">
-                <item
-                    android:id="@+id/nav_fb_eam"
-                    android:icon="@drawable/ic_facebook"
-                    android:title="@string/fb_eam"/>
-                <item
-                    android:id="@+id/nav_ig_eam"
-                    android:icon="@drawable/ic_instagram"
-                    android:title="@string/ig_eam"/>
-            </group>
-        </menu>
-    </item>
-
-    <item
         android:id="@+id/logout_section"
         android:title="@string/title_e_wallet">
         <menu>

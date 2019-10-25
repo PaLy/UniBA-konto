@@ -1,8 +1,6 @@
 package sk.pluk64.unibakontoapp
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -20,11 +18,8 @@ import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import sk.pluk64.unibakonto.IsUnibaKonto
 import sk.pluk64.unibakonto.UnibaKonto
-import sk.pluk64.unibakontoapp.fragments.CardsDialog
-import sk.pluk64.unibakontoapp.fragments.LoginFragment
+import sk.pluk64.unibakontoapp.fragments.*
 import sk.pluk64.unibakontoapp.fragments.statistics.StatisticsFragment
-import sk.pluk64.unibakontoapp.fragments.EwalletAndMenusFragment
-import sk.pluk64.unibakontoapp.fragments.SetThemeDialog
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, RefreshClientDataUiListener {
 
@@ -160,6 +155,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             SetThemeDialog().show(supportFragmentManager, "setTheme")
             return true
         }
+        if (id == R.id.action_menu_hide_soc_networks) {
+            preferences.edit()
+                .putBoolean(PreferencesKeys.SOC_NETWORKS_HIDDEN, !isSocNetworksHidden())
+                .apply()
+            supportFragmentManager.fragments
+                .asSequence()
+                .filterIsInstance<SocNetworksHiddenChangeListener>()
+                .forEach { it.onSocNetworksHiddenChange() }
+            return true
+        }
 
         return super.onOptionsItemSelected(item)
     }
@@ -172,8 +177,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         menu.findItem(R.id.action_menu_refresh).isVisible = isRefreshableFragmentVisible
+        menu.findItem(R.id.action_menu_hide_soc_networks).title =
+            if (isSocNetworksHidden()) getString(R.string.show_soc_networks)
+            else getString(R.string.hide_soc_networks)
+
         return super.onPrepareOptionsMenu(menu)
     }
+
+    private fun isSocNetworksHidden() = preferences.getBoolean(PreferencesKeys.SOC_NETWORKS_HIDDEN, false)
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         var showSelected = true
@@ -190,33 +201,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     ifStatisticsFragmentVisible { showStatisticsFragment() }
                     showSelected = false
                 }
-                R.id.nav_fb_eam -> {
-                    openLink("https://www.facebook.com/eatandmeetmlyny/")
-                    showSelected = false
-                }
-                R.id.nav_ig_eam -> {
-                    openLink("https://www.instagram.com/eatandmeetmlyny/")
-                    showSelected = false
-                }
-                R.id.nav_fb_venza -> {
-                    openLink("https://www.facebook.com/venza.mlyny/")
-                    showSelected = false
-                }
-                R.id.nav_ig_venza -> {
-                    openLink("https://www.instagram.com/venza.na.mlynoch/")
-                    showSelected = false
-                }
             }
         }
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
         return showSelected
-    }
-
-    private fun openLink(uri: String) {
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-        startActivity(browserIntent)
     }
 
     private fun refreshVisibleFragments() {
