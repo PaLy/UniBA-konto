@@ -98,6 +98,13 @@ class AllTransactionsOptimizedTaskTest {
                 allRefreshTimestamp = notRecentlyRefreshed
             )
         )
+        assertEquals(listOf(t1, t2, t3),
+            testMerge(
+                allOld = listOf(t1, t2, t3),
+                lastRefreshed = listOf(t2, t3),
+                allRefreshTimestamp = recentlyRefreshed
+            )
+        )
     }
 
     private fun testMerge(allRefreshed: List<Transaction> = emptyList(),

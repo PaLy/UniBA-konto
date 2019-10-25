@@ -110,7 +110,7 @@ class UnibaKonto(override val username: String, override val password: String) :
     override val allTransactions: List<Transaction>
         @Throws(Util.ConnectionFailedException::class)
         get() {
-            val forms = documents[TRANSACTIONS_PAGE].select(ID_TRANSACTIONS_FORM)
+            val forms = documents.getRefreshed(TRANSACTIONS_PAGE).select(ID_TRANSACTIONS_FORM)
             val form = forms.first()
 
             if (form != null) {
@@ -252,7 +252,7 @@ class UnibaKonto(override val username: String, override val password: String) :
         private fun refresh(location: String): Document {
             val html: String
             try {
-                val connection = UnibaKonto.httpGet(location)
+                val connection = httpGet(location)
                 html = Util.connInput2String(connection)
             } catch (e: IOException) {
                 throw Util.ConnectionFailedException()

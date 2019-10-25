@@ -25,10 +25,6 @@ class MenuImagesAdapter(private val menuFragment: MenuFragment) : RecyclerView.A
     private val positionToItem = SparseArray<Any>()
     private val positionToViewType = SparseArray<ViewType>()
 
-    private val picasso by lazy {
-        Picasso.with(menuFragment.context)
-    }
-
     private enum class ViewType(internal val id: Int) {
         PHOTO_WITH_OPTIONAL_CAPTION(0), DAY(1), POST_MESSAGE(2)
     }
@@ -105,7 +101,7 @@ class MenuImagesAdapter(private val menuFragment: MenuFragment) : RecyclerView.A
             val photoWidth = photo.width
             val scale = if (photoWidth == 0) 0.0 else imageWidth / photoWidth.toDouble()
             val imageHeight = (photo.height * scale).toInt()
-            picasso!!.load(photo.source).resize(imageWidth, imageHeight).into(holder.imageView)
+            Picasso.get().load(photo.source).resize(imageWidth, imageHeight).into(holder.imageView)
             holder.imageView.layoutParams = LinearLayout.LayoutParams(imageWidth, imageHeight)
             holder.imageHeight = imageHeight
 
