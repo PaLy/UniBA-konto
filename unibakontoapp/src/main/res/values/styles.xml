@@ -2,6 +2,7 @@
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="colorPrimary">#b3231b</item>
         <item name="colorPrimaryDark">#b3231b</item>
+        <item name="colorAccent">#b3231b</item>
         <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
     </style>
 
