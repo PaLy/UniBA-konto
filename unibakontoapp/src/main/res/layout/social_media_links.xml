@@ -6,16 +6,16 @@
     android:layout_height="wrap_content"
     android:gravity="center">
 
-    <ImageView
-        android:tint="@android:color/tab_indicator_text"
+    <androidx.appcompat.widget.AppCompatImageView
+        app:tint="@android:color/tab_indicator_text"
         android:id="@+id/fb_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
         app:srcCompat="@drawable/ic_facebook"
         android:background="?attr/selectableItemBackgroundBorderless"/>
 
-    <ImageView
-        android:tint="@android:color/tab_indicator_text"
+    <androidx.appcompat.widget.AppCompatImageView
+        app:tint="@android:color/tab_indicator_text"
         android:layout_marginStart="24dp"
         android:id="@+id/ig_icon"
         android:layout_width="48dp"
