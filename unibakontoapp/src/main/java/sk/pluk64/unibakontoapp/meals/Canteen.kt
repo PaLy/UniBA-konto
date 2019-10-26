@@ -37,8 +37,8 @@ enum class Canteen {
     val fbUri: String
         get() {
             return when (this) {
-                EAM -> "https://www.facebook.com/eatandmeetmlyny/"
-                VENZA -> "https://www.facebook.com/venza.mlyny/"
+                EAM -> "https://www.facebook.com/pg/eatandmeetmlyny/posts/"
+                VENZA -> "https://www.facebook.com/pg/venza.mlyny/posts/"
             }
         }
 
