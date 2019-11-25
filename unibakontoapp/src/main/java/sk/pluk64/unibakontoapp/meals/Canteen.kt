@@ -38,7 +38,7 @@ enum class Canteen {
         get() {
             return when (this) {
                 EAM -> "https://www.facebook.com/pg/eatandmeetmlyny/posts/"
-                VENZA -> "https://www.facebook.com/pg/venza.mlyny/posts/"
+                VENZA -> "https://www.facebook.com/pg/internatmlyny/posts/"
             }
         }
 
@@ -46,7 +46,7 @@ enum class Canteen {
         get() {
             return when (this) {
                 EAM -> "https://www.instagram.com/eatandmeetmlyny/"
-                VENZA -> "https://www.instagram.com/venza.na.mlynoch/"
+                VENZA -> "https://www.instagram.com/internatmlyny/"
             }
         }
 }
