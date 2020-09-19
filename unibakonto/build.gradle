@@ -6,13 +6,13 @@ apply plugin: 'kotlinx-serialization'
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'org.jsoup:jsoup:1.11.3'
-    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.10.0"
-    implementation ('com.google.guava:guava:27.1-android') {
+    implementation 'org.jsoup:jsoup:1.13.1'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc'
+    implementation ('com.google.guava:guava:29.0-jre') {
         exclude group: "com.google.guava"
     }
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 sourceCompatibility = "8"

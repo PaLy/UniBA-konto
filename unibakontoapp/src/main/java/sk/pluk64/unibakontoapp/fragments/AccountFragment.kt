@@ -18,8 +18,8 @@ import kotlinx.android.synthetic.main.fragment_account.view.*
 import kotlinx.android.synthetic.main.refreshed_timestamp_row.view.*
 import kotlinx.android.synthetic.main.transaction.view.*
 import kotlinx.android.synthetic.main.transaction_item.view.*
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
 import sk.pluk64.unibakonto.*
 import sk.pluk64.unibakontoapp.*
 import sk.pluk64.unibakontoapp.preferencesutils.DateSerializer
@@ -76,11 +76,11 @@ class AccountFragment : Fragment(), Refreshable {
     override fun canRefresh() = true
 
     private fun saveData(balances: Balances, clientName: String, transactions: List<Transaction>, cards: List<CardInfo>) {
-        val jsonBalances = Json.stringify(Balances.serializer(), balances)
-        val jsonTransactions = Json.stringify(Transaction.serializer().list, transactions)
-        val jsonCards = Json.stringify(CardInfo.serializer().list, cards)
+        val jsonBalances = Json.encodeToString(Balances.serializer(), balances)
+        val jsonTransactions = Json.encodeToString(ListSerializer(Transaction.serializer()), transactions)
+        val jsonCards = Json.encodeToString(ListSerializer(CardInfo.serializer()), cards)
         refreshTime = DateUtils.currentTime
-        val jsonRefreshTime = Json.stringify(DateSerializer, refreshTime)
+        val jsonRefreshTime = Json.encodeToString(DateSerializer, refreshTime)
 
         preferences.edit()
             .putString(PreferencesKeys.BALANCES, jsonBalances)

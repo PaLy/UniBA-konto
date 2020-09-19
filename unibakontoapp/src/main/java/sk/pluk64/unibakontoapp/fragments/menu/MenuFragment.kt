@@ -93,9 +93,9 @@ class MenuFragment : Fragment(), Refreshable, SocNetworksHiddenChangeListener {
     }
 
     private fun saveData(meals: Meals) {
-        val jsonMeals = Json.stringify(Meals.serializer(), meals)
+        val jsonMeals = Json.encodeToString(Meals.serializer(), meals)
         refreshTime = DateUtils.currentTime
-        val jsonCurrentTime = Json.stringify(DateSerializer, refreshTime)
+        val jsonCurrentTime = Json.encodeToString(DateSerializer, refreshTime)
 
         preferences.edit()
             .putString(PreferencesKeys.meals(canteen), jsonMeals)

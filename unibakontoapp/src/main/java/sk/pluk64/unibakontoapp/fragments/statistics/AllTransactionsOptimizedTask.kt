@@ -1,8 +1,8 @@
 package sk.pluk64.unibakontoapp.fragments.statistics
 
 import android.content.SharedPreferences
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
 import sk.pluk64.unibakonto.Transaction
 import sk.pluk64.unibakontoapp.DateUtils
 import sk.pluk64.unibakontoapp.MainActivity
@@ -32,8 +32,8 @@ class AllTransactionsOptimizedTask(
             unibaKonto.transactions
         }
 
-        val jsonTransactions = Json.stringify(Transaction.serializer().list, transactions)
-        val jsonCurrentTime = Json.stringify(DateSerializer, DateUtils.currentTime)
+        val jsonTransactions = Json.encodeToString(ListSerializer(Transaction.serializer()), transactions)
+        val jsonCurrentTime = Json.encodeToString(DateSerializer, DateUtils.currentTime)
 
         if (isGetAll) {
             preferences.edit()
