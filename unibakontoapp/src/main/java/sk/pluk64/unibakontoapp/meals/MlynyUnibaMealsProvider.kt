@@ -24,9 +24,7 @@ class MlynyUnibaMealsProvider(canteen: Canteen) : MealsProvider {
                 val doc = Jsoup.parse(Util.connInput2String(urlConnection))
                 val mealsBuilder = Meals.builder()
 
-                val dayTitles = doc.select(".mdm_menu_day")
-                val dayMenus = doc.select(".mdm_menu_panel")
-                val days = dayTitles.zip(dayMenus)
+                val days = doc.select(".card")
 
                 for (day in days) {
                     parseDay(mealsBuilder, day)
@@ -39,71 +37,74 @@ class MlynyUnibaMealsProvider(canteen: Canteen) : MealsProvider {
 
         }
 
-    private fun parseDay(mealsBuilder: Meals.Builder, day: Pair<Element, Element>) {
-        val dayTitle = Utils.getFirstOrEmpty(day.first.select(".mdm_menu_day_name"))
+    private fun parseDay(mealsBuilder: Meals.Builder, day: Element) {
+        val dayTitle = Utils.getFirstOrEmpty(day.select(".mdm_menu_day_name"))
 
         if (!isOldDay(dayTitle)) {
             mealsBuilder.newDay(dayTitle)
 
-            val subMenus = day.second.select(".mdm_menu_cat_wrapper")
-            for (subMenu in subMenus) {
-                parseSubMenu(mealsBuilder, subMenu)
+            val menuTable = day.selectFirst("table")
+            if (menuTable != null) {
+                parseDayMenu(mealsBuilder, menuTable)
             }
         }
     }
 
     private fun isOldDay(dayTitle: String): Boolean {
-        val dateStart = dayTitle.indexOf('(')
-        val dateEnd = dayTitle.indexOf(')')
-        if (dateStart != -1 && dateEnd != -1) {
-            val date = dayTitle.substring(dateStart + 1, dateEnd)
+        val dayParts = dayTitle.trim().split(" ")
+        if (dayParts.size > 1) {
+            val date = dayParts[1]
             try {
                 val today = Calendar.getInstance()
 
                 val d = dateFormatter.parse(date)
                 val cDate = Calendar.getInstance()
-                cDate.time = d
+                cDate.time = d!!
 
                 return today.get(Calendar.YEAR) > cDate.get(Calendar.YEAR) || today.get(Calendar.YEAR) == cDate.get(Calendar.YEAR) && today.get(Calendar.DAY_OF_YEAR) > cDate.get(Calendar.DAY_OF_YEAR)
             } catch (ignored: ParseException) {
             }
-
         }
         return false
     }
 
-    private fun parseSubMenu(mealsBuilder: Meals.Builder, subMenu: Element) {
-        val subMenuTitle = Utils.getFirstOrEmpty(subMenu.select("p > strong"))
-        mealsBuilder.newSubMenu(subMenuTitle)
-
-        val meals = subMenu.select(".mdm_menu_item")
-        for (meal in meals) {
-            parseMeal(mealsBuilder, meal)
+    private fun parseDayMenu(mealsBuilder: Meals.Builder, menu: Element) {
+        val allRows = menu.select("tr")
+        if (allRows.size > 1) {
+            val rows = allRows.subList(1, allRows.size)
+            for (row in rows) {
+                val tds = row.select("td")
+                if (tds.size == 1) {
+                    val subMenuTitle = Utils.getFirstOrEmpty(tds)
+                    mealsBuilder.newSubMenu(subMenuTitle)
+                } else {
+                    parseMeal(mealsBuilder, row)
+                }
+            }
         }
     }
 
     private fun parseMeal(mealsBuilder: Meals.Builder, meal: Element) {
-        val mealName = Utils.getFirstOrEmpty(meal.select(".mdm_menu_item_left"))
-        val mealPrice = Utils.getFirstOrEmpty(meal.select(".mdm_menu_item_right"))
+        val tds = meal.select("td")
+        val mealName = Utils.getFirstOrEmpty(tds)
 
-        var parsedMealPrice = mealPrice.substring(0, mealPrice.length - 1)
-                .replace("\u00a0", "")
+        val mainPrice = if (tds.size > 1) tds[1].text().trim() else ""
+        val studentPrice = if (tds.size > 2) tds[2].text().trim() else ""
 
-        val split = parsedMealPrice.split("/".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        if (split.size == 2) {
-            val first = split[0].trim { it <= ' ' }
-            val second = split[1].trim { it <= ' ' }
-            if (first == second) {
-                parsedMealPrice = first
-            }
+        val price = if (mainPrice == studentPrice || studentPrice == "") {
+            mainPrice
+        } else if (mainPrice == "") {
+            studentPrice
+        } else {
+            "$mainPrice / $studentPrice"
         }
 
-        mealsBuilder.addMeal(Meals.Meal(mealName, parsedMealPrice))
+        mealsBuilder.addMeal(Meals.Meal(mealName, price))
     }
 
     companion object {
 
         private val dateFormatter
-            get() = SimpleDateFormat("d.M.yyyy", Locale.US)
+            get() = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     }
 }

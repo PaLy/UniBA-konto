@@ -36,7 +36,7 @@ object Utils {
 
     @JvmStatic
     fun showNoInternetConnection(context: Context) {
-        if (noInternetConnection == null || noInternetConnection!!.view == null || !noInternetConnection!!.view.isShown) {
+        if (noInternetConnection == null || noInternetConnection!!.view == null || !noInternetConnection!!.view!!.isShown) {
             noInternetConnection = Toast.makeText(context, R.string.connection_failed, Toast.LENGTH_LONG)
             noInternetConnection!!.show()
         }
