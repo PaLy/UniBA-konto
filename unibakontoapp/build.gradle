@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId "sk.pluk64.unibakonto"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 30
-        versionCode 47
-        versionName "4.4.3"
+        versionCode 48
+        versionName "4.5.0"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
     }
