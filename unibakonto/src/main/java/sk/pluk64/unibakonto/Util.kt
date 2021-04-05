@@ -42,10 +42,10 @@ object Util {
         }
     }
 
-    internal fun paramsMap2PostData(params: Map<String, String>): ByteArray {
+    fun paramsMap2PostData(params: Map<String, Any>): ByteArray {
         return paramsArray2PostData(
             params.asSequence()
-                .flatMap { sequenceOf(it.key, it.value) }
+                .flatMap { sequenceOf(it.key, it.value.toString()) }
                 .toList()
         )
     }

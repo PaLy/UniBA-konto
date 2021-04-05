@@ -312,7 +312,7 @@ class UnibaKonto(override val username: String, override val password: String) :
         }
 
         @Throws(IOException::class)
-        private fun httpPost(location: String, postData: ByteArray): URLConnection {
+        fun httpPost(location: String, postData: ByteArray): URLConnection {
             val conn = URL(location).openConnection()
             conn.doOutput = true
             DataOutputStream(conn.getOutputStream()).write(postData)
