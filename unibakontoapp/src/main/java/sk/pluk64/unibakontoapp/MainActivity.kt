@@ -13,7 +13,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import com.facebook.appevents.AppEventsLogger
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import sk.pluk64.unibakonto.IsUnibaKonto
@@ -92,8 +91,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         isLoggedIn = prefLoggedIn
 
         refreshClientDataUI()
-
-        AppEventsLogger.activateApp(application)
 
         unibaKonto = createUnibaKonto()
 

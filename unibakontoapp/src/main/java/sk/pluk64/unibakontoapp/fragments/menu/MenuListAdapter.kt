@@ -28,7 +28,7 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
     private val positionToViewType = SparseArray<ViewType>()
 
     private enum class ViewType(internal val id: Int) {
-        DAY_NAME(0), SUBMENU_NAME(1), MEAL(2), GALLERY(3), FB_LOGIN(4), NO_GALLERY_IMAGES(5), REFRESH_TIMESTAMP(6),
+        DAY_NAME(0), SUBMENU_NAME(1), MEAL(2), GALLERY(3), NO_GALLERY_IMAGES(5), REFRESH_TIMESTAMP(6),
         GALLERY_LOADING(7), SOCIAL_MEDIA_LINKS(8)
     }
 
@@ -50,11 +50,6 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
 
     fun setRefreshMenusListener(refreshMenusListener: RefreshMenusListener) {
         this.refreshMenusListener = refreshMenusListener
-    }
-
-    fun showFBButton() {
-        positionToViewType.put(FB_FEED_POSITION, ViewType.FB_LOGIN)
-        notifyDataSetChanged()
     }
 
     fun updatePhotos(photos: List<FBPhoto>) {
@@ -145,7 +140,6 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
                 view.meal_name.text = meal.name
                 view.meal_cost.text = meal.price
             }
-            ViewType.FB_LOGIN -> holder.view.visibility = View.VISIBLE
             ViewType.REFRESH_TIMESTAMP -> {
                 val view = holder.view as TextView
                 view.text = positionToItem.get(position) as CharSequence

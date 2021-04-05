@@ -3,12 +3,9 @@ package sk.pluk64.unibakontoapp.fragments.menu
 import android.os.AsyncTask
 import androidx.fragment.app.FragmentActivity
 
-import com.facebook.FacebookException
-
 import java.lang.ref.WeakReference
 
 import sk.pluk64.unibakonto.Util
-import sk.pluk64.unibakontoapp.R
 import sk.pluk64.unibakontoapp.Utils
 import sk.pluk64.unibakontoapp.meals.Canteen
 import sk.pluk64.unibakontoapp.meals.Meals
