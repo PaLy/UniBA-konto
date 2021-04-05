@@ -46,9 +46,9 @@ class UnibaDinnerServiceMealsProvider(canteen: Canteen) : MealsProvider {
                                     submenu.jsonObject.forEach { (mealName, meal) ->
                                         val getPrice = { key: String ->
                                             meal.jsonObject[key]?.jsonPrimitive?.content.orEmpty()
-                                                .replace("&nbsp;", "")
+                                                .replace("&nbsp;", " ")
                                         }
-                                        val fullPrice = getPrice("FullPrice").replace("€", "")
+                                        val fullPrice = getPrice("FullPrice").replace("€", "").trim()
                                         val clientPrice = getPrice("ClientPrice")
 
                                         val price = if (clientPrice.startsWith(fullPrice))
