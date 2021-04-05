@@ -5,7 +5,7 @@ import sk.pluk64.unibakonto.Util
 enum class Canteen {
     EAM, VENZA;
 
-    val menu: Meals?
+    val menu: Meals
         @Throws(Util.ConnectionFailedException::class)
         get() {
             return when (this) {
@@ -47,6 +47,14 @@ enum class Canteen {
             return when (this) {
                 EAM -> "https://www.instagram.com/eatandmeetmlyny/"
                 VENZA -> "https://www.instagram.com/internatmlyny/"
+            }
+        }
+
+    val websiteUri: String
+        get() {
+            return when (this) {
+                EAM -> "https://mlyny.uniba.sk/stravovanie/eat-and-meet/denne-menu-eat-and-meet/"
+                VENZA -> "https://mlyny.uniba.sk/stravovanie/venza/denne-menu-venza/"
             }
         }
 }

@@ -27,7 +27,7 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
     private val positionToItem = SparseArray<Any>()
     private val positionToViewType = SparseArray<ViewType>()
 
-    private enum class ViewType(internal val id: Int) {
+    private enum class ViewType(val id: Int) {
         DAY_NAME(0), SUBMENU_NAME(1), MEAL(2), GALLERY(3), NO_GALLERY_IMAGES(5), REFRESH_TIMESTAMP(6),
         GALLERY_LOADING(7), SOCIAL_MEDIA_LINKS(8)
     }
@@ -159,6 +159,10 @@ internal class MenuListAdapter(private val menuFragment: MenuFragment) : Recycle
                     val igIcon = holder.view.ig_icon
                     igIcon.setOnClickListener {
                         openLink(menuFragment.canteen.igUri)
+                    }
+                    val websiteIcon = holder.view.website_icon
+                    websiteIcon.setOnClickListener {
+                        openLink(menuFragment.canteen.websiteUri)
                     }
                 }
             }

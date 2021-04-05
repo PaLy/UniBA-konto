@@ -22,4 +22,13 @@
         android:layout_height="48dp"
         app:srcCompat="@drawable/ic_instagram"
         android:background="?attr/selectableItemBackgroundBorderless"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        app:tint="@android:color/tab_indicator_text"
+        android:layout_marginStart="24dp"
+        android:id="@+id/website_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:srcCompat="@drawable/ic_website"
+        android:background="?attr/selectableItemBackgroundBorderless"/>
 </LinearLayout>
