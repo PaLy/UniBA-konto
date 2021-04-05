@@ -5,14 +5,14 @@ apply plugin: 'kotlinx-serialization'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion '30.0.2'
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         applicationId "sk.pluk64.unibakonto"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 48
-        versionName "4.5.0"
+        versionCode 50
+        versionName "4.6.1"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
     }
